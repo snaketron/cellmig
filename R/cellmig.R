@@ -41,10 +41,12 @@ get_fit <- function(x, control, full_model = FALSE) {
                               N = x$d$N[1], 
                               N_well = x$d$N_well[1], 
                               N_plate = x$d$N_plate[1],
+                              N_experiment = x$d$N_experiment[1],
                               N_plate_group = x$d$N_plate_group[1],
                               N_group = x$d$N_group[1],
                               well_id = x$d$well_id,
                               plate_id = x$map_w$plate_id,
+                              experiment_id = x$map_w$experiment_id,
                               plate_group_id = x$map_w$plate_group_id,
                               group_id = x$map_pg$group_id),
                   pars = pars,
@@ -67,12 +69,14 @@ get_summary <- function(x, f) {
   x <- x$d
   
   # get meta data
-  l <- x[, c("well_id", "well", "group_id", "group", 
-             "compound", "dose", "plate_id", "plate", 
+  l <- x[, c("well_id", "well", "group_id", "group", "experiment", 
+             "experiment_id", "compound", "dose", "plate_id", "plate", 
              "plate_group_id", "plate_group")]
   meta_well <- l[duplicated(l)==FALSE, ]
   meta_plate <- l[duplicated(l[, c("plate", "plate_id")])==FALSE, 
                   c("plate", "plate_id")]
+  meta_experiment <- l[duplicated(l[, c("experiment", "experiment_id")])==FALSE, 
+                       c("experiment", "experiment_id")]
   meta_group <- l[duplicated(l[, c("group", "group_id")])==FALSE, 
                   c("group", "group_id", "compound", "dose", 
                     "plate_id", "plate")]
@@ -88,6 +92,12 @@ get_summary <- function(x, f) {
   alpha_plate$plate_id <- 1:nrow(alpha_plate)
   alpha_plate <- merge(x = alpha_plate, y = meta_plate, 
                        by = "plate_id", all.x = TRUE)
+  
+  # par: alpha_experiment
+  alpha_experiment <- data.frame(summary(f, par = "alpha_experiment")$summary)
+  alpha_experiment$experiment_id <- 1:nrow(alpha_experiment)
+  alpha_experiment <- merge(x = alpha_experiment, y = meta_experiment, 
+                            by = "experiment_id", all.x = TRUE)
   
   # par: mu_group
   mu_group <- data.frame(summary(f, par = "mu_group")$summary)
@@ -123,6 +133,7 @@ get_summary <- function(x, f) {
   yhat <- merge(x = yhat, y = meta_well, by = "well_id", all.x = TRUE)
 
   return(list(alpha_plate = alpha_plate,
+              alpha_experiment = alpha_experiment,
               mu_group = mu_group, 
               mu_plate_group = mu_plate_group,
               mu_well = mu_well,

@@ -20,11 +20,14 @@ process_input <- function(x) {
     if(!"dose" %in% colnames(x)) {
       stop("x does not have a column dose")
     }
-    if(!"sample" %in% colnames(x)) {
-      stop("x does not have a column sample")
+    if(!"well" %in% colnames(x)) {
+      stop("x does not have a column well")
     }
     if(!"plate" %in% colnames(x)) {
       stop("x does not have a column plate")
+    }
+    if(!"experiment" %in% colnames(x)) {
+      stop("x does not have a column experiment")
     }
     if(!"v" %in% colnames(x)) {
       stop("x does not have a column v")
@@ -36,11 +39,14 @@ process_input <- function(x) {
     if(is.character(x[,"dose"])==FALSE) {
       stop("column dose must be character")
     }
-    if(is.character(x[,"sample"])==FALSE) {
-      stop("column sample must be character")
+    if(is.character(x[,"well"])==FALSE) {
+      stop("column well must be character")
     }
     if(is.character(x[,"plate"])==FALSE) {
       stop("column plate must be character")
+    }
+    if(is.character(x[,"experiment"])==FALSE) {
+      stop("column experiment must be character")
     }
     if(is.numeric(x[,"v"])==FALSE) {
       stop("column v must be numeric")
@@ -55,8 +61,11 @@ process_input <- function(x) {
     if(any(is.na(x[,"plate"]))) {
       stop("column plate contains NAs")
     }
-    if(any(is.na(x[,"sample"]))) {
-      stop("column sample contains NAs")
+    if(any(is.na(x[,"experiment"]))) {
+      stop("column experiment contains NAs")
+    }
+    if(any(is.na(x[,"well"]))) {
+      stop("column well contains NAs")
     }
     if(any(is.na(x[,"v"]))) {
       stop("column v contains NAs")
@@ -67,16 +76,21 @@ process_input <- function(x) {
   check_cols(x=x)
   
   org_x <- x
-
+  
+  x$experiment_id <- as.numeric(as.factor(x$experiment))
+  
+  x$plate <- paste0(x$experiment, '|', x$plate)
+  x$plate_id <- as.numeric(as.factor(x$plate))
+  
   x$group <- paste0(x$compound, '|', x$dose)
   x$group_id <- as.numeric(as.factor(x$group))
-  x$plate_id <- as.numeric(as.factor(x$plate))
+  
+  x$well <- paste0(x$experiment, '|', x$plate, '|', x$well, '|', x$group)
+  x$well_id <- as.numeric(as.factor(x$well))
   
   x$sv <- x$v/max(x$v)
   
-  x$well <- paste0(x$plate, '|', x$sample, '|', x$group)
-  x$well_id <- as.numeric(as.factor(x$well))
-  
+  # group of wells on plate treated with the same 
   x$plate_group <- paste0(x$plate, '|', x$group)
   x$plate_group_id <- as.numeric(as.factor(x$plate_group))
   
@@ -85,10 +99,11 @@ process_input <- function(x) {
   x$N_plate <- max(x$plate_id)
   x$N_plate_group <- max(x$plate_group_id)
   x$N_group <- max(x$group_id)
+  x$N_experiment <- max(x$experiment_id)
   
   # transform data
   # plate_group_id, plate_id -> well_id 
-  q <- x[, c("well_id", "plate_id", "plate_group_id")]
+  q <- x[, c("well_id", "experiment_id", "plate_id", "plate_group_id")]
   q <- q[duplicated(q)==F, ]
   q <- q[order(q$well_id, decreasing = F),]
   

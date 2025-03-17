@@ -4,8 +4,10 @@ data {
   int<lower=0> N_plate;         // number of plates
   int<lower=0> N_plate_group;   // number of plate groups of wells
   int<lower=0> N_group;         // number groups
+  int<lower=0> N_experiment;    // number experiment
   vector[N] y;                  // cell velocity for N cells
   int well_id [N];              // well ID
+  int experiment_id [N_well];   // experiment ID
   int plate_id [N_well];        // plate ID
   int plate_group_id [N_well];  // plate ID
   int group_id [N_plate_group]; // group ID: treatment x dose
@@ -13,6 +15,7 @@ data {
 
 parameters {
   real <lower=0> shape;
+  vector [N_experiment] alpha_experiment;
   vector [N_plate] alpha_plate;
   vector [N_group] mu_group;
   
@@ -30,11 +33,12 @@ transformed parameters {
 
   mu_plate_group = mu_group[group_id] + sigma_bplate * z_2;
   mu_well = mu_plate_group[plate_group_id] + sigma_wplate * z_1; 
-  rate =  exp(mu_well + alpha_plate[plate_id]);
+  rate = exp(mu_well + alpha_plate[plate_id] + alpha_experiment[experiment_id]);
 }
 
 model {
   shape ~ gamma(0.01, 0.01);
+  alpha_experiment ~ normal(0, 1);
   alpha_plate ~ normal(0, 1);
   mu_group ~ normal(0, 1);
   sigma_bplate ~ normal(0, 0.5);

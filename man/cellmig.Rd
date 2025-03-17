@@ -14,10 +14,14 @@ cellmig(x, control = NULL)
 \arguments{
 \item{x}{main input, data.frame with columns:
 \itemize{
-\item sample = character of sample ID or well ID (s1, s2, s3, etc.)
-\item plate = character id of experimental plate (p1, p2, p3, etc.)
-\item compound = character treatment compound (A, B, C, etc.)
-\item dose = character dose e.g. mmol (0, 1, 5, 10, low, high, mid, etc.)
+\item well = character of well ID (w1, w2, w3, etc.).
+\item plate = character id of plate (p1, p2, p3, etc.). One plate typically 
+contains multiple wells.
+\item experiment = character id of experiment (e1, e2, e3, etc.). One
+experiment typically contains multiple plate.
+\item compound = character id of the treatment compound (A, B, C, etc.)
+\item dose = character representing the treatment dose e.g. mmol (0, 1, 
+5, 10, low, high, mid, etc.)
 \item v = numeric cell migration speed
 }
 }

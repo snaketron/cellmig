@@ -24,53 +24,88 @@ library(cellmig)
 library(ggplot2)
 library(ggforce)
 library(patchwork)
+library(skimr)
 ggplot2::theme_set(new = theme_bw(base_size = 10))
 ```
 
 
 # Data (raw)
-In this vignette we will use simulated data: 
-  
-  * 6 compounds (chemical): c-1, c-2, ..., c-6
-  * 5 doses: 1, 2, 3, 4 and 5
-  * 3 sample: s-1, s-2 and s-3
-  * 2 batches: b-1 and b-2
-
-In each sample from a combination of compound x dose x batch, we have 
-20 observations (cell velocities $v$)
 
 ```{r}
 data("d", package = "cellmig")
 knitr::kable(d[1:10,], row.names = F, digits = 2)
 ```
 
-```{r, fig.width=7, fig.height=5}
+These are the unique experiment, plate, well and group IDs.
+
+```{r}
+apply(X = d[,2:ncol(d)], MARGIN = 2, FUN = unique)
+```
+
+In this vignette we will use simulated data from:
+
+  * two **experiments**: e1, e2
+  * four **plates** (two per experiment): p1, p2, p3 and p4
+  * 90 **wells** per plate: w1, w2, ..., w360
+  * 20 **cells** per well with their migration speeds `v`
+  * the wells are treated with one of six **compounds** c1, c2, ..., c6 at 
+  one of five **doses** d1, d2, ..., d5. Each pair of a compound and dose 
+  is described as group: c1|d1, c2|d2, ... etc.
+
+
+```{r, fig.width=8, fig.height=6}
 ggplot(data = d)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = sample), size = 0.5)+
+  geom_sina(aes(x = as.factor(dose), col = plate, shape = experiment,
+                y = v, group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
   xlab(label = "dose")+
   ylab(label = "migration speed")+
   scale_color_manual(values = c("steelblue", "orange", "forestgreen", "purple"))+
-  guides(color = guide_legend(override.aes = list(size = 3)))
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  guides(shape = guide_legend(override.aes = list(size = 3)))
+```
+
+# We can also show the **mean migration** per well (across all 20 cells each well)
+
+Notice the systematic differences in the mean migration speed between
+the two experiments: e1 and e2.
+
+```{r, fig.width=8, fig.height=6}
+dm <- aggregate(v~well+plate+experiment+compound+dose+group, 
+                data = d, FUN = mean)
+ggplot(data = dm)+
+  facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
+  geom_sina(aes(x = as.factor(dose), col = plate, shape = experiment,
+                y = v, group = well), size = 1.5, alpha = 0.7)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  scale_color_manual(values = c("steelblue", "orange", "forestgreen", "purple"))+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  guides(shape = guide_legend(override.aes = list(size = 3)))
 ```
 
 
 # Migration speed (scaled)
 
-```{r, fig.width=7, fig.height=5}
+```{r, fig.width=8, fig.height=6}
 ggplot(data = d)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, y = v/max(v), group = sample), size = 0.5)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v/max(v), shape = experiment,
+                group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
   xlab(label = "dose")+
-  ylab(label = "migration speed [scaled by max speed]")+
+  ylab(label = "migration speed [scaled by maximum v]")+
   scale_color_manual(values = c("steelblue", "orange", "forestgreen", "purple"))+
-  guides(color = guide_legend(override.aes = list(size = 3)))
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  guides(shape = guide_legend(override.aes = list(size = 3)))
 ```
 
 
@@ -145,7 +180,7 @@ u$plot
 
 # Posterior predictive checks (PPCs)
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=8, fig.height=5}
 g <- get_ppc(x = o)
 g
 ```
@@ -154,27 +189,29 @@ g
 # `migcell` can be used to simulate data
 
 ```{r}
-sim_data <- sim(N_well_cells = 20, 
+sim_data <- sim(N_well_cells = 20,
+                N_experiment = 2,
                 N_plate = 3,
                 N_group = 6,
                 N_well_reps = 3,
                 shape = 4,
                 sigma_bplate = 0.3,
                 sigma_wplate = 0.1,
-                alpha_plate = c(1, 1.2, 1),
+                alpha_plate = matrix(data = c(1, 1.2, 1, 1, 1, 1), 
+                                     nrow = 3, ncol = 2),
+                alpha_experiment = c(1, 1),
                 mu_group = c(-1, -0.5, -0, 0.5, 1, 2))
 ```
 
 ```{r, fig.width=6, fig.height=3}
 ggplot(data = sim_data)+
   geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
-                group = sample), size = 0.5)+
+                group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
   xlab(label = "dose")+
   ylab(label = "migration speed")+
-  scale_color_manual(values = c("steelblue", "orange", "forestgreen", "purple"))+
   guides(color = guide_legend(override.aes = list(size = 3)))
 ```
 
