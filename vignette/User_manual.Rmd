@@ -36,7 +36,7 @@ data("d", package = "cellmig")
 knitr::kable(d[1:10,], row.names = F, digits = 2)
 ```
 
-These are the unique experiment, plate, well and group IDs.
+These are the unique plate, well and group IDs.
 
 ```{r}
 apply(X = d[,2:ncol(d)], MARGIN = 2, FUN = unique)
@@ -44,8 +44,7 @@ apply(X = d[,2:ncol(d)], MARGIN = 2, FUN = unique)
 
 In this vignette we will use simulated data from:
 
-  * two **experiments**: e1, e2
-  * four **plates** (two per experiment): p1, p2, p3 and p4
+  * four **plates**: p1, p2, p3 and p4
   * 90 **wells** per plate: w1, w2, ..., w360
   * 20 **cells** per well with their migration speeds `v`
   * the wells are treated with one of six **compounds** c1, c2, ..., c6 at 
@@ -56,8 +55,7 @@ In this vignette we will use simulated data from:
 ```{r, fig.width=8, fig.height=6}
 ggplot(data = d)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, shape = experiment,
-                y = v, group = well), size = 0.5)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -70,16 +68,13 @@ ggplot(data = d)+
 
 # We can also show the **mean migration** per well (across all 20 cells each well)
 
-Notice the systematic differences in the mean migration speed between
-the two experiments: e1 and e2.
-
 ```{r, fig.width=8, fig.height=6}
-dm <- aggregate(v~well+plate+experiment+compound+dose+group, 
+dm <- aggregate(v~well+plate+compound+dose+group, 
                 data = d, FUN = mean)
 ggplot(data = dm)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, shape = experiment,
-                y = v, group = well), size = 1.5, alpha = 0.7)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
+            size = 1.5, alpha = 0.7)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -96,8 +91,7 @@ ggplot(data = dm)+
 ```{r, fig.width=8, fig.height=6}
 ggplot(data = d)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, y = v/max(v), shape = experiment,
-                group = well), size = 0.5)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v/max(v), group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -190,16 +184,13 @@ g
 
 ```{r}
 sim_data <- sim(N_well_cells = 20,
-                N_experiment = 2,
-                N_plate = 3,
+                N_plate = 6,
                 N_group = 6,
                 N_well_reps = 3,
                 shape = 4,
                 sigma_bplate = 0.3,
                 sigma_wplate = 0.1,
-                alpha_plate = matrix(data = c(1, 1.2, 1, 1, 1, 1), 
-                                     nrow = 3, ncol = 2),
-                alpha_experiment = c(1, 1),
+                alpha_plate = c(0.5, 0.7, 0.4, 1, 1, 1),
                 mu_group = c(-1, -0.5, -0, 0.5, 1, 2))
 ```
 
