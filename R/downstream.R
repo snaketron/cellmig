@@ -51,9 +51,9 @@ get_pairs <- function(x, groups = NA) {
                              group_y = gmap$group[j], 
                              compound = gmap$compound[i], 
                              dose = gmap$dose[i],
-                             delta_M = d_M,
-                             delta_L95 = d_HDI[1],
-                             delta_H95 = d_HDI[2],
+                             rho_M = d_M,
+                             rho_L95 = d_HDI[1],
+                             rho_H95 = d_HDI[2],
                              pmax = pmax)
       ct <- ct + 1
     }
@@ -66,10 +66,10 @@ get_pairs <- function(x, groups = NA) {
   g <- ggplot(data = ds)+
     geom_tile(aes(x = group_x, y = group_y), 
               col = "white", fill = "#eeeeee")+
-    geom_point(aes(x = group_x, y = group_y, size = pmax, col = delta_M))+
+    geom_point(aes(x = group_x, y = group_y, size = pmax, col = rho_M))+
     geom_text(aes(x = group_x, y = group_y, 
                   label = round(x = pmax, digits = 2)), size = 2)+
-    scale_color_distiller(name = expression(delta), palette = "Spectral")+
+    scale_color_distiller(name = expression(rho), palette = "Spectral")+
     scale_radius(name = expression(pi), limits = c(0, 1))+
     theme_bw(base_size = 10)+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
@@ -111,7 +111,7 @@ get_violins <- function(x, from_groups, to_group) {
       
       d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
       pmax <- get_pmax(d)
-      ds[[ct]] <- data.frame(delta = d,
+      ds[[ct]] <- data.frame(rho = d,
                              group_id_x = gmap_from$group_id[i], 
                              group_id_y = gmap_to$group_id[j], 
                              group_x = gmap_from$group[i], 
@@ -132,15 +132,15 @@ get_violins <- function(x, from_groups, to_group) {
   g <- ggplot(data = ds)+
     facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
     geom_hline(yintercept = 0, linetype = "dashed")+
-    geom_violin(aes(x = contrast,, y = delta), 
+    geom_violin(aes(x = contrast, y = rho), 
                 col = "steelblue", fill = "steelblue", alpha = 0.8)+
     geom_text(data = ds_pmax,
-              aes(x = contrast, y = max(ds$delta)+0.25, 
+              aes(x = contrast, y = max(ds$rho)+0.25, 
                   label = round(x = pmax, digits = 2)), size = 2.25)+
     theme_bw(base_size = 10)+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
     xlab(label = 'Comparisons')+
-    ylab(label = expression(delta))
+    ylab(label = expression(rho))
   
   g
   

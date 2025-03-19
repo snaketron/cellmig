@@ -3,7 +3,7 @@
 \title{Posterior Predictive Checks (PPC) Visualization}
 
 \usage{
-get_ppc(x)
+get_ppc(x, wrap = FALSE, ncol = 4)
 }
 
 \arguments{
@@ -11,6 +11,10 @@ get_ppc(x)
 \code{cellmig} function, containing posterior samples from a Bayesian model, 
 specifically the output of a fitted Stan model with posterior predictive 
 samples stored in \code{x$f}.}
+\item{wrap}{logical, if wrap = FALSE (default) we will use facet_grid, 
+and if wrap = TRUE we will use facet_wrap to split data into compound x 
+plate pairs.}
+\item{ncol}{In case wrap = TRUE, how many columns should the plot have?}
 }
 
 \value{
@@ -53,6 +57,6 @@ data(d, package = "cellmig")
 #                            max_treedepth = 10))
 #
 data(cellmig_out, package = "cellmig")
-p <- get_ppc(x = cellmig_out)
+p <- get_ppc(x = cellmig_out, wrap = TRUE, ncol = 4)
 print(p)
 }

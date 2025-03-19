@@ -1,5 +1,5 @@
 
-get_ppc <- function(x) {
+get_ppc <- function(x, wrap = FALSE, ncol = 4) {
     e <- extract(object = x$f, par = "y_hat_sample")$y_hat_sample
     e <- melt(data = e)
     colnames(e) <- c("iter", "well_id", "yhat")
@@ -7,20 +7,41 @@ get_ppc <- function(x) {
     q <- q[duplicated(q)==F,]
     e <- merge(x = e, y = q, all.x = T)
     
-    g <- ggplot()+
-        facet_grid(compound~plate, scales = "free")+
-        geom_sina(data = x$x$d, aes(x = as.factor(dose), 
-                                    y = sv, group = well), 
-                  col = "black", size = 0.3)+
-        geom_violin(data = e, aes(x = as.factor(dose), 
-                                  y = yhat, group = well), 
-                    fill = NA, col = "#f75ea3", alpha = 0.35)+
-        theme_bw(base_size = 10)+
-        theme(legend.position = "none")+
-        theme(strip.text.x = element_text(
-            margin = margin(0.02,0,0.02,0, "cm")))+
-        xlab(label = "dose")+
-        scale_y_continuous(name = "Cell migration speed", 
-                           breaks = pretty_breaks(3))
+    if(wrap==FALSE) {
+        g <- ggplot()+
+            facet_grid(compound~plate, scales = "free")+
+            geom_sina(data = x$x$d, aes(x = as.factor(dose), 
+                                        y = sv, group = well), 
+                      col = "black", size = 0.3)+
+            geom_violin(data = e, aes(x = as.factor(dose), 
+                                      y = yhat, group = well), 
+                        fill = NA, col = "#f75ea3", alpha = 0.35)+
+            theme_bw(base_size = 10)+
+            theme(legend.position = "none")+
+            theme(strip.text.x = element_text(
+                margin = margin(0.02,0,0.02,0, "cm")))+
+            xlab(label = "dose")+
+            scale_y_continuous(name = "Cell migration speed", 
+                               breaks = pretty_breaks(3))
+    }
+    
+    if(wrap) {
+        g <- ggplot()+
+            facet_wrap(~compound+plate, scales = "free", ncol = ncol)+
+            geom_sina(data = x$x$d, aes(x = as.factor(dose), 
+                                        y = sv, group = well), 
+                      col = "black", size = 0.3)+
+            geom_violin(data = e, aes(x = as.factor(dose), 
+                                      y = yhat, group = well), 
+                        fill = NA, col = "#f75ea3", alpha = 0.35)+
+            theme_bw(base_size = 10)+
+            theme(legend.position = "none")+
+            theme(strip.text.x = element_text(
+                margin = margin(0.02,0,0.02,0, "cm")))+
+            xlab(label = "dose")+
+            scale_y_continuous(name = "Cell migration speed", 
+                               breaks = pretty_breaks(3))
+    }
+    
     return(g)
 }
