@@ -32,7 +32,7 @@ get_fit <- function(x, control, full_model = FALSE) {
   if(full_model) {
     pars <- NA
   } else {
-    pars <- c("z_1", "z_2", "log_lik")
+    pars <- c("z_1", "z_2", "log_lik", "mu_well")
   }
   
   # fit model
@@ -46,6 +46,7 @@ get_fit <- function(x, control, full_model = FALSE) {
                               well_id = x$d$well_id,
                               plate_id = x$map_w$plate_id,
                               plate_group_id = x$map_w$plate_group_id,
+                              x = x$map_w$w,
                               group_id = x$map_pg$group_id),
                   pars = pars,
                   include  = FALSE,
@@ -69,7 +70,7 @@ get_summary <- function(x, f) {
   # get meta data
   l <- x[, c("well_id", "well", "group_id", "group", 
              "compound", "dose", "plate_id", "plate", 
-             "plate_group_id", "plate_group")]
+             "plate_group_id", "plate_group", "w")]
   meta_well <- l[duplicated(l)==FALSE, ]
   meta_plate <- l[duplicated(l[, c("plate", "plate_id")])==FALSE, 
                   c("plate", "plate_id")]
@@ -102,19 +103,15 @@ get_summary <- function(x, f) {
   mu_plate_group <- merge(x = mu_plate_group, y = meta_plate_group, 
                           by = "plate_group_id", all.x = TRUE)
   
-  # par: mu_well
-  mu_well <- data.frame(summary(f, par = "mu_well")$summary)
+  # par: mu
+  mu_well <- data.frame(summary(f, par = "mu")$summary)
   mu_well$well_id <- 1:nrow(mu_well)
   mu_well <- merge(x = mu_well, y = meta_well, by = "well_id", all.x = TRUE)
 
   # par: sigma_bplate
   sigma_bplate <- data.frame(summary(f, par = "sigma_bplate")$summary)
   sigma_wplate <- data.frame(summary(f, par = "sigma_wplate")$summary)
-  
-  # par: rate
-  rate <- data.frame(summary(f, par = "rate")$summary)
-  rate$well_id <- 1:nrow(rate)
-  rate <- merge(x = rate, y = meta_well, by = "well_id", all.x = TRUE)
+
 
   # par: shape
   shape <- data.frame(summary(f, par = "shape")$summary)
@@ -130,7 +127,6 @@ get_summary <- function(x, f) {
               mu_well = mu_well,
               sigma_bplate = sigma_bplate,
               sigma_wplate = sigma_wplate,
-              rate = rate, 
               shape = shape,
               yhat = yhat))
 }

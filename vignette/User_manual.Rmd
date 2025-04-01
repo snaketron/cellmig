@@ -106,6 +106,7 @@ ggplot(data = d)+
 # Model fitting
 
 ```{r, fig.width=7, fig.height=3.5}
+d$w <- 1
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
                             mcmc_steps = 1300,

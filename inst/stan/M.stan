@@ -7,8 +7,9 @@ data {
   vector[N] y;                  // cell velocity for N cells
   int well_id [N];              // well ID
   int plate_id [N_well];        // plate ID
-  int plate_group_id [N_well];  // plate ID
+  int plate_group_id [N_well];  // plate group ID
   int group_id [N_plate_group]; // group ID: treatment x dose
+  int x [N_well];
 }
 
 parameters {
@@ -24,13 +25,19 @@ parameters {
 }
 
 transformed parameters {
-  vector<lower=0> [N_well] rate;
+  vector<lower=0> [N_well] mu;
   vector [N_well] mu_well;
   vector [N_plate_group] mu_plate_group;
+  
 
   mu_plate_group = mu_group[group_id] + sigma_bplate * z_2;
-  mu_well = mu_plate_group[plate_group_id] + sigma_wplate * z_1; 
-  rate = exp(mu_well + alpha_plate[plate_id]);
+  mu_well = alpha_plate[plate_id] + mu_plate_group[plate_group_id] .* to_vector(x) + sigma_wplate * z_1;
+  
+  // for(w in 1:N_well) {
+  //   mu_well[w] = alpha_plate[plate_id[w]] + mu_plate_group[plate_group_id[w]] * (1-ref[w]) + sigma_wplate * z_1[w];
+  // }
+  
+  mu = exp(mu_well);
 }
 
 model {
@@ -42,15 +49,15 @@ model {
   z_1 ~ std_normal();
   z_2 ~ std_normal();
 
-  y ~ gamma(shape, shape ./ rate[well_id]);
+  y ~ gamma(shape, shape ./ mu[well_id]);
 }
 
 generated quantities {
   real y_hat_sample [N_well];
   real log_lik [N];
 
-  y_hat_sample = gamma_rng(shape, shape ./ rate);
+  y_hat_sample = gamma_rng(shape, shape ./ mu);
   for(i in 1:N) {
-    log_lik[i] = gamma_lpdf(y[i] | shape, shape ./ rate[well_id[i]]);
+    log_lik[i] = gamma_lpdf(y[i] | shape, shape ./ mu[well_id[i]]);
   }
 }

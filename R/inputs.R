@@ -29,6 +29,9 @@ process_input <- function(x) {
     if(!"v" %in% colnames(x)) {
       stop("x does not have a column v")
     }
+    if(!"w" %in% colnames(x)) {
+      stop("x does not have a column w")
+    }
 
     if(is.character(x[,"compound"])==FALSE) {
       stop("column compound must be character")
@@ -45,6 +48,9 @@ process_input <- function(x) {
     if(is.numeric(x[,"v"])==FALSE) {
       stop("column v must be numeric")
     }
+    if(is.numeric(x[,"w"])==FALSE) {
+      stop("column w must be numeric")
+    }
 
     if(any(is.na(x[,"compound"]))) {
       stop("column compound contains NAs")
@@ -60,6 +66,9 @@ process_input <- function(x) {
     }
     if(any(is.na(x[,"v"]))) {
       stop("column v contains NAs")
+    }
+    if(any(is.na(x[,"w"]))) {
+      stop("column w contains NAs")
     }
   }
 
@@ -90,7 +99,7 @@ process_input <- function(x) {
   
   # transform data
   # plate_group_id, plate_id -> well_id 
-  q <- x[, c("well_id", "plate_id", "plate_group_id")]
+  q <- x[, c("well_id", "plate_id", "plate_group_id", "w")]
   q <- q[duplicated(q)==F, ]
   q <- q[order(q$well_id, decreasing = F),]
   
