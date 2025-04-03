@@ -30,9 +30,23 @@ ggplot2::theme_set(new = theme_bw(base_size = 10))
 
 
 # Data (raw)
+This is how a typical cell migration data looks like $\rightarrow$ a table.
+
+Each rows is a cell with the following features:
+
+  * well = unique well ID (w1, w2, w3, etc.).
+  * plate = unique plate ID (p1, p2, p3, etc.). A plate contains multiple wells.
+  * compound = compound name (c1, c2, c3, etc.)
+  * treatment dose (0, 1, 5, 10, low, mid, high, etc.)
+  * v = Observed cell migration speed (numeric)
+  * offset = binary (0 or 1). Indicates whether a treatment should be used 
+  for batch correction across plates. By default offset = 0 (no correction). 
+  Set to 1 for specific treatment groups (compound x dose) used as offsets. 
+  Ensure that this treatment group appears on each plate.
 
 ```{r}
 data("d", package = "cellmig")
+d$offset <- 0
 knitr::kable(d[1:10,], row.names = F, digits = 2)
 ```
 
@@ -106,7 +120,6 @@ ggplot(data = d)+
 # Model fitting
 
 ```{r, fig.width=7, fig.height=3.5}
-d$offset <- 0
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
                             mcmc_steps = 1000,

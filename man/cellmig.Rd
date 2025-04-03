@@ -25,8 +25,6 @@ the features of a cell:
 \item well = character. Well ID (w1, w2, w3, etc.).
 \item plate = character. plate ID (p1, p2, p3, etc.). A plate contains 
 multiple wells.
-\item experiment = character. experiment ID (e1, e2, e3, etc.). An experiment 
-typically contains multiple plates.
 \item compound = character. Compound name (c1, c2, c3, etc.)
 \item dose = character. Treatment dose (0, 1, 5, 10, low, mid, high, etc.)
 \item v = numeric. Observed cell migration speed.
