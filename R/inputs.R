@@ -113,7 +113,7 @@ process_input <- function(x) {
     # group_id -> plate_group_id 
     z <- x[, c("plate_group_id", "group_id")]
     z <- z[duplicated(z) == FALSE, ]
-    z <- z[order(z$plate_group_id, decreasing == FALSE),]
+    z <- z[order(z$plate_group_id, decreasing = FALSE),]
     z <- z[z$group_id !=0,]
     
     return(list(d = x, org_x = org_x, map_w = q, map_pg = z))

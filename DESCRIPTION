@@ -1,7 +1,7 @@
 Package: cellmig
 Type: Package
 Title: Quantification of cell migration speed with Bayesian probability models
-Version: 0.0.4
+Version: 0.0.5
 Authors@R: 
     person(given = "Simo",  
            family = "Kitanovski",
@@ -36,8 +36,8 @@ Suggests:
 Encoding: UTF-8
 NeedsCompilation: no
 biocViews: Visualization, Clustering, CellBiology, Software
-BugReports: https://github.com/snaketron/MigrateR/issues
-URL: https://github.com/snaketron/MigrateR
+BugReports: https://github.com/snaketron/cellmig/issues
+URL: https://github.com/snaketron/cellmig
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Biarch: true
