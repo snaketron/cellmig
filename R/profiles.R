@@ -5,7 +5,7 @@ get_profiles <- function(x,
                          select_cs,
                          select_ds) {
   eg <- x$s$mu_group
-  es <- x$s$mu_well
+  es <- x$s$mu_plate_group
 
   if(missing(select_ds)==FALSE) {
     if(any(!select_ds %in% unique(eg$dose))) {
@@ -68,6 +68,7 @@ get_profiles <- function(x,
   q <- es[es$compound %in% q$compound, ]
   q$compound <- factor(q$compound, levels = rev(tips))
   g2 <- ggplot(data = q)+
+    geom_hline(yintercept = 0, linetype = "dashed", col = "gray")+
     facet_wrap(facets = compound~plate, 
                nrow = length(unique(q$compound)), 
                switch = "y", scales = "free_y")+

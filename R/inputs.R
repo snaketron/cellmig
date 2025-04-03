@@ -29,8 +29,8 @@ process_input <- function(x) {
     if(!"v" %in% colnames(x)) {
       stop("x does not have a column v")
     }
-    if(!"w" %in% colnames(x)) {
-      stop("x does not have a column w")
+    if(!"offset" %in% colnames(x)) {
+      stop("x does not have a column offset")
     }
 
     if(is.character(x[,"compound"])==FALSE) {
@@ -48,8 +48,8 @@ process_input <- function(x) {
     if(is.numeric(x[,"v"])==FALSE) {
       stop("column v must be numeric")
     }
-    if(is.numeric(x[,"w"])==FALSE) {
-      stop("column w must be numeric")
+    if(is.numeric(x[,"offset"])==FALSE) {
+      stop("column offset must be numeric")
     }
 
     if(any(is.na(x[,"compound"]))) {
@@ -67,8 +67,11 @@ process_input <- function(x) {
     if(any(is.na(x[,"v"]))) {
       stop("column v contains NAs")
     }
-    if(any(is.na(x[,"w"]))) {
-      stop("column w contains NAs")
+    if(any(is.na(x[,"offset"]))) {
+      stop("column offset contains NAs")
+    }
+    if(all(x[,"offset"] %in% c(0,1))==FALSE) {
+      stop("column offset can contain only 0 or 1")
     }
   }
 
@@ -77,38 +80,73 @@ process_input <- function(x) {
   
   org_x <- x
   
-  x$plate_id <- as.numeric(as.factor(x$plate))
-  
-  x$group <- paste0(x$compound, '|', x$dose)
-  x$group_id <- as.numeric(as.factor(x$group))
-  
-  x$well <- paste0(x$plate, '|', x$well, '|', x$group)
-  x$well_id <- as.numeric(as.factor(x$well))
-  
-  x$sv <- x$v/max(x$v)
-  
-  # group of wells on plate treated with the same 
-  x$plate_group <- paste0(x$plate, '|', x$group)
-  x$plate_group_id <- as.numeric(as.factor(x$plate_group))
-  
-  x$N <- nrow(x)
-  x$N_well <- max(x$well_id)
-  x$N_plate <- max(x$plate_id)
-  x$N_plate_group <- max(x$plate_group_id)
-  x$N_group <- max(x$group_id)
-  
-  # transform data
-  # plate_group_id, plate_id -> well_id 
-  q <- x[, c("well_id", "plate_id", "plate_group_id", "w")]
-  q <- q[duplicated(q)==F, ]
-  q <- q[order(q$well_id, decreasing = F),]
-  
-  # group_id -> plate_group_id 
-  z <- x[, c("plate_group_id", "group_id")]
-  z <- z[duplicated(z)==F, ]
-  z <- z[order(z$plate_group_id, decreasing = F),]
-  
-  return(list(d = x, org_x = org_x, map_w = q, map_pg = z))
+  if(any(x$offset == 1)) {
+    x$plate_id <- as.numeric(as.factor(x$plate))
+    x$group <- paste0(x$compound, '|', x$dose)
+    x$well <- paste0(x$plate, '|', x$well, '|', x$group)
+    x$plate_group <- paste0(x$plate, '|', x$group)
+    x$well_id <- as.numeric(as.factor(x$well))
+    
+    x$sv <- x$v/max(x$v)
+    
+    xs <- x[x$offset == 0,]
+    xr <- x[x$offset == 1,]
+    
+    xs$group_id <- as.numeric(as.factor(xs$group))
+    xr$group_id <- 0
+    
+    xs$plate_group_id <- as.numeric(as.factor(xs$plate_group))
+    xr$plate_group_id <- 0
+    
+    x <- rbind(xr, xs)
+    
+    x$N <- nrow(x)
+    x$N_well <- max(x$well_id)
+    x$N_plate <- max(x$plate_id)
+    x$N_plate_group <- max(x$plate_group_id, na.rm = TRUE)
+    x$N_group <- max(x$group_id)
+    
+    q <- x[, c("well_id", "plate_id", "plate_group_id", "offset")]
+    q <- q[duplicated(q) == FALSE, ]
+    q <- q[order(q$well_id, decreasing = FALSE),]
+    
+    # group_id -> plate_group_id 
+    z <- x[, c("plate_group_id", "group_id")]
+    z <- z[duplicated(z) == FALSE, ]
+    z <- z[order(z$plate_group_id, decreasing == FALSE),]
+    z <- z[z$group_id !=0,]
+    
+    return(list(d = x, org_x = org_x, map_w = q, map_pg = z))
+  } else {
+    x$plate_id <- as.numeric(as.factor(x$plate))
+    
+    x$group <- paste0(x$compound, '|', x$dose)
+    x$group_id <- as.numeric(as.factor(x$group))
+    
+    x$well <- paste0(x$plate, '|', x$well, '|', x$group)
+    x$well_id <- as.numeric(as.factor(x$well))
+    
+    x$sv <- x$v/max(x$v)
+    x$plate_group <- paste0(x$plate, '|', x$group)
+    x$plate_group_id <- as.numeric(as.factor(x$plate_group))
+    
+    x$N <- nrow(x)
+    x$N_well <- max(x$well_id)
+    x$N_plate <- max(x$plate_id)
+    x$N_plate_group <- max(x$plate_group_id, na.rm = TRUE)
+    x$N_group <- max(x$group_id)
+    
+    q <- x[, c("well_id", "plate_id", "plate_group_id", "offset")]
+    q <- q[duplicated(q) == FALSE, ]
+    q <- q[order(q$well_id, decreasing = FALSE),]
+    
+    # group_id -> plate_group_id 
+    z <- x[, c("plate_group_id", "group_id")]
+    z <- z[duplicated(z) == FALSE, ]
+    z <- z[order(z$plate_group_id, decreasing = FALSE),]
+    
+    return(list(d = x, org_x = org_x, map_w = q, map_pg = z))
+  }
 }
 
 process_control <- function(control_in) {

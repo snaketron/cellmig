@@ -1,9 +1,9 @@
-\name{get_ppc}
-\alias{get_ppc}
+\name{get_ppc_violins}
+\alias{get_ppc_violins}
 \title{Posterior Predictive Checks (PPC) Visualization}
 
 \usage{
-get_ppc(x, wrap = FALSE, ncol = 4)
+get_ppc_violins(x, wrap = FALSE, ncol = 4)
 }
 
 \arguments{
@@ -27,7 +27,7 @@ A \code{ggplot2} object displaying:
 }
 
 \description{
-The \code{get_ppc} function visualizes posterior predictive checks (PPC) by 
+The \code{get_ppc_violins} function visualizes posterior predictive checks (PPC) by 
 comparing observed data with posterior predictive distributions. The function
 extracts simulated data from the fitted Stan model and overlays them with 
 observed values, grouped by compound and plate.
@@ -57,6 +57,6 @@ data(d, package = "cellmig")
 #                            max_treedepth = 10))
 #
 data(cellmig_out, package = "cellmig")
-p <- get_ppc(x = cellmig_out, wrap = TRUE, ncol = 4)
+p <- get_ppc_violins(x = cellmig_out, wrap = TRUE, ncol = 4)
 print(p)
 }

@@ -1,5 +1,5 @@
 
-get_ppc <- function(x, wrap = FALSE, ncol = 4) {
+get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
     e <- extract(object = x$f, par = "y_hat_sample")$y_hat_sample
     e <- melt(data = e)
     colnames(e) <- c("iter", "well_id", "yhat")
@@ -42,6 +42,27 @@ get_ppc <- function(x, wrap = FALSE, ncol = 4) {
             scale_y_continuous(name = "Cell migration speed", 
                                breaks = pretty_breaks(3))
     }
+    
+    return(g)
+}
+
+
+get_ppc_means <- function(x) {
+    y <- aggregate(sv~well_id, data = x$x$d, FUN = mean)
+    yhat <- x$s$yhat
+    y <- merge(x = y, y = yhat, by = "well_id")
+    
+    g <- ggplot(data = y)+
+        geom_abline(slope = 1, intercept = 0, linetype = "dashed")+
+        geom_errorbar(aes(x = sv, y = mean, ymin = X2.5., ymax = X97.5.), 
+                      col = "darkgray")+
+        geom_point(aes(x = sv, y = mean), shape = 21, 
+                   fill = "white", alpha = 0.75)+
+        theme_bw(base_size = 10)+
+        xlab(label = "Observed migration + 95% HDI [scaled]")+
+        ylab(label = "Predicted migration [scaled]")+
+        xlim(c(0,1))+
+        ylim(c(0,1))
     
     return(g)
 }

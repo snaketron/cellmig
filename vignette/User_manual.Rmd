@@ -106,10 +106,10 @@ ggplot(data = d)+
 # Model fitting
 
 ```{r, fig.width=7, fig.height=3.5}
-d$w <- 1
+d$offset <- 0
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
-                            mcmc_steps = 1300,
+                            mcmc_steps = 1000,
                             mcmc_chains = 4,
                             mcmc_cores = 4,
                             mcmc_algorithm = "NUTS",
@@ -175,10 +175,17 @@ u$plot
 
 # Posterior predictive checks (PPCs)
 
-```{r, fig.width=8, fig.height=5}
-g <- get_ppc(x = o)
+```{r, fig.width=7, fig.height=6}
+g <- get_ppc_violins(x = o)
 g
 ```
+
+
+```{r, fig.width=7, fig.height=6}
+g <- get_ppc_means(x = o)
+g
+```
+
 
 
 # `migcell` can be used to simulate data

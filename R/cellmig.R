@@ -15,6 +15,7 @@ cellmig <- function(x, control = NULL) {
   return(list(f = f, x = x, s = s))
 }
 
+
 get_fit <- function(x, control, full_model = FALSE) {
   message("model fitting... \n")
 
@@ -26,13 +27,13 @@ get_fit <- function(x, control, full_model = FALSE) {
   if(length(full_model)!=1) {
     stop("full_model must be TRUE or FALSE (default)")
   }
-  if(is.logical(full_model)==FALSE) {
+  if(is.logical(full_model) == FALSE) {
     stop("full_model must be TRUE or FALSE (default)")
   }
   if(full_model) {
     pars <- NA
   } else {
-    pars <- c("z_1", "z_2", "log_lik", "mu_well")
+    pars <- c("z_1", "z_2", "z_3", "mu_well", "shape")
   }
   
   # fit model
@@ -46,7 +47,7 @@ get_fit <- function(x, control, full_model = FALSE) {
                               well_id = x$d$well_id,
                               plate_id = x$map_w$plate_id,
                               plate_group_id = x$map_w$plate_group_id,
-                              x = x$map_w$w,
+                              offset = x$map_w$offset,
                               group_id = x$map_pg$group_id),
                   pars = pars,
                   include  = FALSE,
@@ -57,7 +58,7 @@ get_fit <- function(x, control, full_model = FALSE) {
                   algorithm = control$mcmc_algorithm,
                   control = list(adapt_delta = control$adapt_delta,
                                  max_treedepth = control$max_treedepth),
-                  refresh = 500)
+                  refresh = 200)
 
   return(fit)
 }
@@ -70,7 +71,7 @@ get_summary <- function(x, f) {
   # get meta data
   l <- x[, c("well_id", "well", "group_id", "group", 
              "compound", "dose", "plate_id", "plate", 
-             "plate_group_id", "plate_group", "w")]
+             "plate_group_id", "plate_group", "offset")]
   meta_well <- l[duplicated(l)==FALSE, ]
   meta_plate <- l[duplicated(l[, c("plate", "plate_id")])==FALSE, 
                   c("plate", "plate_id")]
@@ -111,10 +112,10 @@ get_summary <- function(x, f) {
   # par: sigma_bplate
   sigma_bplate <- data.frame(summary(f, par = "sigma_bplate")$summary)
   sigma_wplate <- data.frame(summary(f, par = "sigma_wplate")$summary)
-
-
-  # par: shape
-  shape <- data.frame(summary(f, par = "shape")$summary)
+  
+  # shape mu and sigma
+  mu_shape <- data.frame(summary(f, par = "mu_shape")$summary)
+  sigma_shape <- data.frame(summary(f, par = "sigma_shape")$summary)
   
   # par: y_hat_sample
   yhat <- data.frame(summary(f, par = "y_hat_sample")$summary)
@@ -127,6 +128,7 @@ get_summary <- function(x, f) {
               mu_well = mu_well,
               sigma_bplate = sigma_bplate,
               sigma_wplate = sigma_wplate,
-              shape = shape,
+              sigma_shape = sigma_shape,
+              mu_shape = mu_shape,
               yhat = yhat))
 }

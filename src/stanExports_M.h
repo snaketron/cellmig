@@ -27,35 +27,47 @@ namespace model_M_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 52> locations_array__ =
+static constexpr std::array<const char*, 68> locations_array__ =
   {" (found before start of program)",
-  " (in 'M', line 14, column 2 to column 23)",
   " (in 'M', line 15, column 2 to column 31)",
   " (in 'M', line 16, column 2 to column 28)",
   " (in 'M', line 18, column 2 to column 30)",
   " (in 'M', line 19, column 2 to column 30)",
-  " (in 'M', line 21, column 2 to column 22)",
+  " (in 'M', line 21, column 2 to column 16)",
   " (in 'M', line 22, column 2 to column 29)",
-  " (in 'M', line 25, column 2 to column 32)",
-  " (in 'M', line 26, column 2 to column 26)",
-  " (in 'M', line 27, column 2 to column 40)",
-  " (in 'M', line 43, column 2 to column 29)",
-  " (in 'M', line 44, column 2 to column 19)",
-  " (in 'M', line 28, column 2 to column 59)",
-  " (in 'M', line 29, column 2 to column 64)",
-  " (in 'M', line 30, column 2 to column 46)",
-  " (in 'M', line 45, column 2 to column 49)",
-  " (in 'M', line 47, column 4 to column 69)",
-  " (in 'M', line 46, column 16 to line 48, column 3)",
-  " (in 'M', line 46, column 2 to line 48, column 3)",
-  " (in 'M', line 33, column 2 to column 28)",
-  " (in 'M', line 34, column 2 to column 30)",
-  " (in 'M', line 35, column 2 to column 26)",
-  " (in 'M', line 36, column 2 to column 32)",
-  " (in 'M', line 37, column 2 to column 32)",
-  " (in 'M', line 38, column 2 to column 21)",
-  " (in 'M', line 39, column 2 to column 21)",
-  " (in 'M', line 40, column 2 to column 43)",
+  " (in 'M', line 24, column 2 to column 22)",
+  " (in 'M', line 25, column 2 to column 29)",
+  " (in 'M', line 26, column 2 to column 22)",
+  " (in 'M', line 29, column 2 to column 34)",
+  " (in 'M', line 30, column 2 to column 30)",
+  " (in 'M', line 31, column 2 to column 26)",
+  " (in 'M', line 32, column 2 to column 40)",
+  " (in 'M', line 58, column 2 to column 29)",
+  " (in 'M', line 59, column 2 to column 19)",
+  " (in 'M', line 34, column 2 to column 59)",
+  " (in 'M', line 39, column 6 to column 104)",
+  " (in 'M', line 38, column 11 to line 40, column 5)",
+  " (in 'M', line 37, column 6 to column 68)",
+  " (in 'M', line 36, column 21 to line 38, column 5)",
+  " (in 'M', line 36, column 4 to line 40, column 5)",
+  " (in 'M', line 35, column 21 to line 41, column 3)",
+  " (in 'M', line 35, column 2 to line 41, column 3)",
+  " (in 'M', line 42, column 2 to column 20)",
+  " (in 'M', line 43, column 2 to column 44)",
+  " (in 'M', line 60, column 2 to column 47)",
+  " (in 'M', line 62, column 4 to column 91)",
+  " (in 'M', line 61, column 16 to line 63, column 3)",
+  " (in 'M', line 61, column 2 to line 63, column 3)",
+  " (in 'M', line 46, column 2 to column 26)",
+  " (in 'M', line 47, column 2 to column 30)",
+  " (in 'M', line 48, column 2 to column 26)",
+  " (in 'M', line 49, column 2 to column 32)",
+  " (in 'M', line 50, column 2 to column 32)",
+  " (in 'M', line 51, column 2 to column 29)",
+  " (in 'M', line 52, column 2 to column 21)",
+  " (in 'M', line 53, column 2 to column 21)",
+  " (in 'M', line 54, column 2 to column 21)",
+  " (in 'M', line 55, column 2 to column 59)",
   " (in 'M', line 2, column 2 to column 17)",
   " (in 'M', line 3, column 2 to column 22)",
   " (in 'M', line 4, column 2 to column 23)",
@@ -71,15 +83,19 @@ static constexpr std::array<const char*, 52> locations_array__ =
   " (in 'M', line 10, column 2 to column 30)",
   " (in 'M', line 11, column 16 to column 29)",
   " (in 'M', line 11, column 2 to column 31)",
+  " (in 'M', line 12, column 14 to column 20)",
+  " (in 'M', line 12, column 2 to column 22)",
   " (in 'M', line 15, column 10 to column 17)",
   " (in 'M', line 16, column 10 to column 17)",
-  " (in 'M', line 21, column 10 to column 16)",
-  " (in 'M', line 22, column 10 to column 23)",
-  " (in 'M', line 25, column 19 to column 25)",
+  " (in 'M', line 24, column 10 to column 16)",
+  " (in 'M', line 25, column 10 to column 23)",
   " (in 'M', line 26, column 10 to column 16)",
-  " (in 'M', line 27, column 10 to column 23)",
-  " (in 'M', line 43, column 21 to column 27)",
-  " (in 'M', line 44, column 16 to column 17)"};
+  " (in 'M', line 29, column 20 to column 26)",
+  " (in 'M', line 30, column 19 to column 25)",
+  " (in 'M', line 31, column 10 to column 16)",
+  " (in 'M', line 32, column 10 to column 23)",
+  " (in 'M', line 58, column 21 to column 27)",
+  " (in 'M', line 59, column 16 to column 17)"};
 #include <stan_meta_header.hpp>
 class model_M final : public model_base_crtp<model_M> {
 private:
@@ -93,6 +109,7 @@ private:
   std::vector<int> plate_id;
   std::vector<int> plate_group_id;
   std::vector<int> group_id;
+  std::vector<int> offset;
   Eigen::Map<Eigen::Matrix<double,-1,1>> y{nullptr, 0};
 public:
   ~model_M() {}
@@ -113,50 +130,50 @@ public:
     try {
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      current_statement__ = 28;
+      current_statement__ = 40;
       context__.validate_dims("data initialization", "N", "int",
         std::vector<size_t>{});
       N = std::numeric_limits<int>::min();
-      current_statement__ = 28;
+      current_statement__ = 40;
       N = context__.vals_i("N")[(1 - 1)];
-      current_statement__ = 28;
+      current_statement__ = 40;
       stan::math::check_greater_or_equal(function__, "N", N, 0);
-      current_statement__ = 29;
+      current_statement__ = 41;
       context__.validate_dims("data initialization", "N_well", "int",
         std::vector<size_t>{});
       N_well = std::numeric_limits<int>::min();
-      current_statement__ = 29;
+      current_statement__ = 41;
       N_well = context__.vals_i("N_well")[(1 - 1)];
-      current_statement__ = 29;
+      current_statement__ = 41;
       stan::math::check_greater_or_equal(function__, "N_well", N_well, 0);
-      current_statement__ = 30;
+      current_statement__ = 42;
       context__.validate_dims("data initialization", "N_plate", "int",
         std::vector<size_t>{});
       N_plate = std::numeric_limits<int>::min();
-      current_statement__ = 30;
+      current_statement__ = 42;
       N_plate = context__.vals_i("N_plate")[(1 - 1)];
-      current_statement__ = 30;
+      current_statement__ = 42;
       stan::math::check_greater_or_equal(function__, "N_plate", N_plate, 0);
-      current_statement__ = 31;
+      current_statement__ = 43;
       context__.validate_dims("data initialization", "N_plate_group", "int",
         std::vector<size_t>{});
       N_plate_group = std::numeric_limits<int>::min();
-      current_statement__ = 31;
+      current_statement__ = 43;
       N_plate_group = context__.vals_i("N_plate_group")[(1 - 1)];
-      current_statement__ = 31;
+      current_statement__ = 43;
       stan::math::check_greater_or_equal(function__, "N_plate_group",
         N_plate_group, 0);
-      current_statement__ = 32;
+      current_statement__ = 44;
       context__.validate_dims("data initialization", "N_group", "int",
         std::vector<size_t>{});
       N_group = std::numeric_limits<int>::min();
-      current_statement__ = 32;
+      current_statement__ = 44;
       N_group = context__.vals_i("N_group")[(1 - 1)];
-      current_statement__ = 32;
+      current_statement__ = 44;
       stan::math::check_greater_or_equal(function__, "N_group", N_group, 0);
-      current_statement__ = 33;
+      current_statement__ = 45;
       stan::math::validate_non_negative_index("y", "N", N);
-      current_statement__ = 34;
+      current_statement__ = 46;
       context__.validate_dims("data initialization", "y", "double",
         std::vector<size_t>{static_cast<size_t>(N)});
       y_data__ = Eigen::Matrix<double,-1,1>::Constant(N,
@@ -164,81 +181,94 @@ public:
       new (&y) Eigen::Map<Eigen::Matrix<double,-1,1>>(y_data__.data(), N);
       {
         std::vector<local_scalar_t__> y_flat__;
-        current_statement__ = 34;
+        current_statement__ = 46;
         y_flat__ = context__.vals_r("y");
-        current_statement__ = 34;
+        current_statement__ = 46;
         pos__ = 1;
-        current_statement__ = 34;
+        current_statement__ = 46;
         for (int sym1__ = 1; sym1__ <= N; ++sym1__) {
-          current_statement__ = 34;
+          current_statement__ = 46;
           stan::model::assign(y, y_flat__[(pos__ - 1)],
             "assigning variable y", stan::model::index_uni(sym1__));
-          current_statement__ = 34;
+          current_statement__ = 46;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 35;
+      current_statement__ = 47;
       stan::math::validate_non_negative_index("well_id", "N", N);
-      current_statement__ = 36;
+      current_statement__ = 48;
       context__.validate_dims("data initialization", "well_id", "int",
         std::vector<size_t>{static_cast<size_t>(N)});
       well_id = std::vector<int>(N, std::numeric_limits<int>::min());
-      current_statement__ = 36;
+      current_statement__ = 48;
       well_id = context__.vals_i("well_id");
-      current_statement__ = 37;
+      current_statement__ = 49;
       stan::math::validate_non_negative_index("plate_id", "N_well", N_well);
-      current_statement__ = 38;
+      current_statement__ = 50;
       context__.validate_dims("data initialization", "plate_id", "int",
         std::vector<size_t>{static_cast<size_t>(N_well)});
       plate_id = std::vector<int>(N_well, std::numeric_limits<int>::min());
-      current_statement__ = 38;
+      current_statement__ = 50;
       plate_id = context__.vals_i("plate_id");
-      current_statement__ = 39;
+      current_statement__ = 51;
       stan::math::validate_non_negative_index("plate_group_id", "N_well",
         N_well);
-      current_statement__ = 40;
+      current_statement__ = 52;
       context__.validate_dims("data initialization", "plate_group_id", "int",
         std::vector<size_t>{static_cast<size_t>(N_well)});
       plate_group_id = std::vector<int>(N_well,
                          std::numeric_limits<int>::min());
-      current_statement__ = 40;
+      current_statement__ = 52;
       plate_group_id = context__.vals_i("plate_group_id");
-      current_statement__ = 41;
+      current_statement__ = 53;
       stan::math::validate_non_negative_index("group_id", "N_plate_group",
         N_plate_group);
-      current_statement__ = 42;
+      current_statement__ = 54;
       context__.validate_dims("data initialization", "group_id", "int",
         std::vector<size_t>{static_cast<size_t>(N_plate_group)});
       group_id = std::vector<int>(N_plate_group,
                    std::numeric_limits<int>::min());
-      current_statement__ = 42;
+      current_statement__ = 54;
       group_id = context__.vals_i("group_id");
-      current_statement__ = 43;
+      current_statement__ = 55;
+      stan::math::validate_non_negative_index("offset", "N_well", N_well);
+      current_statement__ = 56;
+      context__.validate_dims("data initialization", "offset", "int",
+        std::vector<size_t>{static_cast<size_t>(N_well)});
+      offset = std::vector<int>(N_well, std::numeric_limits<int>::min());
+      current_statement__ = 56;
+      offset = context__.vals_i("offset");
+      current_statement__ = 57;
       stan::math::validate_non_negative_index("alpha_plate", "N_plate",
         N_plate);
-      current_statement__ = 44;
+      current_statement__ = 58;
       stan::math::validate_non_negative_index("mu_group", "N_group", N_group);
-      current_statement__ = 45;
+      current_statement__ = 59;
       stan::math::validate_non_negative_index("z_1", "N_well", N_well);
-      current_statement__ = 46;
+      current_statement__ = 60;
       stan::math::validate_non_negative_index("z_2", "N_plate_group",
         N_plate_group);
-      current_statement__ = 47;
-      stan::math::validate_non_negative_index("rate", "N_well", N_well);
-      current_statement__ = 48;
+      current_statement__ = 61;
+      stan::math::validate_non_negative_index("z_3", "N_well", N_well);
+      current_statement__ = 62;
+      stan::math::validate_non_negative_index("shape", "N_well", N_well);
+      current_statement__ = 63;
+      stan::math::validate_non_negative_index("mu", "N_well", N_well);
+      current_statement__ = 64;
       stan::math::validate_non_negative_index("mu_well", "N_well", N_well);
-      current_statement__ = 49;
+      current_statement__ = 65;
       stan::math::validate_non_negative_index("mu_plate_group",
         "N_plate_group", N_plate_group);
-      current_statement__ = 50;
+      current_statement__ = 66;
       stan::math::validate_non_negative_index("y_hat_sample", "N_well",
         N_well);
-      current_statement__ = 51;
+      current_statement__ = 67;
       stan::math::validate_non_negative_index("log_lik", "N", N);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
-    num_params_r__ = 1 + N_plate + N_group + 1 + 1 + N_well + N_plate_group;
+    num_params_r__ = N_plate + N_group + 1 + 1 + 1 + 1 + N_well +
+      N_plate_group + N_well;
   }
   inline std::string model_name() const final {
     return "model_M";
@@ -266,87 +296,129 @@ public:
     // suppress unused var warning
     (void) function__;
     try {
-      local_scalar_t__ shape = DUMMY_VAR__;
-      current_statement__ = 1;
-      shape = in__.template read_constrain_lb<local_scalar_t__,
-                jacobian__>(0, lp__);
       Eigen::Matrix<local_scalar_t__,-1,1> alpha_plate =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate, DUMMY_VAR__);
-      current_statement__ = 2;
+      current_statement__ = 1;
       alpha_plate = in__.template read<
                       Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate);
       Eigen::Matrix<local_scalar_t__,-1,1> mu_group =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_group, DUMMY_VAR__);
-      current_statement__ = 3;
+      current_statement__ = 2;
       mu_group = in__.template read<
                    Eigen::Matrix<local_scalar_t__,-1,1>>(N_group);
       local_scalar_t__ sigma_bplate = DUMMY_VAR__;
-      current_statement__ = 4;
+      current_statement__ = 3;
       sigma_bplate = in__.template read_constrain_lb<local_scalar_t__,
                        jacobian__>(0, lp__);
       local_scalar_t__ sigma_wplate = DUMMY_VAR__;
-      current_statement__ = 5;
+      current_statement__ = 4;
       sigma_wplate = in__.template read_constrain_lb<local_scalar_t__,
                        jacobian__>(0, lp__);
+      local_scalar_t__ mu_shape = DUMMY_VAR__;
+      current_statement__ = 5;
+      mu_shape = in__.template read<local_scalar_t__>();
+      local_scalar_t__ sigma_shape = DUMMY_VAR__;
+      current_statement__ = 6;
+      sigma_shape = in__.template read_constrain_lb<local_scalar_t__,
+                      jacobian__>(0, lp__);
       Eigen::Matrix<local_scalar_t__,-1,1> z_1 =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
-      current_statement__ = 6;
+      current_statement__ = 7;
       z_1 = in__.template read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well);
       Eigen::Matrix<local_scalar_t__,-1,1> z_2 =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate_group,
           DUMMY_VAR__);
-      current_statement__ = 7;
+      current_statement__ = 8;
       z_2 = in__.template read<
               Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate_group);
-      Eigen::Matrix<local_scalar_t__,-1,1> rate =
+      Eigen::Matrix<local_scalar_t__,-1,1> z_3 =
+        Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
+      current_statement__ = 9;
+      z_3 = in__.template read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well);
+      Eigen::Matrix<local_scalar_t__,-1,1> shape =
+        Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
+      Eigen::Matrix<local_scalar_t__,-1,1> mu =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
       Eigen::Matrix<local_scalar_t__,-1,1> mu_well =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
       Eigen::Matrix<local_scalar_t__,-1,1> mu_plate_group =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate_group,
           DUMMY_VAR__);
-      current_statement__ = 13;
+      current_statement__ = 16;
       stan::model::assign(mu_plate_group,
         stan::math::add(
           stan::model::rvalue(mu_group, "mu_group",
             stan::model::index_multi(group_id)),
           stan::math::multiply(sigma_bplate, z_2)),
         "assigning variable mu_plate_group");
-      current_statement__ = 14;
-      stan::model::assign(mu_well,
-        stan::math::add(
-          stan::model::rvalue(mu_plate_group, "mu_plate_group",
-            stan::model::index_multi(plate_group_id)),
-          stan::math::multiply(sigma_wplate, z_1)),
-        "assigning variable mu_well");
-      current_statement__ = 15;
-      stan::model::assign(rate,
-        stan::math::exp(
-          stan::math::add(mu_well,
-            stan::model::rvalue(alpha_plate, "alpha_plate",
-              stan::model::index_multi(plate_id)))),
-        "assigning variable rate");
-      current_statement__ = 8;
-      stan::math::check_greater_or_equal(function__, "rate", rate, 0);
-      {
-        current_statement__ = 20;
-        lp_accum__.add(stan::math::gamma_lpdf<propto__>(shape, 0.01, 0.01));
+      current_statement__ = 23;
+      for (int w = 1; w <= N_well; ++w) {
         current_statement__ = 21;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(alpha_plate, -1, 2));
-        current_statement__ = 22;
+        if (stan::math::logical_eq(
+              stan::model::rvalue(offset, "offset", stan::model::index_uni(w)),
+              1)) {
+          current_statement__ = 19;
+          stan::model::assign(mu_well,
+            (stan::model::rvalue(alpha_plate, "alpha_plate",
+               stan::model::index_uni(
+                 stan::model::rvalue(plate_id, "plate_id",
+                   stan::model::index_uni(w)))) + (sigma_wplate *
+            stan::model::rvalue(z_1, "z_1", stan::model::index_uni(w)))),
+            "assigning variable mu_well", stan::model::index_uni(w));
+        } else {
+          current_statement__ = 17;
+          stan::model::assign(mu_well,
+            ((stan::model::rvalue(alpha_plate, "alpha_plate",
+                stan::model::index_uni(
+                  stan::model::rvalue(plate_id, "plate_id",
+                    stan::model::index_uni(w)))) +
+            stan::model::rvalue(mu_plate_group, "mu_plate_group",
+              stan::model::index_uni(
+                stan::model::rvalue(plate_group_id, "plate_group_id",
+                  stan::model::index_uni(w))))) + (sigma_wplate *
+            stan::model::rvalue(z_1, "z_1", stan::model::index_uni(w)))),
+            "assigning variable mu_well", stan::model::index_uni(w));
+        }
+      }
+      current_statement__ = 24;
+      stan::model::assign(mu, stan::math::exp(mu_well),
+        "assigning variable mu");
+      current_statement__ = 25;
+      stan::model::assign(shape,
+        stan::math::exp(
+          stan::math::add(mu_shape, stan::math::multiply(sigma_shape, z_3))),
+        "assigning variable shape");
+      current_statement__ = 10;
+      stan::math::check_greater_or_equal(function__, "shape", shape, 0);
+      current_statement__ = 11;
+      stan::math::check_greater_or_equal(function__, "mu", mu, 0);
+      {
+        current_statement__ = 30;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(mu_shape, 2, 1));
+        current_statement__ = 31;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(alpha_plate, -2, 1));
+        current_statement__ = 32;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(mu_group, 0, 1));
-        current_statement__ = 23;
+        current_statement__ = 33;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_bplate, 0, 0.5));
-        current_statement__ = 24;
+        current_statement__ = 34;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_wplate, 0, 0.5));
-        current_statement__ = 25;
+        current_statement__ = 35;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_shape, 0, 1));
+        current_statement__ = 36;
         lp_accum__.add(stan::math::std_normal_lpdf<propto__>(z_1));
-        current_statement__ = 26;
+        current_statement__ = 37;
         lp_accum__.add(stan::math::std_normal_lpdf<propto__>(z_2));
-        current_statement__ = 27;
-        lp_accum__.add(stan::math::gamma_lpdf<propto__>(y, shape,
-                         stan::math::elt_divide(shape,
-                           stan::model::rvalue(rate, "rate",
+        current_statement__ = 38;
+        lp_accum__.add(stan::math::std_normal_lpdf<propto__>(z_3));
+        current_statement__ = 39;
+        lp_accum__.add(stan::math::gamma_lpdf<propto__>(y,
+                         stan::model::rvalue(shape, "shape",
+                           stan::model::index_multi(well_id)),
+                         stan::math::elt_divide(
+                           stan::model::rvalue(shape, "shape",
+                             stan::model::index_multi(well_id)),
+                           stan::model::rvalue(mu, "mu",
                              stan::model::index_multi(well_id)))));
       }
     } catch (const std::exception& e) {
@@ -386,42 +458,53 @@ public:
     // suppress unused var warning
     (void) function__;
     try {
-      double shape = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 1;
-      shape = in__.template read_constrain_lb<local_scalar_t__,
-                jacobian__>(0, lp__);
       Eigen::Matrix<double,-1,1> alpha_plate =
         Eigen::Matrix<double,-1,1>::Constant(N_plate,
           std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 2;
+      current_statement__ = 1;
       alpha_plate = in__.template read<
                       Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate);
       Eigen::Matrix<double,-1,1> mu_group =
         Eigen::Matrix<double,-1,1>::Constant(N_group,
           std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 3;
+      current_statement__ = 2;
       mu_group = in__.template read<
                    Eigen::Matrix<local_scalar_t__,-1,1>>(N_group);
       double sigma_bplate = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 4;
+      current_statement__ = 3;
       sigma_bplate = in__.template read_constrain_lb<local_scalar_t__,
                        jacobian__>(0, lp__);
       double sigma_wplate = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 5;
+      current_statement__ = 4;
       sigma_wplate = in__.template read_constrain_lb<local_scalar_t__,
                        jacobian__>(0, lp__);
+      double mu_shape = std::numeric_limits<double>::quiet_NaN();
+      current_statement__ = 5;
+      mu_shape = in__.template read<local_scalar_t__>();
+      double sigma_shape = std::numeric_limits<double>::quiet_NaN();
+      current_statement__ = 6;
+      sigma_shape = in__.template read_constrain_lb<local_scalar_t__,
+                      jacobian__>(0, lp__);
       Eigen::Matrix<double,-1,1> z_1 =
         Eigen::Matrix<double,-1,1>::Constant(N_well,
           std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 6;
+      current_statement__ = 7;
       z_1 = in__.template read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well);
       Eigen::Matrix<double,-1,1> z_2 =
         Eigen::Matrix<double,-1,1>::Constant(N_plate_group,
           std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 7;
+      current_statement__ = 8;
       z_2 = in__.template read<
               Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate_group);
-      Eigen::Matrix<double,-1,1> rate =
+      Eigen::Matrix<double,-1,1> z_3 =
+        Eigen::Matrix<double,-1,1>::Constant(N_well,
+          std::numeric_limits<double>::quiet_NaN());
+      current_statement__ = 9;
+      z_3 = in__.template read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well);
+      Eigen::Matrix<double,-1,1> shape =
+        Eigen::Matrix<double,-1,1>::Constant(N_well,
+          std::numeric_limits<double>::quiet_NaN());
+      Eigen::Matrix<double,-1,1> mu =
         Eigen::Matrix<double,-1,1>::Constant(N_well,
           std::numeric_limits<double>::quiet_NaN());
       Eigen::Matrix<double,-1,1> mu_well =
@@ -430,43 +513,71 @@ public:
       Eigen::Matrix<double,-1,1> mu_plate_group =
         Eigen::Matrix<double,-1,1>::Constant(N_plate_group,
           std::numeric_limits<double>::quiet_NaN());
-      out__.write(shape);
       out__.write(alpha_plate);
       out__.write(mu_group);
       out__.write(sigma_bplate);
       out__.write(sigma_wplate);
+      out__.write(mu_shape);
+      out__.write(sigma_shape);
       out__.write(z_1);
       out__.write(z_2);
+      out__.write(z_3);
       if (stan::math::logical_negation(
             (stan::math::primitive_value(emit_transformed_parameters__) ||
             stan::math::primitive_value(emit_generated_quantities__)))) {
         return ;
       }
-      current_statement__ = 13;
+      current_statement__ = 16;
       stan::model::assign(mu_plate_group,
         stan::math::add(
           stan::model::rvalue(mu_group, "mu_group",
             stan::model::index_multi(group_id)),
           stan::math::multiply(sigma_bplate, z_2)),
         "assigning variable mu_plate_group");
-      current_statement__ = 14;
-      stan::model::assign(mu_well,
-        stan::math::add(
-          stan::model::rvalue(mu_plate_group, "mu_plate_group",
-            stan::model::index_multi(plate_group_id)),
-          stan::math::multiply(sigma_wplate, z_1)),
-        "assigning variable mu_well");
-      current_statement__ = 15;
-      stan::model::assign(rate,
+      current_statement__ = 23;
+      for (int w = 1; w <= N_well; ++w) {
+        current_statement__ = 21;
+        if (stan::math::logical_eq(
+              stan::model::rvalue(offset, "offset", stan::model::index_uni(w)),
+              1)) {
+          current_statement__ = 19;
+          stan::model::assign(mu_well,
+            (stan::model::rvalue(alpha_plate, "alpha_plate",
+               stan::model::index_uni(
+                 stan::model::rvalue(plate_id, "plate_id",
+                   stan::model::index_uni(w)))) + (sigma_wplate *
+            stan::model::rvalue(z_1, "z_1", stan::model::index_uni(w)))),
+            "assigning variable mu_well", stan::model::index_uni(w));
+        } else {
+          current_statement__ = 17;
+          stan::model::assign(mu_well,
+            ((stan::model::rvalue(alpha_plate, "alpha_plate",
+                stan::model::index_uni(
+                  stan::model::rvalue(plate_id, "plate_id",
+                    stan::model::index_uni(w)))) +
+            stan::model::rvalue(mu_plate_group, "mu_plate_group",
+              stan::model::index_uni(
+                stan::model::rvalue(plate_group_id, "plate_group_id",
+                  stan::model::index_uni(w))))) + (sigma_wplate *
+            stan::model::rvalue(z_1, "z_1", stan::model::index_uni(w)))),
+            "assigning variable mu_well", stan::model::index_uni(w));
+        }
+      }
+      current_statement__ = 24;
+      stan::model::assign(mu, stan::math::exp(mu_well),
+        "assigning variable mu");
+      current_statement__ = 25;
+      stan::model::assign(shape,
         stan::math::exp(
-          stan::math::add(mu_well,
-            stan::model::rvalue(alpha_plate, "alpha_plate",
-              stan::model::index_multi(plate_id)))),
-        "assigning variable rate");
-      current_statement__ = 8;
-      stan::math::check_greater_or_equal(function__, "rate", rate, 0);
+          stan::math::add(mu_shape, stan::math::multiply(sigma_shape, z_3))),
+        "assigning variable shape");
+      current_statement__ = 10;
+      stan::math::check_greater_or_equal(function__, "shape", shape, 0);
+      current_statement__ = 11;
+      stan::math::check_greater_or_equal(function__, "mu", mu, 0);
       if (emit_transformed_parameters__) {
-        out__.write(rate);
+        out__.write(shape);
+        out__.write(mu);
         out__.write(mu_well);
         out__.write(mu_plate_group);
       }
@@ -477,18 +588,25 @@ public:
         std::vector<double>(N_well, std::numeric_limits<double>::quiet_NaN());
       std::vector<double> log_lik =
         std::vector<double>(N, std::numeric_limits<double>::quiet_NaN());
-      current_statement__ = 16;
+      current_statement__ = 26;
       stan::model::assign(y_hat_sample,
-        stan::math::gamma_rng(shape, stan::math::elt_divide(shape, rate),
+        stan::math::gamma_rng(shape, stan::math::elt_divide(shape, mu),
           base_rng__), "assigning variable y_hat_sample");
-      current_statement__ = 19;
+      current_statement__ = 29;
       for (int i = 1; i <= N; ++i) {
-        current_statement__ = 17;
+        current_statement__ = 27;
         stan::model::assign(log_lik,
           stan::math::gamma_lpdf<false>(
-            stan::model::rvalue(y, "y", stan::model::index_uni(i)), shape,
-            (shape /
-            stan::model::rvalue(rate, "rate",
+            stan::model::rvalue(y, "y", stan::model::index_uni(i)),
+            stan::model::rvalue(shape, "shape",
+              stan::model::index_uni(
+                stan::model::rvalue(well_id, "well_id",
+                  stan::model::index_uni(i)))),
+            (stan::model::rvalue(shape, "shape",
+               stan::model::index_uni(
+                 stan::model::rvalue(well_id, "well_id",
+                   stan::model::index_uni(i)))) /
+            stan::model::rvalue(mu, "mu",
               stan::model::index_uni(
                 stan::model::rvalue(well_id, "well_id",
                   stan::model::index_uni(i)))))),
@@ -516,35 +634,39 @@ public:
     try {
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      local_scalar_t__ shape = DUMMY_VAR__;
-      current_statement__ = 1;
-      shape = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0, shape);
       Eigen::Matrix<local_scalar_t__,-1,1> alpha_plate =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate, DUMMY_VAR__);
-      current_statement__ = 2;
+      current_statement__ = 1;
       stan::model::assign(alpha_plate,
         in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate),
         "assigning variable alpha_plate");
       out__.write(alpha_plate);
       Eigen::Matrix<local_scalar_t__,-1,1> mu_group =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_group, DUMMY_VAR__);
-      current_statement__ = 3;
+      current_statement__ = 2;
       stan::model::assign(mu_group,
         in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_group),
         "assigning variable mu_group");
       out__.write(mu_group);
       local_scalar_t__ sigma_bplate = DUMMY_VAR__;
-      current_statement__ = 4;
+      current_statement__ = 3;
       sigma_bplate = in__.read<local_scalar_t__>();
       out__.write_free_lb(0, sigma_bplate);
       local_scalar_t__ sigma_wplate = DUMMY_VAR__;
-      current_statement__ = 5;
+      current_statement__ = 4;
       sigma_wplate = in__.read<local_scalar_t__>();
       out__.write_free_lb(0, sigma_wplate);
+      local_scalar_t__ mu_shape = DUMMY_VAR__;
+      current_statement__ = 5;
+      mu_shape = in__.read<local_scalar_t__>();
+      out__.write(mu_shape);
+      local_scalar_t__ sigma_shape = DUMMY_VAR__;
+      current_statement__ = 6;
+      sigma_shape = in__.read<local_scalar_t__>();
+      out__.write_free_lb(0, sigma_shape);
       Eigen::Matrix<local_scalar_t__,-1,1> z_1 =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
-      current_statement__ = 6;
+      current_statement__ = 7;
       stan::model::assign(z_1,
         in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well),
         "assigning variable z_1");
@@ -552,11 +674,18 @@ public:
       Eigen::Matrix<local_scalar_t__,-1,1> z_2 =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate_group,
           DUMMY_VAR__);
-      current_statement__ = 7;
+      current_statement__ = 8;
       stan::model::assign(z_2,
         in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_plate_group),
         "assigning variable z_2");
       out__.write(z_2);
+      Eigen::Matrix<local_scalar_t__,-1,1> z_3 =
+        Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
+      current_statement__ = 9;
+      stan::model::assign(z_3,
+        in__.read<Eigen::Matrix<local_scalar_t__,-1,1>>(N_well),
+        "assigning variable z_3");
+      out__.write(z_3);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -573,46 +702,48 @@ public:
     (void) DUMMY_VAR__;
     try {
       current_statement__ = 1;
-      context__.validate_dims("parameter initialization", "shape", "double",
-        std::vector<size_t>{});
-      current_statement__ = 2;
       context__.validate_dims("parameter initialization", "alpha_plate",
         "double", std::vector<size_t>{static_cast<size_t>(N_plate)});
-      current_statement__ = 3;
+      current_statement__ = 2;
       context__.validate_dims("parameter initialization", "mu_group",
         "double", std::vector<size_t>{static_cast<size_t>(N_group)});
-      current_statement__ = 4;
+      current_statement__ = 3;
       context__.validate_dims("parameter initialization", "sigma_bplate",
         "double", std::vector<size_t>{});
-      current_statement__ = 5;
+      current_statement__ = 4;
       context__.validate_dims("parameter initialization", "sigma_wplate",
         "double", std::vector<size_t>{});
+      current_statement__ = 5;
+      context__.validate_dims("parameter initialization", "mu_shape",
+        "double", std::vector<size_t>{});
       current_statement__ = 6;
+      context__.validate_dims("parameter initialization", "sigma_shape",
+        "double", std::vector<size_t>{});
+      current_statement__ = 7;
       context__.validate_dims("parameter initialization", "z_1", "double",
         std::vector<size_t>{static_cast<size_t>(N_well)});
-      current_statement__ = 7;
+      current_statement__ = 8;
       context__.validate_dims("parameter initialization", "z_2", "double",
         std::vector<size_t>{static_cast<size_t>(N_plate_group)});
+      current_statement__ = 9;
+      context__.validate_dims("parameter initialization", "z_3", "double",
+        std::vector<size_t>{static_cast<size_t>(N_well)});
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      local_scalar_t__ shape = DUMMY_VAR__;
-      current_statement__ = 1;
-      shape = context__.vals_r("shape")[(1 - 1)];
-      out__.write_free_lb(0, shape);
       Eigen::Matrix<local_scalar_t__,-1,1> alpha_plate =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_plate, DUMMY_VAR__);
       {
         std::vector<local_scalar_t__> alpha_plate_flat__;
-        current_statement__ = 2;
+        current_statement__ = 1;
         alpha_plate_flat__ = context__.vals_r("alpha_plate");
-        current_statement__ = 2;
+        current_statement__ = 1;
         pos__ = 1;
-        current_statement__ = 2;
+        current_statement__ = 1;
         for (int sym1__ = 1; sym1__ <= N_plate; ++sym1__) {
-          current_statement__ = 2;
+          current_statement__ = 1;
           stan::model::assign(alpha_plate, alpha_plate_flat__[(pos__ - 1)],
             "assigning variable alpha_plate", stan::model::index_uni(sym1__));
-          current_statement__ = 2;
+          current_statement__ = 1;
           pos__ = (pos__ + 1);
         }
       }
@@ -621,42 +752,50 @@ public:
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_group, DUMMY_VAR__);
       {
         std::vector<local_scalar_t__> mu_group_flat__;
-        current_statement__ = 3;
+        current_statement__ = 2;
         mu_group_flat__ = context__.vals_r("mu_group");
-        current_statement__ = 3;
+        current_statement__ = 2;
         pos__ = 1;
-        current_statement__ = 3;
+        current_statement__ = 2;
         for (int sym1__ = 1; sym1__ <= N_group; ++sym1__) {
-          current_statement__ = 3;
+          current_statement__ = 2;
           stan::model::assign(mu_group, mu_group_flat__[(pos__ - 1)],
             "assigning variable mu_group", stan::model::index_uni(sym1__));
-          current_statement__ = 3;
+          current_statement__ = 2;
           pos__ = (pos__ + 1);
         }
       }
       out__.write(mu_group);
       local_scalar_t__ sigma_bplate = DUMMY_VAR__;
-      current_statement__ = 4;
+      current_statement__ = 3;
       sigma_bplate = context__.vals_r("sigma_bplate")[(1 - 1)];
       out__.write_free_lb(0, sigma_bplate);
       local_scalar_t__ sigma_wplate = DUMMY_VAR__;
-      current_statement__ = 5;
+      current_statement__ = 4;
       sigma_wplate = context__.vals_r("sigma_wplate")[(1 - 1)];
       out__.write_free_lb(0, sigma_wplate);
+      local_scalar_t__ mu_shape = DUMMY_VAR__;
+      current_statement__ = 5;
+      mu_shape = context__.vals_r("mu_shape")[(1 - 1)];
+      out__.write(mu_shape);
+      local_scalar_t__ sigma_shape = DUMMY_VAR__;
+      current_statement__ = 6;
+      sigma_shape = context__.vals_r("sigma_shape")[(1 - 1)];
+      out__.write_free_lb(0, sigma_shape);
       Eigen::Matrix<local_scalar_t__,-1,1> z_1 =
         Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
       {
         std::vector<local_scalar_t__> z_1_flat__;
-        current_statement__ = 6;
+        current_statement__ = 7;
         z_1_flat__ = context__.vals_r("z_1");
-        current_statement__ = 6;
+        current_statement__ = 7;
         pos__ = 1;
-        current_statement__ = 6;
+        current_statement__ = 7;
         for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
-          current_statement__ = 6;
+          current_statement__ = 7;
           stan::model::assign(z_1, z_1_flat__[(pos__ - 1)],
             "assigning variable z_1", stan::model::index_uni(sym1__));
-          current_statement__ = 6;
+          current_statement__ = 7;
           pos__ = (pos__ + 1);
         }
       }
@@ -666,20 +805,38 @@ public:
           DUMMY_VAR__);
       {
         std::vector<local_scalar_t__> z_2_flat__;
-        current_statement__ = 7;
+        current_statement__ = 8;
         z_2_flat__ = context__.vals_r("z_2");
-        current_statement__ = 7;
+        current_statement__ = 8;
         pos__ = 1;
-        current_statement__ = 7;
+        current_statement__ = 8;
         for (int sym1__ = 1; sym1__ <= N_plate_group; ++sym1__) {
-          current_statement__ = 7;
+          current_statement__ = 8;
           stan::model::assign(z_2, z_2_flat__[(pos__ - 1)],
             "assigning variable z_2", stan::model::index_uni(sym1__));
-          current_statement__ = 7;
+          current_statement__ = 8;
           pos__ = (pos__ + 1);
         }
       }
       out__.write(z_2);
+      Eigen::Matrix<local_scalar_t__,-1,1> z_3 =
+        Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_well, DUMMY_VAR__);
+      {
+        std::vector<local_scalar_t__> z_3_flat__;
+        current_statement__ = 9;
+        z_3_flat__ = context__.vals_r("z_3");
+        current_statement__ = 9;
+        pos__ = 1;
+        current_statement__ = 9;
+        for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
+          current_statement__ = 9;
+          stan::model::assign(z_3, z_3_flat__[(pos__ - 1)],
+            "assigning variable z_3", stan::model::index_uni(sym1__));
+          current_statement__ = 9;
+          pos__ = (pos__ + 1);
+        }
+      }
+      out__.write(z_3);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -688,10 +845,12 @@ public:
   get_param_names(std::vector<std::string>& names__, const bool
                   emit_transformed_parameters__ = true, const bool
                   emit_generated_quantities__ = true) const {
-    names__ = std::vector<std::string>{"shape", "alpha_plate", "mu_group",
-                "sigma_bplate", "sigma_wplate", "z_1", "z_2"};
+    names__ = std::vector<std::string>{"alpha_plate", "mu_group",
+                "sigma_bplate", "sigma_wplate", "mu_shape", "sigma_shape",
+                "z_1", "z_2", "z_3"};
     if (emit_transformed_parameters__) {
-      std::vector<std::string> temp{"rate", "mu_well", "mu_plate_group"};
+      std::vector<std::string>
+        temp{"shape", "mu", "mu_well", "mu_plate_group"};
       names__.reserve(names__.size() + temp.size());
       names__.insert(names__.end(), temp.begin(), temp.end());
     }
@@ -705,15 +864,19 @@ public:
   get_dims(std::vector<std::vector<size_t>>& dimss__, const bool
            emit_transformed_parameters__ = true, const bool
            emit_generated_quantities__ = true) const {
-    dimss__ = std::vector<std::vector<size_t>>{std::vector<size_t>{},
-                std::vector<size_t>{static_cast<size_t>(N_plate)},
+    dimss__ = std::vector<std::vector<size_t>>{std::vector<size_t>{static_cast<
+                                                                    size_t>(
+                                                                    N_plate)},
                 std::vector<size_t>{static_cast<size_t>(N_group)},
                 std::vector<size_t>{}, std::vector<size_t>{},
+                std::vector<size_t>{}, std::vector<size_t>{},
                 std::vector<size_t>{static_cast<size_t>(N_well)},
-                std::vector<size_t>{static_cast<size_t>(N_plate_group)}};
+                std::vector<size_t>{static_cast<size_t>(N_plate_group)},
+                std::vector<size_t>{static_cast<size_t>(N_well)}};
     if (emit_transformed_parameters__) {
       std::vector<std::vector<size_t>>
         temp{std::vector<size_t>{static_cast<size_t>(N_well)},
+             std::vector<size_t>{static_cast<size_t>(N_well)},
              std::vector<size_t>{static_cast<size_t>(N_well)},
              std::vector<size_t>{static_cast<size_t>(N_plate_group)}};
       dimss__.reserve(dimss__.size() + temp.size());
@@ -731,7 +894,6 @@ public:
   constrained_param_names(std::vector<std::string>& param_names__, bool
                           emit_transformed_parameters__ = true, bool
                           emit_generated_quantities__ = true) const final {
-    param_names__.emplace_back(std::string() + "shape");
     for (int sym1__ = 1; sym1__ <= N_plate; ++sym1__) {
       param_names__.emplace_back(std::string() + "alpha_plate" + '.' +
         std::to_string(sym1__));
@@ -742,6 +904,8 @@ public:
     }
     param_names__.emplace_back(std::string() + "sigma_bplate");
     param_names__.emplace_back(std::string() + "sigma_wplate");
+    param_names__.emplace_back(std::string() + "mu_shape");
+    param_names__.emplace_back(std::string() + "sigma_shape");
     for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
       param_names__.emplace_back(std::string() + "z_1" + '.' +
         std::to_string(sym1__));
@@ -750,9 +914,17 @@ public:
       param_names__.emplace_back(std::string() + "z_2" + '.' +
         std::to_string(sym1__));
     }
+    for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
+      param_names__.emplace_back(std::string() + "z_3" + '.' +
+        std::to_string(sym1__));
+    }
     if (emit_transformed_parameters__) {
       for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
-        param_names__.emplace_back(std::string() + "rate" + '.' +
+        param_names__.emplace_back(std::string() + "shape" + '.' +
+          std::to_string(sym1__));
+      }
+      for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
+        param_names__.emplace_back(std::string() + "mu" + '.' +
           std::to_string(sym1__));
       }
       for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
@@ -779,7 +951,6 @@ public:
   unconstrained_param_names(std::vector<std::string>& param_names__, bool
                             emit_transformed_parameters__ = true, bool
                             emit_generated_quantities__ = true) const final {
-    param_names__.emplace_back(std::string() + "shape");
     for (int sym1__ = 1; sym1__ <= N_plate; ++sym1__) {
       param_names__.emplace_back(std::string() + "alpha_plate" + '.' +
         std::to_string(sym1__));
@@ -790,6 +961,8 @@ public:
     }
     param_names__.emplace_back(std::string() + "sigma_bplate");
     param_names__.emplace_back(std::string() + "sigma_wplate");
+    param_names__.emplace_back(std::string() + "mu_shape");
+    param_names__.emplace_back(std::string() + "sigma_shape");
     for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
       param_names__.emplace_back(std::string() + "z_1" + '.' +
         std::to_string(sym1__));
@@ -798,9 +971,17 @@ public:
       param_names__.emplace_back(std::string() + "z_2" + '.' +
         std::to_string(sym1__));
     }
+    for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
+      param_names__.emplace_back(std::string() + "z_3" + '.' +
+        std::to_string(sym1__));
+    }
     if (emit_transformed_parameters__) {
       for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
-        param_names__.emplace_back(std::string() + "rate" + '.' +
+        param_names__.emplace_back(std::string() + "shape" + '.' +
+          std::to_string(sym1__));
+      }
+      for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
+        param_names__.emplace_back(std::string() + "mu" + '.' +
           std::to_string(sym1__));
       }
       for (int sym1__ = 1; sym1__ <= N_well; ++sym1__) {
@@ -824,10 +1005,10 @@ public:
     }
   }
   inline std::string get_constrained_sizedtypes() const {
-    return std::string("[{\"name\":\"shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha_plate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate) + "},\"block\":\"parameters\"},{\"name\":\"mu_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_group) + "},\"block\":\"parameters\"},{\"name\":\"sigma_bplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_wplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_1\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"z_2\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"parameters\"},{\"name\":\"rate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_well\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_plate_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"transformed_parameters\"},{\"name\":\"y_hat_sample\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_well) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"alpha_plate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate) + "},\"block\":\"parameters\"},{\"name\":\"mu_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_group) + "},\"block\":\"parameters\"},{\"name\":\"sigma_bplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_wplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"mu_shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_1\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"z_2\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"parameters\"},{\"name\":\"z_3\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"shape\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_well\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_plate_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"transformed_parameters\"},{\"name\":\"y_hat_sample\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_well) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"}]");
   }
   inline std::string get_unconstrained_sizedtypes() const {
-    return std::string("[{\"name\":\"shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"alpha_plate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate) + "},\"block\":\"parameters\"},{\"name\":\"mu_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_group) + "},\"block\":\"parameters\"},{\"name\":\"sigma_bplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_wplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_1\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"z_2\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"parameters\"},{\"name\":\"rate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_well\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_plate_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"transformed_parameters\"},{\"name\":\"y_hat_sample\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_well) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"alpha_plate\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate) + "},\"block\":\"parameters\"},{\"name\":\"mu_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_group) + "},\"block\":\"parameters\"},{\"name\":\"sigma_bplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_wplate\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"mu_shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_shape\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_1\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"z_2\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"parameters\"},{\"name\":\"z_3\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"parameters\"},{\"name\":\"shape\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_well\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_well) + "},\"block\":\"transformed_parameters\"},{\"name\":\"mu_plate_group\",\"type\":{\"name\":\"vector\",\"length\":" + std::to_string(N_plate_group) + "},\"block\":\"transformed_parameters\"},{\"name\":\"y_hat_sample\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N_well) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"},{\"name\":\"log_lik\",\"type\":{\"name\":\"array\",\"length\":" + std::to_string(N) + ",\"element_type\":{\"name\":\"real\"}},\"block\":\"generated_quantities\"}]");
   }
   // Begin method overload boilerplate
   template <typename RNG> inline void
@@ -836,10 +1017,10 @@ public:
               emit_transformed_parameters = true, const bool
               emit_generated_quantities = true, std::ostream*
               pstream = nullptr) const {
-    const size_t num_params__ = ((((((1 + N_plate) + N_group) + 1) + 1) +
-      N_well) + N_plate_group);
-    const size_t num_transformed = emit_transformed_parameters * (((N_well +
-      N_well) + N_plate_group));
+    const size_t num_params__ = ((((((((N_plate + N_group) + 1) + 1) + 1) +
+      1) + N_well) + N_plate_group) + N_well);
+    const size_t num_transformed = emit_transformed_parameters * ((((N_well +
+      N_well) + N_well) + N_plate_group));
     const size_t num_gen_quantities = emit_generated_quantities * ((N_well +
       N));
     const size_t num_to_write = num_params__ + num_transformed +
@@ -856,10 +1037,10 @@ public:
               emit_transformed_parameters = true, bool
               emit_generated_quantities = true, std::ostream*
               pstream = nullptr) const {
-    const size_t num_params__ = ((((((1 + N_plate) + N_group) + 1) + 1) +
-      N_well) + N_plate_group);
-    const size_t num_transformed = emit_transformed_parameters * (((N_well +
-      N_well) + N_plate_group));
+    const size_t num_params__ = ((((((((N_plate + N_group) + 1) + 1) + 1) +
+      1) + N_well) + N_plate_group) + N_well);
+    const size_t num_transformed = emit_transformed_parameters * ((((N_well +
+      N_well) + N_well) + N_plate_group));
     const size_t num_gen_quantities = emit_generated_quantities * ((N_well +
       N));
     const size_t num_to_write = num_params__ + num_transformed +

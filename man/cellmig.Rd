@@ -2,50 +2,60 @@
 \alias{cellmig}
 \title{Model-based quantification of cell migration speed}
 \description{
-The functions takes a data.frame, x, as its main input. Meanwhile,
-the input list control can be used to configure the MCMC procedure
-performed by R-package rstan. The output is a list which contains:
-1) f = fit as rstan object; 2) x = processed input; 3) s = summary 
-of model parameters (means, medians, 95\% credible intervals, etc.).
+The \code{cellmig} function estimates cell migration speed using a 
+Bayesian model implemented in \code{rstan}. It takes a data.frame as 
+input and allows users to configure the Markov Chain Monte Carlo (MCMC) 
+sampling procedure via the \code{control} parameter. The function 
+returns a list containing:
+
+\itemize{
+\item \code{f} - the fitted model as an \code{rstan} object.
+\item \code{x} - the processed input data.
+\item \code{s} - a summary of model parameters, including means, medians, and 
+95\% credible intervals.
+}
 }
 \usage{
 cellmig(x, control = NULL)
 }
 \arguments{
-\item{x}{main input, data.frame with columns:
+\item{x}{A data.frame containing the following columns. Each row represents
+the features of a cell:
 \itemize{
-\item well = character of well ID (w1, w2, w3, etc.).
-\item plate = character id of plate (p1, p2, p3, etc.). One plate typically 
-contains multiple wells.
-\item experiment = character id of experiment (e1, e2, e3, etc.). One
-experiment typically contains multiple plate.
-\item compound = character id of the treatment compound (A, B, C, etc.)
-\item dose = character representing the treatment dose e.g. mmol (0, 1, 
-5, 10, low, high, mid, etc.)
-\item v = numeric cell migration speed
+\item well = character. Well ID (w1, w2, w3, etc.).
+\item plate = character. plate ID (p1, p2, p3, etc.). A plate contains 
+multiple wells.
+\item experiment = character. experiment ID (e1, e2, e3, etc.). An experiment 
+typically contains multiple plates.
+\item compound = character. Compound name (c1, c2, c3, etc.)
+\item dose = character. Treatment dose (0, 1, 5, 10, low, mid, high, etc.)
+\item v = numeric. Observed cell migration speed.
+\item offset = binary (0 or 1). Indicates whether a treatment should be used 
+for batch correction across plates. Default: 0 (no correction). Set to 1 for 
+specific treatment groups used as offsets, ensuring they appear on each plate.
 }
 }
-\item{control}{input to configure the Markov Chain Monte Carlo (MCMC) 
-sampling algorithm, list, with elements and default values:
+\item{control}{A list configuring the MCMC sampling algorithm with the 
+following default values:
 \itemize{
-\item mcmc_warmup = 500
-\item mcmc_steps = 1500
-\item mcmc_chains = 4
-\item mcmc_cores = 1
-\item mcmc_algorithm = "NUTS",
-\item adapt_delta = 0.8
-\item max_treedepth = 10
+\item mcmc_warmup = 500 (Number of warmup iterations).
+\item mcmc_steps = 1500 (Number of sampling iterations).
+\item mcmc_chains = 4 (Number of Markov chains).
+\item mcmc_cores = 1 (Number of CPU cores used for sampling).
+\item mcmc_algorithm = "NUTS" (MCMC algorithm).
+\item adapt_delta = 0.8 (Target acceptance probability for NUTS sampler).
+\item max_treedepth = 10 (Maximum depth of tree exploration in NUTS sampler).
 }
 }
 }
 \value{
-A list which contains:
+A list containing:
 \itemize{
-\item f = fit as rstan object
-\item x = processed input
-\item s = summary of model parameters (means, 95\% credible intervals, etc.)
+\item \code{f} = The fitted model as an rstan object.
+\item \code{x} = The processed input data.
+\item \code{s} = A summary of model parameters, including means and 95\% 
+credible intervals.
 }
-
 }
 
 \examples{
