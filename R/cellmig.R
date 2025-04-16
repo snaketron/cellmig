@@ -1,26 +1,28 @@
 cellmig <- function(x, control = NULL) {
-
+  
   # check inputs
   x <- process_input(x)
-
+  
   # check control
   control <- process_control(control_in = control)
-
+  
   # fit model
   f <- get_fit(x = x, control = control)
-
+  
   # get summary
   s <- get_summary(x = x, f = f)
-
-  return(list(f = f, x = x, s = s))
+  
+  return(list(fit = f, 
+              posteriors = s, 
+              data = x, 
+              control = control))
 }
-
 
 get_fit <- function(x, control, full_model = FALSE) {
   message("model fitting... \n")
-
+  
   M <- stanmodels$M
-
+  
   if(missing(full_model)) {
     full_model <- FALSE
   }
@@ -33,40 +35,52 @@ get_fit <- function(x, control, full_model = FALSE) {
   if(full_model) {
     pars <- NA
   } else {
-    pars <- c("z_1", "z_2", "z_3", "mu_well", "shape")
+    pars <- c("z_1", "z_2", "z_3", "mu_well")
   }
   
   # fit model
-  fit <- sampling(object = M,
-                  data = list(y = x$d$sv, 
-                              N = x$d$N[1], 
-                              N_well = x$d$N_well[1], 
-                              N_plate = x$d$N_plate[1],
-                              N_plate_group = x$d$N_plate_group[1],
-                              N_group = x$d$N_group[1],
-                              well_id = x$d$well_id,
-                              plate_id = x$map_w$plate_id,
-                              plate_group_id = x$map_w$plate_group_id,
-                              offset = x$map_w$offset,
-                              group_id = x$map_pg$group_id),
-                  pars = pars,
-                  include  = FALSE,
-                  chains = control$mcmc_chains,
-                  cores = control$mcmc_cores,
-                  iter = control$mcmc_steps,
-                  warmup = control$mcmc_warmup,
-                  algorithm = control$mcmc_algorithm,
-                  control = list(adapt_delta = control$adapt_delta,
-                                 max_treedepth = control$max_treedepth),
-                  refresh = 200)
-
+  fit <- sampling(object=M,
+                  data=list(y=x$proc_x$v, 
+                            N=x$proc_x$N[1], 
+                            N_well=x$proc_x$N_well[1], 
+                            N_plate=x$proc_x$N_plate[1],
+                            N_plate_group=x$proc_x$N_plate_group[1],
+                            N_group=x$proc_x$N_group[1],
+                            well_id=x$proc_x$well_id,
+                            plate_id=x$map_w$plate_id,
+                            plate_group_id=x$map_w$plate_group_id,
+                            offset=x$map_w$offset,
+                            group_id=x$map_pg$group_id,
+                            prior_alpha_p_M=control$prior_alpha_p_M,
+                            prior_alpha_p_SD=control$prior_alpha_p_SD,
+                            prior_sigma_bio_M=control$prior_sigma_bio_M,
+                            prior_sigma_bio_SD=control$prior_sigma_bio_SD,
+                            prior_sigma_tech_M=control$prior_sigma_tech_M,
+                            prior_sigma_tech_SD=control$prior_sigma_tech_SD,
+                            prior_kappa_mu_M=control$prior_kappa_mu_M,
+                            prior_kappa_mu_SD=control$prior_kappa_mu_SD,
+                            prior_kappa_sigma_M=control$prior_kappa_sigma_M,
+                            prior_kappa_sigma_SD=control$prior_kappa_sigma_SD,
+                            prior_mu_group_M=control$prior_mu_group_M,
+                            prior_mu_group_SD=control$prior_mu_group_SD),
+                  pars=pars,
+                  include =FALSE,
+                  chains=control$mcmc_chains,
+                  cores=control$mcmc_cores,
+                  iter=control$mcmc_steps,
+                  warmup=control$mcmc_warmup,
+                  algorithm=control$mcmc_algorithm,
+                  control=list(adapt_delta=control$adapt_delta,
+                               max_treedepth=control$max_treedepth),
+                  refresh=200)
+  
   return(fit)
 }
 
 get_summary <- function(x, f) {
   message("computing posterior summaries...\n")
-
-  x <- x$d
+  
+  x <- x$proc_x
   
   # get meta data
   l <- x[, c("well_id", "well", "group_id", "group", 
@@ -87,17 +101,17 @@ get_summary <- function(x, f) {
                           "compound", "dose", 
                           "plate_group", "plate_group_id")]
   
-  # par: alpha_plate
-  alpha_plate <- data.frame(summary(f, par = "alpha_plate")$summary)
-  alpha_plate$plate_id <- 1:nrow(alpha_plate)
-  alpha_plate <- merge(x = alpha_plate, y = meta_plate, 
-                       by = "plate_id", all.x = TRUE)
+  # par: alpha_p
+  alpha_p <- data.frame(summary(f, par = "alpha_p")$summary)
+  alpha_p$plate_id <- 1:nrow(alpha_p)
+  alpha_p <- merge(x = alpha_p, y = meta_plate, 
+                   by = "plate_id", all.x = TRUE)
   
   # par: mu_group
   mu_group <- data.frame(summary(f, par = "mu_group")$summary)
   mu_group$group_id <- 1:nrow(mu_group)
   mu_group <- merge(x = mu_group, y = meta_group, by = "group_id", all.x = TRUE)
-
+  
   # par: mu_plate_group
   mu_plate_group <- data.frame(summary(f, par = "mu_plate_group")$summary)
   mu_plate_group$plate_group_id <- 1:nrow(mu_plate_group)
@@ -108,27 +122,33 @@ get_summary <- function(x, f) {
   mu_well <- data.frame(summary(f, par = "mu")$summary)
   mu_well$well_id <- 1:nrow(mu_well)
   mu_well <- merge(x = mu_well, y = meta_well, by = "well_id", all.x = TRUE)
-
-  # par: sigma_bplate
-  sigma_bplate <- data.frame(summary(f, par = "sigma_bplate")$summary)
-  sigma_wplate <- data.frame(summary(f, par = "sigma_wplate")$summary)
   
-  # shape mu and sigma
-  mu_shape <- data.frame(summary(f, par = "mu_shape")$summary)
-  sigma_shape <- data.frame(summary(f, par = "sigma_shape")$summary)
+  # par: kappa
+  kappa_well <- data.frame(summary(f, par = "kappa")$summary)
+  kappa_well$well_id <- 1:nrow(kappa_well)
+  kappa_well <- merge(x = kappa_well, y = meta_well, by = "well_id", all.x = TRUE)
+  
+  # par: sigma_bio
+  sigma_bio <- data.frame(summary(f, par = "sigma_bio")$summary)
+  sigma_tech <- data.frame(summary(f, par = "sigma_tech")$summary)
+  
+  # kappa mu and sigma
+  kappa_mu <- data.frame(summary(f, par = "kappa_mu")$summary)
+  kappa_sigma <- data.frame(summary(f, par = "kappa_sigma")$summary)
   
   # par: y_hat_sample
   yhat <- data.frame(summary(f, par = "y_hat_sample")$summary)
   yhat$well_id <- 1:nrow(yhat)
   yhat <- merge(x = yhat, y = meta_well, by = "well_id", all.x = TRUE)
-
-  return(list(alpha_plate = alpha_plate,
+  
+  return(list(alpha_p = alpha_p,
               mu_group = mu_group, 
               mu_plate_group = mu_plate_group,
               mu_well = mu_well,
-              sigma_bplate = sigma_bplate,
-              sigma_wplate = sigma_wplate,
-              sigma_shape = sigma_shape,
-              mu_shape = mu_shape,
+              kappa_well = kappa_well,
+              kappa_mu = kappa_mu,
+              kappa_sigma = kappa_sigma,
+              sigma_bio = sigma_bio,
+              sigma_tech = sigma_tech,
               yhat = yhat))
 }

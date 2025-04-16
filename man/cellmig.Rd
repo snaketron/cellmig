@@ -9,10 +9,11 @@ sampling procedure via the \code{control} parameter. The function
 returns a list containing:
 
 \itemize{
-\item \code{f} - the fitted model as an \code{rstan} object.
-\item \code{x} - the processed input data.
-\item \code{s} - a summary of model parameters, including means, medians, and 
+\item \code{fit} - the fitted model as an \code{rstan} object.
+\item \code{data} - the input/processed input data
+\item \code{posteriors} - a summary of model parameters: means, medians, and 
 95\% credible intervals.
+\item \code{control} - the list of input controls
 }
 }
 \usage{
@@ -33,8 +34,8 @@ for batch correction across plates. Default: 0 (no correction). Set to 1 for
 specific treatment groups used as offsets, ensuring they appear on each plate.
 }
 }
-\item{control}{A list configuring the MCMC sampling algorithm with the 
-following default values:
+\item{control}{A list configuring the MCMC sampling algorithm, and parameter
+priors with the following default values:
 \itemize{
 \item mcmc_warmup = 500 (Number of warmup iterations).
 \item mcmc_steps = 1500 (Number of sampling iterations).
@@ -43,16 +44,29 @@ following default values:
 \item mcmc_algorithm = "NUTS" (MCMC algorithm).
 \item adapt_delta = 0.8 (Target acceptance probability for NUTS sampler).
 \item max_treedepth = 10 (Maximum depth of tree exploration in NUTS sampler).
+\item prior_alpha_p_M = 2, prior_alpha_p_SD = 1 (prior on alpha_p: normal
+distribution mean (M) and standard deviation (SD))
+\item prior_sigma_bio_M = 0, prior_sigma_bio_SD = 0.5 (prior on sigma_bio: 
+normal distribution mean (M) and standard deviation (SD))
+\item prior_sigma_tech_M = 0, prior_sigma_tech_SD = 0.5 (prior on sigma_tech: 
+normal distribution mean (M) and standard deviation (SD))
+\item prior_kappa_mu_M = 2, prior_kappa_mu_SD = 1 (prior on kappa_mu: 
+normal distribution mean (M) and standard deviation (SD))
+\item prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1 (prior on kappa_sigma: 
+normal distribution mean (M) and standard deviation (SD))
+\item prior_mu_group_M = 0, prior_mu_group_SD = 1 (prior on mu_group: 
+normal distribution mean (M) and standard deviation (SD))
 }
 }
 }
 \value{
 A list containing:
 \itemize{
-\item \code{f} = The fitted model as an rstan object.
-\item \code{x} = The processed input data.
-\item \code{s} = A summary of model parameters, including means and 95\% 
-credible intervals.
+\item \code{fit} = The fitted model as an rstan object.
+\item \code{data} = The raw and processed input data.
+\item \code{posteriors} = A summary of model parameters, including means 
+and 95\% credible intervals.
+\item \code{control} = The list of input controls
 }
 }
 

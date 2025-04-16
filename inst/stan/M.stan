@@ -10,17 +10,30 @@ data {
   int plate_group_id [N_well];  // plate group ID
   int group_id [N_plate_group]; // group ID: treatment x dose
   int offset [N_well];          // offset = 1 (use for batch correction)
+  // priors
+  real prior_alpha_p_M;         // prior mean of alpha_p
+  real prior_alpha_p_SD;        // prior SD of alpha_p
+  real prior_sigma_bio_M;       // prior mean of sigma_bio
+  real prior_sigma_bio_SD;      // prior SD of sigma_bio
+  real prior_sigma_tech_M;      // prior mean of sigma_tech
+  real prior_sigma_tech_SD;     // prior SD of sigma_tech
+  real prior_kappa_mu_M;        // prior mean of kappa_mu
+  real prior_kappa_mu_SD;       // prior SD of kappa_mu
+  real prior_kappa_sigma_M;     // prior mean of kappa_sigma
+  real prior_kappa_sigma_SD;    // prior SD of kappa_sigma
+  real prior_mu_group_M;        // prior mean of mu_group
+  real prior_mu_group_SD;       // prior SD of mu_group
 }
 
 parameters {
-  vector [N_plate] alpha_plate;
+  vector [N_plate] alpha_p;
   vector [N_group] mu_group;
   
-  real <lower=0> sigma_bplate;
-  real <lower=0> sigma_wplate;
+  real <lower=0> sigma_bio;
+  real <lower=0> sigma_tech;
   
-  real mu_shape;
-  real <lower=0> sigma_shape;
+  real kappa_mu;
+  real <lower=0> kappa_sigma;
   
   vector [N_well] z_1;
   vector [N_plate_group] z_2;
@@ -28,43 +41,43 @@ parameters {
 }
 
 transformed parameters {
-  vector <lower=0> [N_well] shape;
+  vector <lower=0> [N_well] kappa;
   vector<lower=0> [N_well] mu;
   vector [N_well] mu_well;
   vector [N_plate_group] mu_plate_group;
   
-  mu_plate_group = mu_group[group_id] + sigma_bplate * z_2;
+  mu_plate_group = mu_group[group_id] + sigma_bio * z_2;
   for(w in 1:N_well) {
     if(offset[w]==1) {
-      mu_well[w] = alpha_plate[plate_id[w]] + sigma_wplate * z_1[w];
+      mu_well[w] = alpha_p[plate_id[w]] + sigma_tech * z_1[w];
     } else {
-      mu_well[w] = alpha_plate[plate_id[w]] + mu_plate_group[plate_group_id[w]] + sigma_wplate * z_1[w];
+      mu_well[w] = alpha_p[plate_id[w]] + mu_plate_group[plate_group_id[w]] + sigma_tech * z_1[w];
     }
   }
   mu = exp(mu_well);
-  shape = exp(mu_shape + sigma_shape * z_3);
+  kappa = exp(kappa_mu + kappa_sigma * z_3);
 }
 
 model {
-  mu_shape ~ normal(2, 1);
-  alpha_plate ~ normal(-2, 1);
-  mu_group ~ normal(0, 1);
-  sigma_bplate ~ normal(0, 0.5);
-  sigma_wplate ~ normal(0, 0.5);
-  sigma_shape ~ normal(0, 1);
+  alpha_p ~ normal(prior_alpha_p_M, prior_alpha_p_SD);
+  mu_group ~ normal(prior_mu_group_M, prior_mu_group_SD);
+  sigma_bio ~ normal(prior_sigma_bio_M, prior_sigma_bio_SD);
+  sigma_tech ~ normal(prior_sigma_tech_M, prior_sigma_bio_SD);
+  kappa_mu ~ normal(prior_kappa_mu_M, prior_kappa_mu_SD);
+  kappa_sigma ~ normal(prior_kappa_sigma_M, prior_kappa_sigma_SD);
   z_1 ~ std_normal();
   z_2 ~ std_normal();
   z_3 ~ std_normal();
 
-  y ~ gamma(shape[well_id], shape[well_id] ./ mu[well_id]);
+  y ~ gamma(kappa[well_id], kappa[well_id] ./ mu[well_id]);
 }
 
 generated quantities {
   real y_hat_sample [N_well];
   real log_lik [N];
 
-  y_hat_sample = gamma_rng(shape, shape ./ mu);
+  y_hat_sample = gamma_rng(kappa, kappa ./ mu);
   for(i in 1:N) {
-    log_lik[i] = gamma_lpdf(y[i] | shape[well_id[i]], shape[well_id[i]] ./ mu[well_id[i]]);
+    log_lik[i] = gamma_lpdf(y[i] | kappa[well_id[i]], kappa[well_id[i]] ./ mu[well_id[i]]);
   }
 }

@@ -87,7 +87,8 @@ process_input <- function(x) {
     x$plate_group <- paste0(x$plate, '|', x$group)
     x$well_id <- as.numeric(as.factor(x$well))
     
-    x$sv <- x$v/max(x$v)
+    # do we want to scale?
+    # x$sv <- x$v/max(x$v)
     
     xs <- x[x$offset == 0,]
     xr <- x[x$offset == 1,]
@@ -116,7 +117,7 @@ process_input <- function(x) {
     z <- z[order(z$plate_group_id, decreasing = FALSE),]
     z <- z[z$group_id !=0,]
     
-    return(list(d = x, org_x = org_x, map_w = q, map_pg = z))
+    return(list(proc_x = x, org_x = org_x, map_w = q, map_pg = z))
   } else {
     x$plate_id <- as.numeric(as.factor(x$plate))
     
@@ -126,7 +127,7 @@ process_input <- function(x) {
     x$well <- paste0(x$plate, '|', x$well, '|', x$group)
     x$well_id <- as.numeric(as.factor(x$well))
     
-    x$sv <- x$v/max(x$v)
+    # x$sv <- x$v/max(x$v)
     x$plate_group <- paste0(x$plate, '|', x$group)
     x$plate_group_id <- as.numeric(as.factor(x$plate_group))
     
@@ -145,7 +146,7 @@ process_input <- function(x) {
     z <- z[duplicated(z) == FALSE, ]
     z <- z[order(z$plate_group_id, decreasing = FALSE),]
     
-    return(list(d = x, org_x = org_x, map_w = q, map_pg = z))
+    return(list(proc_x = x, org_x = org_x, map_w = q, map_pg = z))
   }
 }
 
@@ -156,7 +157,21 @@ process_control <- function(control_in) {
                   mcmc_cores = 1,
                   mcmc_algorithm = "NUTS",
                   adapt_delta = 0.8,
-                  max_treedepth = 10)
+                  max_treedepth = 10,
+                  prior_alpha_p_M = 2,
+                  prior_alpha_p_SD = 1,
+                  prior_sigma_bio_M = 0,
+                  prior_sigma_bio_SD = 0.5,
+                  prior_sigma_tech_M = 0,
+                  prior_sigma_tech_SD = 0.5,
+                  prior_kappa_mu_M = 2,
+                  prior_kappa_mu_SD = 1,
+                  prior_kappa_sigma_M = 0,
+                  prior_kappa_sigma_SD = 1,
+                  prior_mu_group_M = 0,
+                  prior_mu_group_SD = 1)
+  
+  
 
   # if missing control_in -> use default values
   if(missing(control_in) || is.null(control_in)) {
