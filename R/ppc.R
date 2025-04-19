@@ -1,17 +1,18 @@
 
 get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
-    e <- extract(object = x$f, par = "y_hat_sample")$y_hat_sample
+    e <- extract(object = x$fit, par = "y_hat_sample")$y_hat_sample
     e <- melt(data = e)
     colnames(e) <- c("iter", "well_id", "yhat")
-    q <- x$x$d[, c("well_id", "compound", "dose", "group", "plate", "well")]
+    q <- x$data$proc_x[, c("well_id", "compound", "dose", 
+                           "group", "plate", "well")]
     q <- q[duplicated(q)==F,]
     e <- merge(x = e, y = q, all.x = T)
     
     if(wrap==FALSE) {
         g <- ggplot()+
             facet_grid(compound~plate, scales = "free")+
-            geom_sina(data = x$x$d, aes(x = as.factor(dose), 
-                                        y = sv, group = well), 
+            geom_sina(data = x$data$proc_x, aes(x = as.factor(dose), 
+                                        y = v, group = well), 
                       col = "black", size = 0.3)+
             geom_violin(data = e, aes(x = as.factor(dose), 
                                       y = yhat, group = well), 
@@ -28,8 +29,8 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
     if(wrap) {
         g <- ggplot()+
             facet_wrap(~compound+plate, scales = "free", ncol = ncol)+
-            geom_sina(data = x$x$d, aes(x = as.factor(dose), 
-                                        y = sv, group = well), 
+            geom_sina(data = x$data$proc_x, aes(x = as.factor(dose), 
+                                        y = v, group = well), 
                       col = "black", size = 0.3)+
             geom_violin(data = e, aes(x = as.factor(dose), 
                                       y = yhat, group = well), 
@@ -48,15 +49,15 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
 
 
 get_ppc_means <- function(x) {
-    y <- aggregate(sv~well_id, data = x$x$d, FUN = mean)
-    yhat <- x$s$yhat
+    y <- aggregate(v~well_id, data = x$data$proc_x, FUN = mean)
+    yhat <- x$posteriors$yhat
     y <- merge(x = y, y = yhat, by = "well_id")
     
     g <- ggplot(data = y)+
         geom_abline(slope = 1, intercept = 0, linetype = "dashed")+
-        geom_errorbar(aes(x = sv, y = mean, ymin = X2.5., ymax = X97.5.), 
+        geom_errorbar(aes(x = v, y = mean, ymin = X2.5., ymax = X97.5.), 
                       col = "darkgray")+
-        geom_point(aes(x = sv, y = mean), shape = 21, 
+        geom_point(aes(x = v, y = mean), shape = 21, 
                    fill = "white", alpha = 0.75)+
         theme_bw(base_size = 10)+
         xlab(label = "Observed migration + 95% HDI [scaled]")+

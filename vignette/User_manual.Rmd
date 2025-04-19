@@ -117,7 +117,7 @@ o <- cellmig(x = d,
 # What are the overall effects of compounds and doses on cell migration?
 
 ```{r, fig.width=6, fig.height=3}
-ggplot(data = o$s$mu_group)+
+ggplot(data = o$posteriors$mu_group)+
   geom_line(aes(x = dose, y = mean, col = compound, group = compound))+
   geom_point(aes(x = dose, y = mean, col = compound))+
   geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5., 
@@ -184,21 +184,31 @@ g
 
 
 
+
 # `migcell` can be used to simulate data
 
 ```{r}
-sim_data <- sim(N_well_cells = 20,
+sim_data <- sim(N_well_cells = 30,
                 N_plate = 6,
-                N_group = 6,
-                N_well_reps = 3,
-                shape = 4,
-                sigma_bplate = 0.3,
-                sigma_wplate = 0.1,
-                alpha_plate = c(0.5, 0.7, 0.4, 1, 1, 1),
-                mu_group = c(-1, -0.5, -0, 0.5, 1, 2))
+                N_group = 10,
+                N_well_reps = 5,
+                kappa_mu = 2,
+                kappa_sigma = 0.3,
+                sigma_bio = 0.3,
+                sigma_tech = 0.1,
+                alpha_p = rep(0, 6),
+                mu_group = rep(0, 10),
+                offset = 4)
+
+sim_data$compound <- sim_data$group
+sim_data$dose <- "low"
 ```
 
-```{r, fig.width=6, fig.height=3}
+
+We can show the newly simulated cell migration velocity (y-axis) for each cell 
+(dot) at plate (color)
+
+```{r, fig.width=7, fig.height=3}
 ggplot(data = sim_data)+
   geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
                 group = well), size = 0.5)+
@@ -207,8 +217,70 @@ ggplot(data = sim_data)+
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
   xlab(label = "dose")+
   ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()
 ```
+
+
+... or we can show the mean cell migration speed per well (dot) in each group 
+(x-axis) and plate (color)
+
+```{r, fig.width=7, fig.height=3}
+ggplot(data = aggregate(v~well+group+plate, data = sim_data, FUN = mean))+
+  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
+                group = well), size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()
+```
+
+
+
+# Model ref-fitting
+
+```{r, fig.width=7, fig.height=3.5}
+osd <- cellmig(x = sim_data,
+               control = list(mcmc_warmup = 300,
+                              mcmc_steps = 1000,
+                              mcmc_chains = 4,
+                              mcmc_cores = 4,
+                              mcmc_algorithm = "NUTS",
+                              adapt_delta = 0.8,
+                              max_treedepth = 10))
+```
+
+
+
+```{r}
+osd$posteriors$alpha_p
+```
+
+```{r}
+osd$posteriors$mu_group
+```
+
+
+```{r}
+# kappa_mu = 2, kappa_sigma = 0.5,
+osd$posteriors$kappa_mu
+osd$posteriors$kappa_sigma
+```
+
+
+```{r}
+# sigma_bio = 0.3, sigma_tech = 0.1,
+osd$posteriors$sigma_bio
+osd$posteriors$sigma_tech
+```
+
+
+
+
+
 
 
 

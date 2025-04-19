@@ -4,8 +4,8 @@ get_profiles <- function(x,
                          hc_dist = "euclidean",
                          select_cs,
                          select_ds) {
-  eg <- x$s$mu_group
-  es <- x$s$mu_plate_group
+  eg <- x$posteriors$mu_group
+  es <- x$posteriors$mu_plate_group
 
   if(missing(select_ds)==FALSE) {
     if(any(!select_ds %in% unique(eg$dose))) {
@@ -96,7 +96,7 @@ get_boot_profiles <- function(x, gs, hc_dist, hc_link, main_ph) {
   e <- extract(x$f, par = "mu_group")$mu_group[, gs]
   e <- e[sample(x = 1:nrow(e), size = min(nrow(e), 1000), replace = FALSE),]
 
-  meta <- x$s$mu_group[, c("group_id", "compound", "dose")]
+  meta <- x$posteriors$mu_group[, c("group_id", "compound", "dose")]
   meta <- meta[order(meta$group_id, decreasing = F),]
   meta <- meta[meta$group_id %in% gs, ]
   meta$group_id <- NULL

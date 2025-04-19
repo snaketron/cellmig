@@ -9,10 +9,11 @@
       N_plate, 
       N_group, 
       N_well_reps, 
-      shape, 
-      sigma_bplate, 
-      sigma_wplate, 
-      alpha_plate, 
+      kappa_mu,
+      kappa_sigma,
+      sigma_bio, 
+      sigma_tech, 
+      alpha_p, 
       mu_group)
 }
 \arguments{
@@ -22,12 +23,11 @@
   administrated at different doses).}
   \item{N_well_reps}{Number of technical replicates (wells) per 
   group per plate.}
-  \item{shape}{Shape parameter for the Gamma distribution.}
-  \item{sigma_bplate}{Between-plate variability in the group 
-  effects on cell migration.}
-  \item{sigma_wplate}{Within-plate (well) variability in the 
-  group effects on cell migration.}
-  \item{alpha_plate}{Vector of plate-level intercept effects 
+  \item{kappa_mu}{Mean of kappa population.}
+  \item{kappa_sigma}{Standard deviation of kappa population.}
+  \item{sigma_bio}{Variability between biological replicates.}
+  \item{sigma_tech}{Variability between technical replicates.}
+  \item{alpha_p}{Vector of plate-level intercept effects 
   (baseline effects) on cell migration.}
   \item{mu_group}{Vector of group-level mean effects on cell 
   migration.}
@@ -52,10 +52,11 @@ ds <- sim(N_well_cells = 100,
           N_plate = 3, 
           N_group = 5, 
           N_well_reps = 3, 
-          shape = 4, 
-          sigma_bplate = 0.3, 
-          sigma_wplate = 0.1, 
-          alpha_plate = c(1, 1.2, 1), 
+          kappa_mu = 2,
+          kappa_sigma = 1,
+          sigma_bio = 0.3, 
+          sigma_tech = 0.1, 
+          alpha_p = c(1, 1.2, 1), 
           mu_group = c(-2, -1, 0, 1, 2))
 }
 \seealso{
