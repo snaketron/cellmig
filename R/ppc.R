@@ -60,10 +60,8 @@ get_ppc_means <- function(x) {
         geom_point(aes(x = v, y = mean), shape = 21, 
                    fill = "white", alpha = 0.75)+
         theme_bw(base_size = 10)+
-        xlab(label = "Observed migration + 95% HDI [scaled]")+
-        ylab(label = "Predicted migration [scaled]")+
-        xlim(c(0,1))+
-        ylim(c(0,1))
+        xlab(label = "Observed migration + 95% HDI")+
+        ylab(label = "Predicted migration")
     
     return(g)
 }

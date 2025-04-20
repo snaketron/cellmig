@@ -29,7 +29,6 @@ parameters {
   vector [N_plate] alpha_p;
   vector [N_group] mu_group;
   
-  // vector  <lower=0> [N_group] sigma_bio;
   real <lower=0> sigma_bio;
   real <lower=0> sigma_tech;
   
@@ -47,7 +46,6 @@ transformed parameters {
   vector [N_well] mu_well;
   vector [N_plate_group] mu_plate_group;
   
-  // mu_plate_group = mu_group[group_id] + sigma_bio[group_id] .* z_2;
   mu_plate_group = mu_group[group_id] + sigma_bio * z_2;
   for(w in 1:N_well) {
     if(offset[w]==1) {
