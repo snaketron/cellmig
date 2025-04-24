@@ -38,10 +38,7 @@ sim_d <- function(data_in) {
     get_gamma <- function(x, w, n_cells) {
         y <- rgamma(n = n_cells, shape = w$kappa[x], 
                     rate = w$kappa[x]/w$mu[x])
-        y <- data.frame(v = y, 
-                        # well_id = w$well_id[x],
-                        # plate_id = w$p[x], 
-                        # group_id = w$g[x], 
+        y <- data.frame(v = y,
                         well = paste0("w", w$well_id[x]),
                         plate = paste0("p", w$p[x]), 
                         group = paste0("g", w$g[x]), 
@@ -51,13 +48,17 @@ sim_d <- function(data_in) {
     
     m <- matrix(data = 0, nrow = data_in$N_group, ncol = data_in$N_plate)
     for(g in 1:data_in$N_group) {
-        m[g,] <- rnorm(n = data_in$N_plate, mean = data_in$mu_group[g], 
+        m[g,] <- rnorm(n = data_in$N_plate, mean = data_in$mu_group[g],
                        sd = data_in$sigma_bio)
+        # mu_raw <- rt(n = data_in$N_plate, df = data_in$mu_df)
+        # sd_raw <- sqrt(data_in$mu_df / (data_in$mu_df - 2))
+        # m[g,] <- mu_raw + (data_in$sigma_bio / sd_raw) * mu_raw
     }
     m <- reshape2::melt(m)
     colnames(m) <- c("g", "p", "m")
     m$offset <- ifelse(m$g == data_in$offset, yes = 1, no = 0)
-    # browser()
+
+    
     w <- c()
     for(i in 1:nrow(m)) {
         if(m$offset[i]==1) {

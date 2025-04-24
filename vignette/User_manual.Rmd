@@ -279,6 +279,85 @@ osd$posteriors$sigma_tech
 
 
 
+
+
+# `migcell` can be used to simulate data
+
+```{r}
+sim_data <- sim(N_well_cells = 30,
+                N_plate = 6,
+                N_group = 10,
+                N_well_reps = 5,
+                kappa_mu = 2,
+                kappa_sigma = 0.3,
+                sigma_bio = 0.3,
+                sigma_tech = 0.1,
+                alpha_p = rep(0, 6),
+                mu_group = rep(0, 10),
+                offset = 4)
+
+sim_data$compound <- sim_data$group
+sim_data$dose <- "low"
+```
+
+
+We can show the newly simulated cell migration velocity (y-axis) for each cell 
+(dot) at plate (color)
+
+```{r, fig.width=7, fig.height=3}
+ggplot(data = sim_data)+
+  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
+                group = well), size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()
+```
+
+
+... or we can show the mean cell migration speed per well (dot) in each group 
+(x-axis) and plate (color)
+
+```{r, fig.width=7, fig.height=3}
+ggplot(data = aggregate(v~well+group+plate, data = sim_data, FUN = mean))+
+  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
+                group = well), size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()
+```
+
+
+
+# Prior predictive check
+
+
+```{r}
+sim_data <- sim(N_well_cells = 50,
+                N_plate = 6,
+                N_group = 10,
+                N_well_reps = 5,
+                kappa_mu = 2,
+                kappa_sigma = 0.3,
+                sigma_bio = 0.3,
+                sigma_tech = 0.1,
+                alpha_p = rep(0, 6),
+                mu_group = rep(0, 10),
+                offset = 4)
+
+sim_data$compound <- sim_data$group
+sim_data$dose <- "low"
+```
+
+
+
 # Session Info
 
 ```{r}
