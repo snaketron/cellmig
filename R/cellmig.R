@@ -12,10 +12,7 @@ cellmig <- function(x, control = NULL) {
   # get summary
   s <- get_summary(x = x, f = f)
   
-  return(list(fit = f, 
-              posteriors = s, 
-              data = x, 
-              control = control))
+  return(list(fit = f, posteriors = s, data = x, control = control))
 }
 
 get_fit <- function(x, control, full_model = FALSE) {
