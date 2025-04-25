@@ -164,7 +164,7 @@ process_control <- function(control_in) {
                   prior_sigma_bio_SD = 1.0,
                   prior_sigma_tech_M = 0.0,
                   prior_sigma_tech_SD = 1.0,
-                  prior_kappa_mu_M = 1.0,
+                  prior_kappa_mu_M = 1.7,
                   prior_kappa_mu_SD = 1.0,
                   prior_kappa_sigma_M = 0.0,
                   prior_kappa_sigma_SD = 1.0,
