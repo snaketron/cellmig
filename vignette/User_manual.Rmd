@@ -185,23 +185,25 @@ g
 
 
 
-# `migcell` can be used to simulate data
+# `cellmig` can be used to simulate data
 
 ```{r}
-sim_data <- sim(N_well_cells = 30,
-                N_plate = 6,
-                N_group = 10,
-                N_well_reps = 5,
-                kappa_mu = 2,
-                kappa_sigma = 0.3,
-                sigma_bio = 0.3,
-                sigma_tech = 0.1,
-                alpha_p = rep(0, 6),
-                mu_group = rep(0, 10),
-                offset = 4)
+control <- list(N_biorep = 3, 
+                N_techrep = 3, 
+                N_cell = 50, 
+                delta = c(0, -0.4, -0.2, -0.1, 
+                          0, 0.1, 0.2, 0.4),
+                sigma_bio = 0.2, 
+                sigma_tech = 0.05, 
+                offset = 1,
+                prior_alpha_p_M = 1.7,
+                prior_alpha_p_SD = 0.5,
+                prior_kappa_mu_M = 1.7,
+                prior_kappa_mu_SD = 0.5,
+                prior_kappa_sigma_M = 0,
+                prior_kappa_sigma_SD = 0.3)
 
-sim_data$compound <- sim_data$group
-sim_data$dose <- "low"
+y_p <- gen_partial(control = control)
 ```
 
 
@@ -209,9 +211,9 @@ We can show the newly simulated cell migration velocity (y-axis) for each cell
 (dot) at plate (color)
 
 ```{r, fig.width=7, fig.height=3}
-ggplot(data = sim_data)+
-  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
-                group = well), size = 0.5)+
+ggplot(data = y_p$y)+
+  geom_sina(aes(x = paste0("g=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -226,9 +228,9 @@ ggplot(data = sim_data)+
 (x-axis) and plate (color)
 
 ```{r, fig.width=7, fig.height=3}
-ggplot(data = aggregate(v~well+group+plate, data = sim_data, FUN = mean))+
-  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
-                group = well), size = 0.5)+
+ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
+  geom_sina(aes(x = paste0("g=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 1)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -243,6 +245,10 @@ ggplot(data = aggregate(v~well+group+plate, data = sim_data, FUN = mean))+
 # Model ref-fitting
 
 ```{r, fig.width=7, fig.height=3.5}
+sim_data <- y_p$y
+sim_data$offset <- 0
+sim_data$offset[sim_data$group=="1"] <- 1
+
 osd <- cellmig(x = sim_data,
                control = list(mcmc_warmup = 300,
                               mcmc_steps = 1000,
@@ -281,81 +287,42 @@ osd$posteriors$sigma_tech
 
 
 
-# `migcell` can be used to simulate data
-
-```{r}
-sim_data <- sim(N_well_cells = 30,
-                N_plate = 6,
-                N_group = 10,
-                N_well_reps = 5,
-                kappa_mu = 2,
-                kappa_sigma = 0.3,
-                sigma_bio = 0.3,
-                sigma_tech = 0.1,
-                alpha_p = rep(0, 6),
-                mu_group = rep(0, 10),
-                offset = 4)
-
-sim_data$compound <- sim_data$group
-sim_data$dose <- "low"
-```
-
-
-We can show the newly simulated cell migration velocity (y-axis) for each cell 
-(dot) at plate (color)
-
-```{r, fig.width=7, fig.height=3}
-ggplot(data = sim_data)+
-  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
-                group = well), size = 0.5)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_y_log10()
-```
-
-
-... or we can show the mean cell migration speed per well (dot) in each group 
-(x-axis) and plate (color)
-
-```{r, fig.width=7, fig.height=3}
-ggplot(data = aggregate(v~well+group+plate, data = sim_data, FUN = mean))+
-  geom_sina(aes(x = paste0("group=", group), col = plate, y = v, 
-                group = well), size = 0.5)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_y_log10()
-```
-
-
-
 # Prior predictive check
 
 
 ```{r}
-sim_data <- sim(N_well_cells = 50,
-                N_plate = 6,
-                N_group = 10,
-                N_well_reps = 5,
-                kappa_mu = 2,
-                kappa_sigma = 0.3,
-                sigma_bio = 0.3,
-                sigma_tech = 0.1,
-                alpha_p = rep(0, 6),
-                mu_group = rep(0, 10),
-                offset = 4)
+control <- list(N_biorep = 3, 
+                N_techrep = 3, 
+                N_cell = 50, 
+                prior_alpha_p_M = 1.7,
+                prior_alpha_p_SD = 1.0,
+                prior_kappa_mu_M = 1.7,
+                prior_kappa_mu_SD = 1.0,
+                prior_kappa_sigma_M = 0,
+                prior_kappa_sigma_SD = 1.0,
+                prior_sigma_bio_M = 0.0,
+                prior_sigma_bio_SD = 1.0,
+                prior_sigma_tech_M = 0.0,
+                prior_sigma_tech_SD = 1.0,
+                prior_mu_group_M = 0.0,
+                prior_mu_group_SD = 1.0)
 
-sim_data$compound <- sim_data$group
-sim_data$dose <- "low"
+y_f <- gen_full(control = control)
 ```
 
+```{r, fig.width=4, fig.height=4}
+ggplot(data = data.frame(v_sim = y_f$y$v, 
+                                v_obs = d$v[1:nrow(y_f$y)]))+
+    geom_point((aes(x = v_obs, y = v_sim)), size = 0.5)+
+    geom_density_2d(aes(x = v_obs, y = v_sim), col = "orange")+
+    geom_hline(yintercept = c(min(d$v[1:nrow(y_f$y)]), 
+                              max(d$v[1:nrow(y_f$y)])), 
+               col = "darkgray")+
+    scale_x_log10(name = "Observed v")+
+    scale_y_log10(name = "Simulated v", limits = c(0.001, 10^6))+
+    annotation_logticks(base = 10, sides = "lb")+
+    theme_bw(base_size = 10)
+```
 
 
 # Session Info

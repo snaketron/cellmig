@@ -15,25 +15,12 @@ cellmig <- function(x, control = NULL) {
   return(list(fit = f, posteriors = s, data = x, control = control))
 }
 
-get_fit <- function(x, control, full_model = FALSE) {
+get_fit <- function(x, control) {
   message("model fitting... \n")
   
   M <- stanmodels$M
   
-  if(missing(full_model)) {
-    full_model <- FALSE
-  }
-  if(length(full_model)!=1) {
-    stop("full_model must be TRUE or FALSE (default)")
-  }
-  if(is.logical(full_model) == FALSE) {
-    stop("full_model must be TRUE or FALSE (default)")
-  }
-  if(full_model) {
-    pars <- NA
-  } else {
-    pars <- c("z_1", "z_2", "z_3", "mu_well")
-  }
+  pars <- c("z_1", "z_2", "z_3", "mu_well")
   
   # fit model
   fit <- sampling(object=M,

@@ -1,88 +1,221 @@
 
-sim <- function(N_well_cells,
-                N_plate, 
-                N_group, 
-                N_well_reps, 
-                kappa_mu,
-                kappa_sigma,
-                sigma_bio, 
-                sigma_tech, 
-                alpha_p,
-                mu_group,
-                offset) {
+gen_partial <- function(control = list(N_biorep = 3, 
+                                       N_techrep = 3, 
+                                       N_cell = 50, 
+                                       delta = c(0, -0.4, -0.2, -0.1, 
+                                                 0, 0.1, 0.2, 0.4),
+                                       sigma_bio = 0.2, 
+                                       sigma_tech = 0.05, 
+                                       offset = 1,
+                                       prior_alpha_p_M = 1.7,
+                                       prior_alpha_p_SD = 0.5,
+                                       prior_kappa_mu_M = 1.7,
+                                       prior_kappa_mu_SD = 0.5,
+                                       prior_kappa_sigma_M = 0,
+                                       prior_kappa_sigma_SD = 0.3)) {
     
-    data_in <- list(N_plate = N_plate,
-                    N_group = N_group,
-                    N_well_reps = N_well_reps,
-                    N_well_cells = N_well_cells,
-                    kappa_mu = kappa_mu,
-                    kappa_sigma = kappa_sigma,
-                    sigma_bio = sigma_bio,
-                    sigma_tech = sigma_tech,
-                    alpha_p = alpha_p,
-                    mu_group = mu_group,
-                    offset = offset)
-    
-    message("simulation... \n")
-    
-    y <- sim_d(data_in = data_in)
-    
-    return(y)
-}
-
-
-
-
-sim_d <- function(data_in) {
-    
-    get_gamma <- function(x, w, n_cells) {
-        y <- rgamma(n = n_cells, shape = w$kappa[x], 
-                    rate = w$kappa[x]/w$mu[x])
-        y <- data.frame(v = y,
-                        well = paste0("w", w$well_id[x]),
-                        plate = paste0("p", w$p[x]), 
-                        group = paste0("g", w$g[x]), 
-                        offset = w$offset[x])
-        return(y)
-    }
-    
-    m <- matrix(data = 0, nrow = data_in$N_group, ncol = data_in$N_plate)
-    for(g in 1:data_in$N_group) {
-        m[g,] <- rnorm(n = data_in$N_plate, mean = data_in$mu_group[g],
-                       sd = data_in$sigma_bio)
-        # mu_raw <- rt(n = data_in$N_plate, df = data_in$mu_df)
-        # sd_raw <- sqrt(data_in$mu_df / (data_in$mu_df - 2))
-        # m[g,] <- mu_raw + (data_in$sigma_bio / sd_raw) * mu_raw
-    }
-    m <- reshape2::melt(m)
-    colnames(m) <- c("g", "p", "m")
-    m$offset <- ifelse(m$g == data_in$offset, yes = 1, no = 0)
-
-    
-    w <- c()
-    for(i in 1:nrow(m)) {
-        if(m$offset[i]==1) {
-            y <- rnorm(n = data_in$N_well_reps, 
-                       mean = data_in$alpha_p[m$p[i]], 
-                       sd = data_in$sigma_tech)
-            y <- data.frame(mu = y, p = m$p[i], g = m$g[i], offset = m$offset[i])
-            w <- rbind(w, y)
-        } else {
-            y <- rnorm(n = data_in$N_well_reps, 
-                       mean = data_in$alpha_p[m$p[i]]+m$m[i], 
-                       sd = data_in$sigma_tech)
-            y <- data.frame(mu = y, p = m$p[i], g = m$g[i], offset = m$offset[i])
-            w <- rbind(w, y)
+    get_meta <- function(control) {
+        wi = 1
+        m <- c()
+        for(g in 1:control$N_group) {
+            for(p in 1:control$N_plate) {
+                for(w in 1:control$N_well_reps) {
+                    m <- rbind(m, data.frame(well_id = wi, 
+                                             group_id = g, 
+                                             plate_id = p,
+                                             trep_id = w))
+                    wi <- wi + 1;
+                }
+            }
         }
+        return(m)
     }
-    w$mu <- exp(w$mu)
-    w$kappa <- exp(rnorm(n = nrow(w), 
-                         mean = data_in$kappa_mu, 
-                         sd = data_in$kappa_sigma))
-    w$well_id <- 1:nrow(w)
-    u <- do.call(rbind, lapply(X = 1:nrow(w), FUN = get_gamma, 
-                               w = w, n_cells = data_in$N_well_cells))
-    u$compound <- NA
-    u$dose <- NA
-    return(u)
+    
+    get_control <- function(control_in) {
+        control <- list(N_biorep = 3, 
+                        N_techrep = 3, 
+                        N_cell = 50, 
+                        delta = c(0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),
+                        sigma_bio = 0.2, 
+                        sigma_tech = 0.05, 
+                        offset = 1,
+                        prior_alpha_p_M = 1.7,
+                        prior_alpha_p_SD = 0.5,
+                        prior_kappa_mu_M = 1.7,
+                        prior_kappa_mu_SD = 0.5,
+                        prior_kappa_sigma_M = 0,
+                        prior_kappa_sigma_SD = 0.3)
+        
+        # if missing control_in -> use default values
+        if(missing(control_in) || is.null(control_in)) {
+            return(control)
+        }
+        if(is.list(control_in) == FALSE) {
+            stop("control must be a list")
+        }
+        if(all(names(control_in) %in% names(control)) == FALSE) {
+            stop("unrecognized elements found in control")
+        }
+        
+        ns <- names(control_in)
+        for (i in seq_len(length(control_in))) {
+            control[[ns[i]]] <- control_in[[ns[i]]]
+        }
+        
+        control$N_group <- length(control$delta)
+        control$N_plate <- control$N_biorep
+        control$N_well_reps <- control$N_techrep
+        control$mu_group <- control$delta
+        
+        control$prior_sigma_bio_M <- 0.0
+        control$prior_sigma_bio_SD <- 0.0
+        control$prior_sigma_tech_M <- 0.0
+        control$prior_sigma_tech_SD <- 0.0
+        control$prior_mu_group_M <- 0.0
+        control$prior_mu_group_SD <- 0.0
+        
+        return(control)
+    }
+    
+    control <- get_control(control_in = control)
+    
+    # get meta
+    meta <- get_meta(control = control)
+    
+    # sample
+    s <- sampling(object = stanmodels$gen_P,
+                  algorithm = "Fixed_param", 
+                  chains = 1, 
+                  iter = control$N_cell+10, 
+                  warmup = 10, 
+                  data = control,
+                  refresh = -1)
+    # extract
+    y <- extract(object = s, par = "y")$y
+    
+    # get data.frame
+    y <- melt(data = y)
+    colnames(y) <- c("i", "well_id", "v")
+    y <- merge(x = y, y = meta, by = "well_id", all.x = TRUE)
+    y <- y[y$i <= control$N_cell, ]
+    
+    y$well <- as.character(y$well_id)
+    y$plate <- as.character(y$plate_id)
+    y$group <- as.character(y$group_id)
+    y$compound <- y$group
+    y$dose <- "X"
+    y <- y[,c("i", "v", "well", "plate", "group", 
+              "compound", "dose", "trep_id")]
+    
+    return(list(y = y, control = control))
 }
+
+
+gen_full <- function(control = list(N_biorep = 3, 
+                                    N_techrep = 3, 
+                                    N_cell = 50, 
+                                    N_group = 5,
+                                    prior_alpha_p_M = 1.7,
+                                    prior_alpha_p_SD = 1.0,
+                                    prior_kappa_mu_M = 1.7,
+                                    prior_kappa_mu_SD = 1.0,
+                                    prior_kappa_sigma_M = 0,
+                                    prior_kappa_sigma_SD = 1.0,
+                                    prior_sigma_bio_M = 0.0,
+                                    prior_sigma_bio_SD = 1.0,
+                                    prior_sigma_tech_M = 0.0,
+                                    prior_sigma_tech_SD = 1.0,
+                                    prior_mu_group_M = 0.0,
+                                    prior_mu_group_SD = 1.0)) {
+    
+    get_meta <- function(control) {
+        wi = 1
+        m <- c()
+        for(g in 1:control$N_group) {
+            for(p in 1:control$N_plate) {
+                for(w in 1:control$N_well_reps) {
+                    m <- rbind(m, data.frame(well_id = wi, 
+                                             group_id = g, 
+                                             plate_id = p,
+                                             trep_id = w))
+                    wi <- wi + 1;
+                }
+            }
+        }
+        return(m)
+    }
+    
+    get_control <- function(control_in) {
+        control <- list(N_biorep = 3, 
+                        N_techrep = 3, 
+                        N_cell = 50, 
+                        N_group = 5,
+                        prior_alpha_p_M = 1.7,
+                        prior_alpha_p_SD = 1.0,
+                        prior_kappa_mu_M = 1.7,
+                        prior_kappa_mu_SD = 1.0,
+                        prior_kappa_sigma_M = 0,
+                        prior_kappa_sigma_SD = 1.0,
+                        prior_sigma_bio_M = 0.0,
+                        prior_sigma_bio_SD = 1.0,
+                        prior_sigma_tech_M = 0.0,
+                        prior_sigma_tech_SD = 1.0,
+                        prior_mu_group_M = 0.0,
+                        prior_mu_group_SD = 1.0)
+        
+        # if missing control_in -> use default values
+        if(missing(control_in) || is.null(control_in)) {
+            return(control)
+        }
+        if(is.list(control_in) == FALSE) {
+            stop("control must be a list")
+        }
+        if(all(names(control_in) %in% names(control)) == FALSE) {
+            stop("unrecognized elements found in control")
+        }
+        
+        ns <- names(control_in)
+        for (i in seq_len(length(control_in))) {
+            control[[ns[i]]] <- control_in[[ns[i]]]
+        }
+        
+        control$N_plate <- control$N_biorep
+        control$N_well_reps <- control$N_techrep
+        control$offset <- 1
+        
+        return(control)
+    }
+    
+    control <- get_control(control_in = control)
+    
+    # get meta
+    meta <- get_meta(control = control)
+    
+    # sample
+    s <- sampling(object = stanmodels$gen_F,
+                  algorithm = "Fixed_param", 
+                  chains = 1, 
+                  iter = control$N_cell+10, 
+                  warmup = 10, 
+                  data = control,
+                  refresh = -1)
+    # extract
+    y <- extract(object = s, par = "y")$y
+    
+    # get data.frame
+    y <- melt(data = y)
+    colnames(y) <- c("i", "well_id", "v")
+    y <- merge(x = y, y = meta, by = "well_id", all.x = TRUE)
+    y <- y[y$i <= control$N_cell, ]
+    
+    y$well <- as.character(y$well_id)
+    y$plate <- as.character(y$plate_id)
+    y$group <- as.character(y$group_id)
+    y$compound <- y$group
+    y$dose <- "X"
+    y <- y[,c("i", "v", "well", "plate", "group", 
+              "compound", "dose", "trep_id")]
+    
+    return(list(y = y, control = control))
+}
+
