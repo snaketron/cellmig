@@ -15,14 +15,15 @@ experimental plate with identifier (column \code{plate}).
 data("d", package = "cellmig")
 }
 \format{
-  A data frame with 7200 observations on the following 6 variables.
+  A data frame with 6,300 (cells) observations with the following features.
   \describe{
     \item{\code{v}}{a numeric vector with cell migration speeds}
-    \item{\code{sample}}{a character vector}
+    \item{\code{well}}{a character vector}
     \item{\code{compound}}{a character vector}
     \item{\code{dose}}{a character vector}
-    \item{\code{group}}{a character vector}
     \item{\code{plate}}{a character vector}
+    \item{\code{offset}}{indicator: 1 = control, 0 = non-control. Used for
+    batch correction}
   }
 }
 \details{

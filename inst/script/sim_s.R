@@ -1,57 +1,31 @@
 # Simulate data with severe replicate effects
-n_reps <- 3
-n_cells <- 20
+control <- list(N_biorep = 4, 
+                N_techrep = 3, 
+                N_cell = 20, 
+                delta = c(+0.0, +0.0, +0.0, +0.0, +0.0, +0.0, +0.0,
+                          -0.8, -0.4, -0.2, +0.0, +0.2, +0.4, +0.8,
+                          -0.4, -0.2, -0.1, +0.0, +0.1, +0.2, +0.4,
+                          -0.2, -0.1, -0.1, +0.0, +0.2, +0.4, +0.5,
+                          +0.4, +0.2, +0.1, +0.0, -0.1, -0.2, -0.4),
+                sigma_bio = 0.1, 
+                sigma_tech = 0.05, 
+                offset = 1,
+                prior_alpha_p_M = 1.7,
+                prior_alpha_p_SD = 0.5,
+                prior_kappa_mu_M = 1.7,
+                prior_kappa_mu_SD = 0.5,
+                prior_kappa_sigma_M = 0,
+                prior_kappa_sigma_SD = 0.3)
 
-alpha_plate <- c(0.7, 0.9, 1, 1.2)
-mu_compound <- c(0, 0.1, -1.3, -2, +2, +1.3) 
-mu_dose <- c(0, 0.3, 0.8, 0.4, 0.1)
+y <- gen_partial(control = control)
 
-sigma_bplate <- 0.1
-sigma_wplate <- 0.05
+d <- y$y
+d <- d[,c("well", "plate", "compound", "dose", "v")]
 
-shape <- 4
+d$compound <- paste0("C", rep(x = 1:5, each = 7*20*4*3))
+d$dose <- paste0("D", rep(rep(x = 1:7, each = 20*4*3), times = 5))
 
-x <- c()
-# well counter
-wc <- 1
-for(c in 1:length(mu_compound)) {
-  for(d in 1:length(mu_dose)) {
-    
-    mu_group <- mu_compound[c]*mu_dose[d]
-    
-    for(p in 1:length(alpha_plate)) {
-      u <- rnorm(n = n_reps, mean = alpha_plate[p] + mu_group, sd = sigma_bplate)
-      
-      for(s in 1:n_reps) {
-        z <- rnorm(n = 1, mean = u, sd = sigma_wplate)
-        
-        y <- rgamma(n = n_cells, shape = shape, rate = shape/exp(z))
-        x <- rbind(x, data.frame(v = y,
-                                 well = paste0("w", wc),
-                                 plate = paste0("p", p),
-                                 compound = paste0("c", c),
-                                 dose = paste0("d", d),
-                                 group = paste0("c", c, "|d", d)))
-        wc <- wc+1
-      }
-    }
-  }
-}
+d$offset <- 0
+d$offset[d$compound=="C1"] <- 1
 
-d <- x
 save(d, file = "data/d.RData", compress = TRUE)
-
-
-
-
-# apply cellmig
-# cellmig_out <- cellmig(x = d,
-#              control = list(mcmc_warmup = 250,
-#                             mcmc_steps = 750,
-#                             mcmc_chains = 3,
-#                             mcmc_cores = 3,
-#                             mcmc_algorithm = "NUTS",
-#                             adapt_delta = 0.8,
-#                             max_treedepth = 10))
-# 
-# save(cellmig_out, file = "data/cellmig_out.RData", compress = TRUE)

@@ -61,9 +61,9 @@ In this vignette we will use simulated data from:
   * four **plates**: p1, p2, p3 and p4
   * 90 **wells** per plate: w1, w2, ..., w360
   * 20 **cells** per well with their migration speeds `v`
-  * the wells are treated with one of six **compounds** c1, c2, ..., c6 at 
-  one of five **doses** d1, d2, ..., d5. Each pair of a compound and dose 
-  is described as group: c1|d1, c2|d2, ... etc.
+  * the wells are treated with **compounds** c1, c2, ..., c4 at 
+   **dose** d1, d2, ..., d7. Each pair of a compound and dose 
+  is considered as a treatment group: c1|d1, c2|d2, ... etc.
 
 
 ```{r, fig.width=8, fig.height=6}
@@ -83,8 +83,7 @@ ggplot(data = d)+
 # We can also show the **mean migration** per well (across all 20 cells each well)
 
 ```{r, fig.width=8, fig.height=6}
-dm <- aggregate(v~well+plate+compound+dose+group, 
-                data = d, FUN = mean)
+dm <- aggregate(v~well+plate+compound+dose, data = d, FUN = mean)
 ggplot(data = dm)+
   facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
   geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
@@ -106,8 +105,8 @@ ggplot(data = dm)+
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
                             mcmc_steps = 1000,
-                            mcmc_chains = 4,
-                            mcmc_cores = 4,
+                            mcmc_chains = 3,
+                            mcmc_cores = 3,
                             mcmc_algorithm = "NUTS",
                             adapt_delta = 0.8,
                             max_treedepth = 10))
@@ -129,9 +128,16 @@ ggplot(data = o$posteriors$mu_group)+
 
 # Compare the dose-response `profiles` for different compounds
 
-```{r, fig.width=9, fig.height=5}
-get_profiles(x = o)+
+```{r, fig.width=12, fig.height=5}
+get_dose_response_tree(x = o)+
   patchwork::plot_layout(widths = c(1, 1, 5))
+```
+
+
+# Compare the treatment group `profiles`
+
+```{r, fig.width=4, fig.height=7}
+get_treatment_tree(x = o)
 ```
 
 
@@ -161,9 +167,10 @@ u$plot
   $\rho$
 
 ```{r, fig.width=7, fig.height=2.5}
+get_groups(x = o)
 u <- get_violins(x = o, 
-                 from_groups = c("c1|d1", "c1|d2", "c1|d3", "c1|d4", "c1|d5"), 
-                 to_group = "c2|d1")
+                 from_groups = get_groups(x = o)$group,
+                 to_group = "C2|D1")
 u$plot
 ```
 
@@ -177,7 +184,7 @@ g
 ```
 
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=4, fig.height=4}
 g <- get_ppc_means(x = o)
 g
 ```
@@ -252,8 +259,8 @@ sim_data$offset[sim_data$group=="1"] <- 1
 osd <- cellmig(x = sim_data,
                control = list(mcmc_warmup = 300,
                               mcmc_steps = 1000,
-                              mcmc_chains = 4,
-                              mcmc_cores = 4,
+                              mcmc_chains = 3,
+                              mcmc_cores = 3,
                               mcmc_algorithm = "NUTS",
                               adapt_delta = 0.8,
                               max_treedepth = 10))
