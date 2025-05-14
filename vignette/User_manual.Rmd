@@ -153,7 +153,7 @@ get_treatment_profile(x = o,
   * $\rho$: Difference between treatment groups at y-x axis.
   * $\pi$: probability of observing either a completely positive or negative $\rho$
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=14, fig.height=6}
 u <- get_pairs(x = o)
 u$plot
 ```

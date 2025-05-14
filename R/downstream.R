@@ -82,7 +82,7 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
       geom_tile(aes(x = group_x, y = group_y, fill = rho_M), col = "white")+
       geom_text(aes(x = group_x, y = group_y, 
                     label = round(x = rho_M, digits = 1)), size = 2)+
-      scale_color_distiller(name = expression(rho), palette = "Spectral")+
+      scale_fill_distiller(name = expression(rho), palette = "Spectral")+
       scale_radius(name = expression(rho))+
       theme_bw(base_size = 10)+
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
@@ -94,8 +94,8 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
       geom_tile(aes(x = group_x, y = group_y, fill = rho_M_exp), col = "white")+
       geom_text(aes(x = group_x, y = group_y, 
                     label = round(x = rho_M_exp, digits = 1)), size = 2)+
-      scale_color_distiller(name = expression(rho*"'"), palette = "Spectral")+
-      scale_radius(name = expression(rho))+
+      scale_fill_distiller(name = expression(rho*"'"), palette = "Spectral")+
+      scale_radius(name = expression(rho*"'"))+
       theme_bw(base_size = 10)+
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
       xlab(label = '')+
