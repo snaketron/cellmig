@@ -10,7 +10,7 @@ get_groups <- function(x) {
 
 
 
-get_pairs <- function(x, groups = NA) {
+get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
   gmap <- get_groups(x = x)
   if(missing(groups)) {
     warning("groups not specified, we will use all groups")
@@ -55,6 +55,9 @@ get_pairs <- function(x, groups = NA) {
                              rho_M = d_M,
                              rho_L95 = d_HDI[1],
                              rho_H95 = d_HDI[2],
+                             rho_M_exp = exp(d_M),
+                             rho_L95_exp = exp(d_HDI[1]),
+                             rho_H95_exp = exp(d_HDI[2]),
                              pmax = pmax)
       ct <- ct + 1
     }
@@ -64,27 +67,49 @@ get_pairs <- function(x, groups = NA) {
   ds$group_x <- factor(x = ds$group_x, levels = groups)
   ds$group_y <- factor(x = ds$group_y, levels = groups)
   
-  g <- ggplot(data = ds)+
-    geom_tile(aes(x = group_x, y = group_y), 
-              col = "white", fill = "#eeeeee")+
-    geom_point(aes(x = group_x, y = group_y, size = pmax, col = rho_M))+
+  g_pi <- ggplot(data = ds)+
+    geom_tile(aes(x = group_x, y = group_y, fill = pmax), col = "white")+
     geom_text(aes(x = group_x, y = group_y, 
                   label = round(x = pmax, digits = 2)), size = 2)+
-    scale_color_distiller(name = expression(rho), palette = "Spectral")+
-    scale_radius(name = expression(pi), limits = c(0, 1))+
+    scale_fill_gradient(name = expression(pi), low = "white",high = "darkgray")+
     theme_bw(base_size = 10)+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
     xlab(label = '')+
     ylab(label = '')
   
-  g
+  if(exponentiate==FALSE) {
+    g <- ggplot(data = ds)+
+      geom_tile(aes(x = group_x, y = group_y, fill = rho_M), col = "white")+
+      geom_text(aes(x = group_x, y = group_y, 
+                    label = round(x = rho_M, digits = 1)), size = 2)+
+      scale_color_distiller(name = expression(rho), palette = "Spectral")+
+      scale_radius(name = expression(rho))+
+      theme_bw(base_size = 10)+
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+      xlab(label = '')+
+      ylab(label = '')
+  } 
+  else {
+    g <- ggplot(data = ds)+
+      geom_tile(aes(x = group_x, y = group_y, fill = rho_M_exp), col = "white")+
+      geom_text(aes(x = group_x, y = group_y, 
+                    label = round(x = rho_M_exp, digits = 1)), size = 2)+
+      scale_color_distiller(name = expression(rho*"'"), palette = "Spectral")+
+      scale_radius(name = expression(rho))+
+      theme_bw(base_size = 10)+
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+      xlab(label = '')+
+      ylab(label = '')
+  }
   
-  return(list(ds = ds, plot = g))
+  plot <- g|g_pi
+  
+  return(list(ds = ds, plot = plot))
 }
 
 
 
-get_violins <- function(x, from_groups, to_group) {
+get_violins <- function(x, from_groups, to_group, exponentiate = FALSE) {
     if(length(to_group)!=1) {
         stop("only one to_group allowed")
     }
@@ -131,18 +156,35 @@ get_violins <- function(x, from_groups, to_group) {
     
     ds_pmax <- ds[duplicated(ds[, c("group_x", "group_y")])==FALSE,]
     
-    g <- ggplot(data = ds)+
+    if(exponentiate==FALSE) {
+      g <- ggplot(data = ds)+
         facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
         geom_hline(yintercept = 0, linetype = "dashed")+
         geom_violin(aes(x = dose, y = rho), 
-                    col = "steelblue", fill = "steelblue", alpha = 0.8)+
+                    col = "steelblue", fill = "steelblue", alpha = 0.7)+
         geom_text(data = ds_pmax,
                   aes(x = dose, y = max(ds$rho)+0.15, 
                       label = round(x = pmax, digits = 2)), size = 2.25)+
         theme_bw(base_size = 10)+
+        theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
         xlab(label = 'Dose')+
         ylab(label = expression("LFC ("*rho*")"))+
-        ggtitle(label = paste0("other treatments (x-axis) vs. ", to_group))
+        ggtitle(label = paste0("treatments / ", to_group))
+    } else {
+      g <- ggplot(data = ds)+
+        facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
+        geom_hline(yintercept = 1, linetype = "dashed")+
+        geom_violin(aes(x = dose, y = exp(rho)), 
+                    col = "steelblue", fill = "steelblue", alpha = 0.7)+
+        geom_text(data = ds_pmax,
+                  aes(x = dose, y = max(exp(ds$rho))+0.15, 
+                      label = round(x = pmax, digits = 2)), size = 2.25)+
+        theme_bw(base_size = 10)+
+        theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
+        xlab(label = 'Dose')+
+        ylab(label = expression("FC ("*rho*"')"))+
+        ggtitle(label = paste0("treatments / ", to_group))
+    }
     
     g
     

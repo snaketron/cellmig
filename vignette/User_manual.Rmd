@@ -129,15 +129,19 @@ ggplot(data = o$posteriors$mu_group)+
 # Compare the dose-response `profiles` for different compounds
 
 ```{r, fig.width=12, fig.height=5}
-get_dose_response_tree(x = o)+
+get_dose_response_profile(x = o)+
   patchwork::plot_layout(widths = c(1, 1, 5))
 ```
 
 
 # Compare the treatment group `profiles`
 
-```{r, fig.width=4, fig.height=7}
-get_treatment_tree(x = o)
+```{r, fig.width=4, fig.height=3}
+get_treatment_profile(x = o,
+                      hc_link = "average",
+                      hc_dist = "euclidean",
+                      select_gs = get_groups(o)$group[1:5],
+                      B = 1000)
 ```
 
 

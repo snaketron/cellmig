@@ -1,12 +1,12 @@
 
-get_dose_response_tree <- function(x,
-                                   hc_link = "average",
-                                   hc_dist = "euclidean",
-                                   select_cs,
-                                   select_ds) {
+get_dose_response_profile <- function(x,
+                                      hc_link = "average",
+                                      hc_dist = "euclidean",
+                                      select_gs,
+                                      B = 1000) {
   
   
-  get_boot <- function(x, hc_dist, hc_link) {
+  get_boot <- function(x, hc_dist, hc_link, B) {
     
     eg <- x$posteriors$mu_group
     gs <- eg$group_id
@@ -24,7 +24,7 @@ get_dose_response_tree <- function(x,
     
     # extract posterior
     e <- extract(x$f, par = "mu_group")$mu_group[, gs]
-    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), 1000), replace = TRUE),]
+    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), B), replace = TRUE),]
     
     boot_ph <- c()
     for(i in 1:nrow(e)) {
@@ -50,7 +50,7 @@ get_dose_response_tree <- function(x,
     
     # add bootstrap
     main_ph$node.label <- clades
-
+    
     # b = 0 for these nodes
     na_nodes <- which(is.na(main_ph$node.label))
     if(length(na_nodes)!=0) {
@@ -62,24 +62,15 @@ get_dose_response_tree <- function(x,
   
   eg <- x$posteriors$mu_group
   es <- x$posteriors$mu_plate_group
-  
-  if(missing(select_ds)==FALSE) {
-    if(any(!select_ds %in% unique(eg$dose))) {
-      stop("selected doses not found in data")
+  if(missing(select_gs)==FALSE) {
+    if(any(!select_gs %in% unique(eg$group))) {
+      stop("selected treatment groups not found in data")
     }
-    eg <- eg[eg$dose %in% select_ds, ]
-    es <- es[es$dose %in% select_ds, ]
+    eg <- eg[eg$group %in% select_gs, ]
+    es <- es[es$group %in% select_gs, ]
   }
   
-  if(missing(select_cs)==FALSE) {
-    if(any(!select_cs %in% unique(eg$compound))) {
-      stop("selected compounds not found in data")
-    }
-    eg <- eg[eg$compound %in% select_cs, ]
-    es <- es[es$compound %in% select_cs, ]
-  }
-  
-  bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link)
+  bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link, B = B)
   
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
@@ -138,13 +129,22 @@ get_dose_response_tree <- function(x,
   return(gs)
 }
 
-get_treatment_tree <- function(x, 
-                               hc_link = "average", 
-                               hc_dist = "euclidean") {
+get_treatment_profile <- function(x, 
+                                  hc_link = "average", 
+                                  hc_dist = "euclidean",
+                                  select_gs,
+                                  B = 1000) {
   
-  get_boot <- function(x, hc_dist, hc_link) {
+  get_boot <- function(x, hc_dist, hc_link, select_gs, B) {
     
     eg <- x$posteriors$mu_group
+    
+    if(missing(select_gs)==FALSE) {
+      if(any(!select_gs %in% unique(eg$group))) {
+        stop("selected treatment groups not found in data")
+      }
+      eg <- eg[eg$group %in% select_gs, ]
+    }
     
     # hclust -> main tree
     gs <- eg$group_id
@@ -157,7 +157,7 @@ get_treatment_tree <- function(x,
     
     # extract posterior
     e <- extract(x$f, par = "mu_group")$mu_group[, gs]
-    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), 1000), replace = TRUE),]
+    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), B), replace = TRUE),]
     
     boot_ph <- c()
     for(i in 1:nrow(e)) {
@@ -193,7 +193,8 @@ get_treatment_tree <- function(x,
     return(list(main_ph = main_ph, boot_ph = boot_ph))
   }
   
-  bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link)
+  bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link,
+                 select_gs = select_gs, B = B)
   
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
