@@ -95,8 +95,8 @@ get_dose_response_profile <- function(x,
     facet_grid(compound~., switch = "y")+
     geom_hline(yintercept = 0, linetype = "dashed", col = "gray")+
     geom_point(aes(x = dose, y = mean))+
-    geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., 
-                      ymax = X97.5.), width = 0)+
+    geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5.), 
+                  width = 0)+
     scale_y_continuous(position = "right", 
                        breaks = pretty_breaks(n = 5))+
     theme_bw(base_size = 10)+

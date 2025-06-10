@@ -1,0 +1,269 @@
+---
+title: "Simulating data with cellmig"
+author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{User manual: data simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include = FALSE, warning = FALSE}
+knitr::opts_chunk$set(comment = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
+```
+
+
+```{r}
+library(cellmig)
+library(ggplot2)
+library(ggforce)
+library(patchwork)
+library(skimr)
+ggplot2::theme_set(new = theme_bw(base_size = 10))
+```
+
+
+# Motivation
+In this vignette, we demonstrate the capabilities of cellmig to generate 
+cell velocity data through two case studies:
+
+1. Simulation from a `partially generative` model (user-specified parameters 
+with some random components)
+2. Simulation from a `fully generative` model (all parameters randomly 
+generated)
+
+# Data simulation from **partially generative** model
+We generate data using an experimental design specified in the `control` list:
+
+```{r}
+control <- list(
+  N_biorep = 4,     # Biological replicates (independent plates)
+  N_techrep = 3,    # Technical replicates (wells per plate)
+  N_cell = 30,      # Cells per well
+  delta = c(0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),  # Treatment effects
+  sigma_bio = 0.2,  # Biological variability
+  sigma_tech = 0.05,# Technical variability
+  offset = 1,       # Systematic offset (explain usage if relevant)
+  prior_alpha_p_M = 1.7,    # Mean for plate effects
+  prior_alpha_p_SD = 0.5,   # SD for plate effects
+  prior_kappa_mu_M = 1.7,   # Mean for kappa location
+  prior_kappa_mu_SD = 0.5,  # SD for kappa location
+  prior_kappa_sigma_M = 0,  # Mean for kappa scale
+  prior_kappa_sigma_SD = 0.3# SD for kappa scale
+)
+```
+
+Experimental design parameters:
+
+  * 4 biological replicates (independent experimental plates, $p = \{1,2,3,4\}$)
+  * 3 technical replicates per biological replicate (wells per plate)
+  * 30 cells per well
+  * 8 treatment groups ($t = \{1,...,8\}$) with fixed effects 
+  $\delta_t$ = [0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4]
+  * Biological replicate variability: $\sigma_\text{bio}}$ = 0.2
+  * Technical replicate variability: $\sigma_\text{tech}}$ = 0.05
+
+## Model specification
+
+### Setting $\alpha_p$
+I assume that there are strong plate-specific batch effects, which is what
+we typically observe in real experiments. To generate such effects, we draw 
+random values for the parameter $\alpha_p$ 
+
+$\alpha_p \sim \text{Normal}(1.7, 0.5)$ 
+
+where $\alpha_p$ represents the plate-specific offset. The mean (defined by 
+parameter `prior_alpha_p_M`=1.7) and standard deviation (defined by parameter 
+`prior_alpha_p_SD`=0.5) of the normal distribution are defined in `control`.
+
+### Setting $\kappa_w$
+The velocities in each well are gamma distributed, and the gamma distribution
+is defined by a rate and shape parameter. The shape parameter for well $w$, 
+$\kappa_w$, controls the form or skewness of the distribution and, to some 
+extent, the variability in the data.
+
+We simulate the values of $\log(\kappa_w)$ by drawing randomly from a 
+normal distribution with mean ($\mu_{\kappa}$) and standard deviation 
+(${\sigma}_{\kappa}$). The values of $\mu_{\kappa}$ and ${\sigma}_{\kappa}$ 
+can either be fixed to point values, or be drawn from two normal distributions 
+whose means and standard deviations are described by the inputs `prior_kappa_mu_M`, `prior_kappa_sigma_M`, `prior_kappa_mu_SD`, and `prior_kappa_sigma_SD`. To fix 
+the values of $\mu_{\kappa}$ and ${\sigma}_{\kappa}$ to point estimates set the 
+scales to small values (e.g., set in `control` `prior_kappa_mu_SD`=0.01 and 
+`prior_kappa_sigma_SD`).
+
+### Defining the offset
+To do batch effect correction across plates we have to select one of treatment
+as a reference. We do this by setting the parameter `offset` = $x$ in the
+`control`, where $x \in t$. In this example `offset=1`.
+
+## Generates dataframe with simulated velocities
+
+```{r}
+# set seed for reproducible results
+set.seed(seed = 1252)
+# simulate data
+y_p <- gen_partial(control = control)  
+```
+
+```{r}
+# see data structure
+str(y_p$y)
+```
+
+We can visualize data data as a scatterplot with cells as dots
+
+  * y-axis = velocity
+  * x-axis = treatment group
+  * color = plate identifier
+
+```{r, fig.width=6, fig.height=3}
+ggplot(data = y_p$y)+
+  geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_color_discrete(name = "plate")+
+  scale_y_log10()
+```
+
+... or we can just show the plate-specific means (below). Notice, the 
+systematic batch effects between plates.
+
+```{r, fig.width=6, fig.height=3}
+ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
+  geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 1)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()+
+  scale_color_discrete(name = "plate")
+```
+
+### Generated data can be **analyzed** with `cellmig`
+
+```{r, fig.width=7, fig.height=3.5}
+sim_data <- y_p$y
+
+# format simulated data to be used as input in cellmig
+sim_data$well <- as.character(sim_data$well)
+sim_data$compound <- as.character(sim_data$compound)
+sim_data$plate <- as.character(sim_data$plate)
+sim_data$offset <- 0
+sim_data$offset[sim_data$group=="1"] <- 1
+
+
+osd <- cellmig(x = sim_data,
+               control = list(mcmc_warmup = 300,
+                              mcmc_steps = 1000,
+                              mcmc_chains = 3,
+                              mcmc_cores = 3,
+                              mcmc_algorithm = "NUTS",
+                              adapt_delta = 0.8,
+                              max_treedepth = 10))
+```
+
+
+### Compare simulated vs inferred parameters
+
+Let's compare inferred (black) vs originally simulated (red) $\alpha_p$
+
+```{r, fig.width=4, fig.height=2}
+ggplot(data = osd$posteriors$alpha_p)+
+  geom_point(aes(y = plate_id, x = exp(mean)))+
+  geom_errorbarh(aes(y = plate_id, x = exp(mean), xmin = exp(X2.5.), 
+                     xmax = exp(X97.5.)), height = 0.1)+
+  geom_point(data = data.frame(v = exp(y_p$par$alpha_p), plate = 1:4),
+             aes(y = plate, x = v), col = "red")+
+  scale_y_continuous(breaks = 1:4)+
+  xlab(label = expression(alpha[p]*"'"))
+```
+
+... and also $\delta_t$
+
+```{r, fig.width=4, fig.height=2.5}
+ggplot(data = osd$posteriors$mu_group)+
+  geom_point(aes(y = group_id, x = mean))+
+  geom_errorbarh(aes(y = group_id, x = mean, xmin = X2.5., xmax = X97.5.), height = 0.1)+
+  geom_point(data = data.frame(delta = c(-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4), group_id = 1:7),
+             aes(y = group_id, x = delta), col = "red")+
+  xlab(label = expression(delta[t]))+
+  ylab(label = "treatment")+
+  scale_y_continuous(breaks = 1:8)
+```
+
+# Data simulation from **fully generative** model 
+We can also use `cellmig` to generate cell velocities from the prior 
+distributions of the parameters $\rightarrow$ data from prior predictive 
+distribution
+
+In this scenario, the parameters, such as $\delta_t$, will not be fixed to
+point values but rather generated from their priors.
+
+## Model specification
+
+```{r}
+control <- list(N_biorep = 4, 
+                N_techrep = 3, 
+                N_cell = 30, 
+                N_group = 8,
+                prior_alpha_p_M = 1.7,
+                prior_alpha_p_SD = 1.0,
+                prior_kappa_mu_M = 1.7,
+                prior_kappa_mu_SD = 1.0,
+                prior_kappa_sigma_M = 0,
+                prior_kappa_sigma_SD = 1.0,
+                prior_sigma_bio_M = 0.0,
+                prior_sigma_bio_SD = 1.0,
+                prior_sigma_tech_M = 0.0,
+                prior_sigma_tech_SD = 1.0,
+                prior_mu_group_M = 0.0,
+                prior_mu_group_SD = 1.0)
+```
+
+
+
+```{r}
+# generate data
+y_f <- gen_full(control = control)
+```
+
+The generate data has a similar structure as before:
+
+```{r}
+str(y_f)
+```
+
+
+
+## Compare density of velocities from partially vs. fully generative models
+
+```{r, fig.width=4, fig.height=4}
+w <- data.frame(v_f = y_f$y$v, v_p = y_p$y$v)
+ ggplot(data = w)+
+    geom_point(aes(x = v_f, y = v_p), size = 0.5)+
+    geom_density_2d(aes(x = v_f, y = v_p), col = "orange")+
+    scale_x_log10(name = "Velocity from fully generative model", limits = c(0.01, 10^4))+
+    scale_y_log10(name = "Velocity from partially generative model", limits = c(0.01, 10^4))+
+    annotation_logticks(base = 10, sides = "lb")+
+    theme_bw(base_size = 10)
+```
+
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
+

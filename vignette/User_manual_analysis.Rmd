@@ -46,25 +46,17 @@ Each rows is a cell with the following features:
 
 ```{r}
 data("d", package = "cellmig")
-d$offset <- 0
-knitr::kable(d[1:10,], row.names = F, digits = 2)
-```
-
-These are the unique plate, well and group IDs.
-
-```{r}
-apply(X = d[,2:ncol(d)], MARGIN = 2, FUN = unique)
+str(d)
 ```
 
 In this vignette we will use simulated data from:
 
-  * four **plates**: p1, p2, p3 and p4
-  * 90 **wells** per plate: w1, w2, ..., w360
-  * 20 **cells** per well with their migration speeds `v`
-  * the wells are treated with **compounds** c1, c2, ..., c4 at 
-   **dose** d1, d2, ..., d7. Each pair of a compound and dose 
-  is considered as a treatment group: c1|d1, c2|d2, ... etc.
-
+  * **plates** ($p$): 1, 2, ... , 4
+  * **wells** ($w$): 1, 2, ... , 504
+  * **cells** per well with their migration speed `v`
+  * wells are treated with **compounds** 1, 2, ..., 6 at **dose** 1, 2, ..., 7. 
+  * combination of a compound and dose is a **treatment** ($t$) 
+  $\rightarrow$ 1, 2, ..., 42.
 
 ```{r, fig.width=8, fig.height=6}
 ggplot(data = d)+
@@ -115,7 +107,7 @@ o <- cellmig(x = d,
 
 # What are the overall effects of compounds and doses on cell migration?
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=5, fig.height=3}
 ggplot(data = o$posteriors$mu_group)+
   geom_line(aes(x = dose, y = mean, col = compound, group = compound))+
   geom_point(aes(x = dose, y = mean, col = compound))+
@@ -128,19 +120,19 @@ ggplot(data = o$posteriors$mu_group)+
 
 # Compare the dose-response `profiles` for different compounds
 
-```{r, fig.width=12, fig.height=5}
+```{r, fig.width=9, fig.height=5}
 get_dose_response_profile(x = o)+
-  patchwork::plot_layout(widths = c(1, 1, 5))
+  patchwork::plot_layout(widths = c(1, 1, 4))
 ```
 
 
 # Compare the treatment group `profiles`
 
-```{r, fig.width=4, fig.height=3}
+```{r, fig.width=4, fig.height=6}
 get_treatment_profile(x = o,
                       hc_link = "average",
                       hc_dist = "euclidean",
-                      select_gs = get_groups(o)$group[1:5],
+                      select_gs = get_groups(o)$group,
                       B = 1000)
 ```
 
@@ -182,9 +174,9 @@ u$plot
 
 # Posterior predictive checks (PPCs)
 
-```{r, fig.width=7, fig.height=6}
+```{r, fig.width=6, fig.height=6}
 g <- get_ppc_violins(x = o)
-g
+g+scale_y_log10()
 ```
 
 
@@ -195,145 +187,30 @@ g
 
 
 
+```{r, fig.height=2, fig.width=6}
+g_alpha_p <- ggplot(data = o$posteriors$alpha_p)+
+  geom_errorbarh(aes(y = plate_id, x = mean, xmin = X2.5., xmax = X97.5.),
+                 height = 0.1)+
+  geom_point(aes(y = plate_id, x = mean))
 
-# `cellmig` can be used to simulate data
+g_sigma <- ggplot()+
+  geom_errorbarh(data = o$posteriors$sigma_bio,
+                 aes(y = "sigma_bio",
+                     x = mean, xmin = X2.5., xmax = X97.5.),
+                 height = 0.1)+
+  geom_errorbarh(data = o$posteriors$sigma_tech,
+                 aes(y = "sigma_tech",
+                     x = mean, xmin = X2.5., xmax = X97.5.),
+                 height = 0.1)+
+  geom_point(data = o$posteriors$sigma_bio,
+             aes(y = "sigma_bio", x = mean))+
+  geom_point(data = o$posteriors$sigma_tech,
+             aes(y = "sigma_tech", x = mean))+
+  ylab(label = '')
 
-```{r}
-control <- list(N_biorep = 3, 
-                N_techrep = 3, 
-                N_cell = 50, 
-                delta = c(0, -0.4, -0.2, -0.1, 
-                          0, 0.1, 0.2, 0.4),
-                sigma_bio = 0.2, 
-                sigma_tech = 0.05, 
-                offset = 1,
-                prior_alpha_p_M = 1.7,
-                prior_alpha_p_SD = 0.5,
-                prior_kappa_mu_M = 1.7,
-                prior_kappa_mu_SD = 0.5,
-                prior_kappa_sigma_M = 0,
-                prior_kappa_sigma_SD = 0.3)
-
-y_p <- gen_partial(control = control)
+g_alpha_p|g_sigma
 ```
 
-
-We can show the newly simulated cell migration velocity (y-axis) for each cell 
-(dot) at plate (color)
-
-```{r, fig.width=7, fig.height=3}
-ggplot(data = y_p$y)+
-  geom_sina(aes(x = paste0("g=", group), col = paste0("p=", plate), 
-                y = v, group = well), size = 0.5)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_y_log10()
-```
-
-
-... or we can show the mean cell migration speed per well (dot) in each group 
-(x-axis) and plate (color)
-
-```{r, fig.width=7, fig.height=3}
-ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
-  geom_sina(aes(x = paste0("g=", group), col = paste0("p=", plate), 
-                y = v, group = well), size = 1)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_y_log10()
-```
-
-
-
-# Model ref-fitting
-
-```{r, fig.width=7, fig.height=3.5}
-sim_data <- y_p$y
-sim_data$offset <- 0
-sim_data$offset[sim_data$group=="1"] <- 1
-
-osd <- cellmig(x = sim_data,
-               control = list(mcmc_warmup = 300,
-                              mcmc_steps = 1000,
-                              mcmc_chains = 3,
-                              mcmc_cores = 3,
-                              mcmc_algorithm = "NUTS",
-                              adapt_delta = 0.8,
-                              max_treedepth = 10))
-```
-
-
-
-```{r}
-osd$posteriors$alpha_p
-```
-
-```{r}
-osd$posteriors$mu_group
-```
-
-
-```{r}
-# kappa_mu = 2, kappa_sigma = 0.5,
-osd$posteriors$kappa_mu
-osd$posteriors$kappa_sigma
-```
-
-
-```{r}
-# sigma_bio = 0.3, sigma_tech = 0.1,
-osd$posteriors$sigma_bio
-osd$posteriors$sigma_tech
-```
-
-
-
-
-
-# Prior predictive check
-
-
-```{r}
-control <- list(N_biorep = 3, 
-                N_techrep = 3, 
-                N_cell = 50, 
-                prior_alpha_p_M = 1.7,
-                prior_alpha_p_SD = 1.0,
-                prior_kappa_mu_M = 1.7,
-                prior_kappa_mu_SD = 1.0,
-                prior_kappa_sigma_M = 0,
-                prior_kappa_sigma_SD = 1.0,
-                prior_sigma_bio_M = 0.0,
-                prior_sigma_bio_SD = 1.0,
-                prior_sigma_tech_M = 0.0,
-                prior_sigma_tech_SD = 1.0,
-                prior_mu_group_M = 0.0,
-                prior_mu_group_SD = 1.0)
-
-y_f <- gen_full(control = control)
-```
-
-```{r, fig.width=4, fig.height=4}
-ggplot(data = data.frame(v_sim = y_f$y$v, 
-                                v_obs = d$v[1:nrow(y_f$y)]))+
-    geom_point((aes(x = v_obs, y = v_sim)), size = 0.5)+
-    geom_density_2d(aes(x = v_obs, y = v_sim), col = "orange")+
-    geom_hline(yintercept = c(min(d$v[1:nrow(y_f$y)]), 
-                              max(d$v[1:nrow(y_f$y)])), 
-               col = "darkgray")+
-    scale_x_log10(name = "Observed v")+
-    scale_y_log10(name = "Simulated v", limits = c(0.001, 10^6))+
-    annotation_logticks(base = 10, sides = "lb")+
-    theme_bw(base_size = 10)
-```
 
 
 # Session Info
