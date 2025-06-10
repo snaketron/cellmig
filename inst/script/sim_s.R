@@ -41,4 +41,6 @@ cellmig_out <- cellmig(x = d,
                             adapt_delta = 0.8,
                             max_treedepth = 10))
 
+# make it slim for output
+cellmig_out$fit <- NULL
 save(cellmig_out, file = "data/cellmig_out.RData", compress = TRUE)
