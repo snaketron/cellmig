@@ -30,3 +30,15 @@ d$offset <- 0
 d$offset[d$compound=="C1"] <- 1
 
 save(d, file = "data/d.RData", compress = TRUE)
+
+
+cellmig_out <- cellmig(x = d,
+             control = list(mcmc_warmup = 300,
+                            mcmc_steps = 1500,
+                            mcmc_chains = 3,
+                            mcmc_cores = 3,
+                            mcmc_algorithm = "NUTS",
+                            adapt_delta = 0.8,
+                            max_treedepth = 10))
+
+save(cellmig_out, file = "data/cellmig_out.RData", compress = TRUE)

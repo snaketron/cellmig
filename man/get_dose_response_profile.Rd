@@ -40,7 +40,7 @@ different doses. These compounds are clustered together in the
 hierarchical dendrogram.
 }
 \examples{
-data(d, package = "cellmig")
+#data(d, package = "cellmig")
 #o <- cellmig(x = d,
 #             control = list(mcmc_warmup = 300,
 #                            mcmc_steps = 1500,
