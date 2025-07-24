@@ -1,0 +1,281 @@
+---
+title: "Simulating data with cellmig"
+author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{User manual: data simulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include = FALSE, warning = FALSE}
+knitr::opts_chunk$set(comment = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
+```
+
+
+```{r}
+library(cellmig)
+library(ggplot2)
+library(ggforce)
+library(patchwork)
+library(parallel)
+
+ggplot2::theme_set(new = theme_bw(base_size = 10))
+```
+
+
+# Data simulation from **partially generative** model
+
+
+```{r}
+N_simulations <- 10
+N_bioreps <- c(2, 4, 6, 8, 10)
+N_techreps <- c(2, 4, 6, 8, 10)
+N_cellreps <- c(10, 100, 1000)
+deltas <- log(c(1, seq(from = 0.5, to = 2, by = 0.25)[-3]))
+```
+
+
+```{r}
+run_configure <- function(b, N_bio, N_tech, N_cells) {
+  control <- list(
+    N_biorep = N_bio,
+    N_techrep = N_tech,
+    N_cell = N_cells,
+    delta = deltas,   # Treatment effects
+    sigma_bio = 0.2,  # Biological variability
+    sigma_tech = 0.05,# Technical variability
+    offset = 1,       # Systematic offset (explain usage if relevant)
+    prior_alpha_p_M = 0,    # Mean for plate effects
+    prior_alpha_p_SD = 0.3,   # SD for plate effects
+    prior_kappa_mu_M = 1.7,   # Mean for kappa location
+    prior_kappa_mu_SD = 0.5,  # SD for kappa location
+    prior_kappa_sigma_M = 0,  # Mean for kappa scale
+    prior_kappa_sigma_SD = 0.3# SD for kappa scale
+  )
+  
+  seed_id <- sample(x = 1000+1:10^6, size = 1)
+  set.seed(seed_id)
+  
+  y_p <- gen_partial(control = control)  
+  
+  sim_data <- y_p$y
+  
+  # format simulated data to be used as input in cellmig
+  sim_data$well <- as.character(sim_data$well)
+  sim_data$compound <- as.character(sim_data$compound)
+  sim_data$plate <- as.character(sim_data$plate)
+  sim_data$offset <- 0
+  sim_data$offset[sim_data$group==control$offset] <- 1
+  
+  o <- cellmig(x = sim_data,
+               control = list(mcmc_warmup = 300,
+                              mcmc_steps = 1000,
+                              mcmc_chains = 3,
+                              mcmc_cores = 1,
+                              mcmc_algorithm = "NUTS",
+                              adapt_delta = 0.8,
+                              max_treedepth = 10))
+  
+  og <- o$posteriors$mu_group
+  og$real_delta <- deltas[-1]
+  og$fp <- (og$real_delta >= og$X2.5. & og$real_delta <= og$X97.5.) & 
+    !(og$X2.5. <= 0 & og$X97.5. >= 0)
+  og$b <- b
+  og$N_bio <- N_bio
+  og$N_tech <- N_tech
+  og$N_cells <- N_cells
+  og$seed_id <- seed_id
+  
+  return(og)
+}
+```
+
+
+```{r}
+o <- mclapply(X = 1:10, 
+              FUN = run_configure, 
+              N_bio = 2, N_tech = 2, N_cells = 10,
+              mc.cores = 6)
+
+o <- do.call(rbind, o)
+```
+
+```{r}
+ggplot(data = o)+
+  facet_grid(N_bio~N_tech)+
+  geom_point(aes(x = as.character(N_cells), y = exp(mean), col = fp, 
+                 group = as.factor(exp(o$real_delta))),
+             position = position_dodge(width = 1))
+```
+
+
+
+```{r}
+# for(N_bio in N_bioreps) {
+#   for(N_tech in N_techreps) {
+#     for(N_cells in N_cellreps) {
+#     }
+#   }
+# }
+```
+
+
+
+
+Experimental design parameters:
+
+  * 4 biological replicates (independent experimental plates, $p = \{1,2,3,4\}$)
+  * 3 technical replicates per biological replicate (wells per plate)
+  * 30 cells per well
+  * 8 treatment groups ($t = \{1,...,8\}$) with fixed effects 
+  $\delta_t$ = [0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4]
+  * Biological replicate variability: $\sigma_\text{bio}}$ = 0.2
+  * Technical replicate variability: $\sigma_\text{tech}}$ = 0.05
+
+## Model specification
+
+### Setting $\alpha_p$
+I assume that there are strong plate-specific batch effects, which is what
+we typically observe in real experiments. To generate such effects, we draw 
+random values for the parameter $\alpha_p$ 
+
+$\alpha_p \sim \text{Normal}(1.7, 0.5)$ 
+
+where $\alpha_p$ represents the plate-specific offset. The mean (defined by 
+parameter `prior_alpha_p_M`=1.7) and standard deviation (defined by parameter 
+`prior_alpha_p_SD`=0.5) of the normal distribution are defined in `control`.
+
+### Setting $\kappa_w$
+The velocities in each well are gamma distributed, and the gamma distribution
+is defined by a rate and shape parameter. The shape parameter for well $w$, 
+$\kappa_w$, controls the form or skewness of the distribution and, to some 
+extent, the variability in the data.
+
+We simulate the values of $\log(\kappa_w)$ by drawing randomly from a 
+normal distribution with mean ($\mu_{\kappa}$) and standard deviation 
+(${\sigma}_{\kappa}$). The values of $\mu_{\kappa}$ and ${\sigma}_{\kappa}$ 
+can either be fixed to point values, or be drawn from two normal distributions 
+whose means and standard deviations are described by the inputs `prior_kappa_mu_M`, `prior_kappa_sigma_M`, `prior_kappa_mu_SD`, and `prior_kappa_sigma_SD`. To fix 
+the values of $\mu_{\kappa}$ and ${\sigma}_{\kappa}$ to point estimates set the 
+scales to small values (e.g., set in `control` `prior_kappa_mu_SD`=0.01 and 
+`prior_kappa_sigma_SD`).
+
+### Defining the offset
+To do batch effect correction across plates we have to select one of treatment
+as a reference. We do this by setting the parameter `offset` = $x$ in the
+`control`, where $x \in t$. In this example `offset=1`.
+
+## Generates dataframe with simulated velocities
+
+```{r}
+# set seed for reproducible results
+set.seed(seed = 1252)
+# simulate data
+y_p <- gen_partial(control = control)  
+```
+
+```{r}
+# see data structure
+str(y_p$y)
+```
+
+We can visualize data data as a scatterplot with cells as dots
+
+  * y-axis = velocity
+  * x-axis = treatment group
+  * color = plate identifier
+
+```{r, fig.width=6, fig.height=3}
+ggplot(data = y_p$y)+
+  geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_color_discrete(name = "plate")+
+  scale_y_log10()
+```
+
+... or we can just show the plate-specific means (below). Notice, the 
+systematic batch effects between plates.
+
+```{r, fig.width=6, fig.height=3}
+ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
+  geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
+                y = v, group = well), size = 1)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  xlab(label = "dose")+
+  ylab(label = "migration speed")+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()+
+  scale_color_discrete(name = "plate")
+```
+
+### Generated data can be **analyzed** with `cellmig`
+
+```{r, fig.width=7, fig.height=3.5}
+sim_data <- y_p$y
+
+# format simulated data to be used as input in cellmig
+sim_data$well <- as.character(sim_data$well)
+sim_data$compound <- as.character(sim_data$compound)
+sim_data$plate <- as.character(sim_data$plate)
+sim_data$offset <- 0
+sim_data$offset[sim_data$group=="1"] <- 1
+
+
+osd <- cellmig(x = sim_data,
+               control = list(mcmc_warmup = 300,
+                              mcmc_steps = 1000,
+                              mcmc_chains = 3,
+                              mcmc_cores = 3,
+                              mcmc_algorithm = "NUTS",
+                              adapt_delta = 0.8,
+                              max_treedepth = 10))
+```
+
+
+### Compare simulated vs inferred parameters
+
+Let's compare inferred (black) vs originally simulated (red) $\alpha_p$
+
+```{r, fig.width=4, fig.height=2}
+ggplot(data = osd$posteriors$alpha_p)+
+  geom_point(aes(y = plate_id, x = exp(mean)))+
+  geom_errorbarh(aes(y = plate_id, x = exp(mean), xmin = exp(X2.5.), 
+                     xmax = exp(X97.5.)), height = 0.1)+
+  geom_point(data = data.frame(v = exp(y_p$par$alpha_p), plate = 1:4),
+             aes(y = plate, x = v), col = "red")+
+  scale_y_continuous(breaks = 1:4)+
+  xlab(label = expression(alpha[p]*"'"))
+```
+
+... and also $\delta_t$
+
+```{r, fig.width=4, fig.height=2.5}
+ggplot(data = osd$posteriors$mu_group)+
+  geom_point(aes(y = group_id, x = mean))+
+  geom_errorbarh(aes(y = group_id, x = mean, xmin = X2.5., xmax = X97.5.), height = 0.1)+
+  geom_point(data = data.frame(delta = c(-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4), group_id = 1:7),
+             aes(y = group_id, x = delta), col = "red")+
+  xlab(label = expression(delta[t]))+
+  ylab(label = "treatment")+
+  scale_y_continuous(breaks = 1:8)
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
