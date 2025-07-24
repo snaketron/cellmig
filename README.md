@@ -1,8 +1,6 @@
-# cellmig
+# cellmig: Uncertainty-aware quantitative analysis of high-throughput live cell migration data
 
-Quantification of cell migration speed with Bayesian probability models
-
-## Overview
+# Overview
 
 Cell imaging enables us to profile the migration speeds of cells under various 
 treatment conditions, such as different chemical compounds at varying doses, 
@@ -21,11 +19,7 @@ across different treatments. Additionally, cellmig includes tools that assist
 in planning future experiments, answering critical questions such as: "How many 
 replicates and cells are needed to reliably detect a given effect?"
 
-## How to use cellmig
-
-scBubbletree is an R-package
-
-<https://github.com/snaketron/cellmig>
+# How to use cellmig
 
 To install this package, start R and enter:
 
@@ -36,6 +30,6 @@ devtools::install_github("snaketron/cellmig")
 
 Case studies are provided in the directory /vignettes
 
-## Workflow & output
+# Workflow & output
 
 ![alt text](inst/extdata/logo.png)
