@@ -93,10 +93,8 @@ In this vignette we will use simulated data from:
     $\rightarrow$ 1, 2, ..., 42.
 
 
-Let's visualize the data. Dots are cells with velocity (y-axis). Each facet is 
-a compound. The x-axis represent doses. There are three plates (color code). 
-Four technical replicates (wells) analyzed on the same plate are stacked next 
-to each other.
+Let's visualize the data. Each dot represents a cell with its velocity on the y-axis. Each facet corresponds to a compound. The x-axis represents the dose. 
+There are three plates, indicated by color. Four technical replicates (wells), analyzed on the same plate, are stacked next to each other.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
@@ -129,10 +127,13 @@ ggplot(data = dm)+
   xlab(label = '')+
   scale_color_grey()+
   guides(color = guide_legend(override.aes = list(size = 3)))+
-  guides(shape = guide_legend(override.aes = list(size = 3)))
+  guides(shape = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()+
+  annotation_logticks(base = 10, sides = "l")
 ```
 
 # Model fitting
+Next, we fit the Stan model employed by cellmig.
 
 ```{r, fig.width=7, fig.height=3.5}
 o <- cellmig(x = d,
@@ -145,26 +146,27 @@ o <- cellmig(x = d,
                             max_treedepth = 10))
 ```
 
-## What are the **overall treatment effects** ($\delta$) on cell migration velocity?
+## What are the **overall treatment effects** (parameter $\delta$) on cell migration velocity?
 
-* Dot = mean $\delta$
-* Error bar = 95% HDI of $\delta$
-* $\exp(\delta)$ = fold change in cell velocity relative to control
+* Dot: Posterior mean of $\delta$
+* Error bar: 95% highest density interval (HDI) of $\delta$
+* $\exp(\delta)$: Fold change in cell velocity relative to control
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3.3}
 ggplot(data = o$posteriors$mu_group)+
   geom_line(aes(x = dose, y = mean, col = compound, group = compound))+
   geom_point(aes(x = dose, y = mean, col = compound))+
   geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5., 
-                    col = compound), width = 0.04)+
-  ylab(label = expression("Overall treatment effect ("*delta*")"))
+                    col = compound), width = 0.1)+
+  ylab(label = expression("Overall treatment effect ("*delta*")"))+
+  theme(legend.position = "top")
 ```
 
 ## Compare the dose-response `profiles` for different compounds
 
 ```{r, fig.width=9, fig.height=5}
 get_dose_response_profile(x = o)+
-  patchwork::plot_layout(widths = c(1, 1, 4))
+  patchwork::plot_layout(widths = c(.7, 1, 4))
 ```
 
 ## Compare the treatment group `profiles`
@@ -211,7 +213,7 @@ u$plot
 
 # Posterior predictive checks (PPCs)
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=5, fig.height=6}
 g <- get_ppc_violins(x = o)
 g+scale_y_log10()
 ```
