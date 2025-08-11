@@ -49,19 +49,16 @@ The function follows these steps:
 data(d, package = "cellmig")
 
 # Run cellmig with MCMC sampling
-# o <- cellmig(x = d,
-#              control = list(mcmc_warmup = 300,
-#                             mcmc_steps = 1500,
-#                             mcmc_chains = 3,
-#                             mcmc_cores = 3,
-#                             mcmc_algorithm = "NUTS",
-#                             adapt_delta = 0.8,
-#                             max_treedepth = 10))
-
-# Load precomputed output
-data(cellmig_out, package = "cellmig")
+o <- cellmig(x = d,
+             control = list(mcmc_warmup = 300,
+                            mcmc_steps = 1000,
+                            mcmc_chains = 2,
+                            mcmc_cores = 2,
+                            mcmc_algorithm = "NUTS",
+                            adapt_delta = 0.8,
+                            max_treedepth = 10))
 
 # Generate PPC means plot
-p <- get_ppc_means(x = cellmig_out)
+p <- get_ppc_means(x = o)
 print(p)
 }

@@ -7,37 +7,51 @@
 }
 \usage{
   gen_full(control = list(N_biorep = 3, 
-                          N_techrep = 3, 
-                          N_cell = 50, 
+                          N_techrep = 3,
+                          N_cell = 50,
+                          N_group = 5,
                           prior_alpha_p_M = 1.7,
-                          prior_alpha_p_SD = 1.0,
+                          prior_alpha_p_SD = 1,
                           prior_kappa_mu_M = 1.7,
-                          prior_kappa_mu_SD = 1.0,
+                          prior_kappa_mu_SD = 1,
                           prior_kappa_sigma_M = 0,
-                          prior_kappa_sigma_SD = 1.0,
-                          prior_sigma_bio_M = 0.0,
-                          prior_sigma_bio_SD = 1.0,
-                          prior_sigma_tech_M = 0.0,
-                          prior_sigma_tech_SD = 1.0,
-                          prior_mu_group_M = 0.0,
-                          prior_mu_group_SD = 1.0))
+                          prior_kappa_sigma_SD = 1,
+                          prior_sigma_bio_M = 0,
+                          prior_sigma_bio_SD = 1,
+                          prior_sigma_tech_M = 0,
+                          prior_sigma_tech_SD = 1,
+                          prior_mu_group_M = 0,
+                          prior_mu_group_SD = 1))
 }
 \arguments{
-  \item{N_biorep}{Number of plates (biological replicates) in the simulation.}
-  \item{N_techrep}{Number of technical replicates: wells on a plate treated 
+  \item{control}{A list configuring the MCMC sampling algorithm, and parameter
+priors with the following default values:
+\itemize{
+  \item{N_biorep: Number of plates (biological replicates) in the simulation.}
+  \item{N_techrep: Number of technical replicates: wells on a plate treated 
   with the same treatment.}
-  \item{N_cell}{Number of cells per well.}
-  \item{sigma_bio}{Variability between biological replicates.}
-  \item{sigma_tech}{Variability between technical replicates.}
-  \item{prior_alpha_p_M, prior_alpha_p_SD}{Mean (M) and standard deviation 
+  \item{N_cell: Number of cells per well.}
+  \item{prior_alpha_p_M, prior_alpha_p_SD: Mean (M) and standard deviation 
   (SD) of a normal distribution describing plate-specific batch effects 
   (on log-scale).}
-  \item{prior_kappa_mu_M, prior_kappa_mu_SD}{Mean (M) and standard deviation 
+  \item{prior_kappa_mu_M, prior_kappa_mu_SD: Mean (M) and standard deviation 
   (SD) of a normal distribution describing the mean of the population of 
   well-specific shape (kappa) parameters.}
-  \item{prior_kappa_sigma_M, prior_kappa_sigma_SD}{Mean (M) and standard 
+  \item{prior_kappa_sigma_M, prior_kappa_sigma_SD: Mean (M) and standard 
   deviation (SD) of a normal distribution describing the standard deviation 
   of the population of well-specific shape (kappa) parameters.}
+  \item{prior_sigma_bio_M,  prior_sigma_bio_SD: Mean (M) and standard 
+  deviation (SD) of a normal distribution describing the variability of 
+  overall treatment effects between biological replicates.}
+  \item{prior_sigma_tech_M,  prior_sigma_tech_SD: Mean (M) and standard 
+  deviation (SD) of a normal distribution describing the variability of
+  treatment effects between technical replicates.}
+  \item{prior_mu_group_M, prior_mu_group_SD: Mean (M) and standard 
+  deviation (SD) of a normal distribution describing the population of overall 
+  treatment effects.
+}
+}
+}
 }
 \details{
   This function constructs a hierarchical dataset by simulating values 

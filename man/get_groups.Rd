@@ -25,16 +25,15 @@
 }
 \examples{
 data(d, package = "cellmig")
-#cellmig_out <- cellmig(x = d,
-#           control = list(mcmc_warmup = 300,
-#                            mcmc_steps = 1500,
-#                            mcmc_chains = 3,
-#                            mcmc_cores = 3,
-#                            mcmc_algorithm = "NUTS",
-#                            adapt_delta = 0.8,
-#                            max_treedepth = 10))
-data(cellmig_out, package = "cellmig")
-u <- get_groups(x = cellmig_out)
+o <- cellmig(x = d,
+             control = list(mcmc_warmup = 300,
+                            mcmc_steps = 1000,
+                            mcmc_chains = 2,
+                            mcmc_cores = 2,
+                            mcmc_algorithm = "NUTS",
+                            adapt_delta = 0.8,
+                            max_treedepth = 10))
+u <- get_groups(x = o)
 }
 \seealso{
   \code{cellmig}, \code{get_pairs}, \code{get_groups}, \code{get_violins}

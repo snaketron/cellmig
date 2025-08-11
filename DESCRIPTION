@@ -1,7 +1,7 @@
 Package: cellmig
 Type: Package
 Title: Uncertainty-aware quantitative analysis of high-throughput live cell migration data
-Version: 0.0.15
+Version: 0.0.16
 Authors@R: 
     person(given = "Simo",  
            family = "Kitanovski",

@@ -40,19 +40,19 @@ different doses. These compounds are clustered together in the
 hierarchical dendrogram.
 }
 \examples{
-# data(d, package = "cellmig")
-# o <- cellmig(x = d,
-#              control = list(mcmc_warmup = 300,
-#                             mcmc_steps = 1500,
-#                             mcmc_chains = 3,
-#                             mcmc_cores = 3,
-#                             mcmc_algorithm = "NUTS",
-#                             adapt_delta = 0.8,
-#                             max_treedepth = 10))
-data(cellmig_out, package = "cellmig")
-p <- get_dose_response_profile(x = cellmig_out,
+data(d, package = "cellmig")
+o <- cellmig(x = d,
+            control = list(mcmc_warmup = 300,
+                           mcmc_steps = 1000,
+                           mcmc_chains = 2,
+                           mcmc_cores = 2,
+                           mcmc_algorithm = "NUTS",
+                           adapt_delta = 0.8,
+                           max_treedepth = 10))
+
+p <- get_dose_response_profile(x = o,
                                hc_link = "average",
                                hc_dist = "euclidean",
-                               B = 1000)
+                               B = 100)
 p
 }

@@ -47,16 +47,15 @@ visualization, where:
 
 \examples{
 data(d, package = "cellmig")
-#o <- cellmig(x = d,
-#             control = list(mcmc_warmup = 300,
-#                            mcmc_steps = 1500,
-#                            mcmc_chains = 3,
-#                            mcmc_cores = 3,
-#                            mcmc_algorithm = "NUTS",
-#                            adapt_delta = 0.8,
-#                            max_treedepth = 10))
-#
-data(cellmig_out, package = "cellmig")
-p <- get_ppc_violins(x = cellmig_out, wrap = TRUE, ncol = 4)
+o <- cellmig(x = d,
+             control = list(mcmc_warmup = 300,
+                            mcmc_steps = 1000,
+                            mcmc_chains = 2,
+                            mcmc_cores = 2,
+                            mcmc_algorithm = "NUTS",
+                            adapt_delta = 0.8,
+                            max_treedepth = 10))
+
+p <- get_ppc_violins(x = o, wrap = TRUE, ncol = 4)
 print(p)
 }

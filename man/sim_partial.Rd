@@ -22,24 +22,29 @@
                              prior_kappa_sigma_SD = 0.3))
 }
 \arguments{
-  \item{N_biorep}{Number of plates (biological replicates) in the simulation.}
-  \item{N_techrep}{Number of technical replicates: wells on a plate treated 
+  \item{control}{A list configuring the MCMC sampling algorithm, and parameter
+priors with the following default values:
+\itemize{
+  \item{N_biorep: Number of plates (biological replicates) in the simulation.}
+  \item{N_techrep: Number of technical replicates: wells on a plate treated 
   with the same treatment.}
-  \item{N_cell}{Number of cells per well.}
-  \item{delta}{Effects (on log-scale) on cell velocity for each treatment.}
-  \item{sigma_bio}{Variability between biological replicates.}
-  \item{sigma_tech}{Variability between technical replicates.}
-  \item{offset}{Index of the control treatment (which treatment should be used
+  \item{N_cell: Number of cells per well.}
+  \item{delta: Effects (on log-scale) on cell velocity for each treatment.}
+  \item{sigma_bio: Variability between biological replicates.}
+  \item{sigma_tech: Variability between technical replicates.}
+  \item{offset: Index of the control treatment (which treatment should be used
   for batch correction between plates).}
-  \item{prior_alpha_p_M, prior_alpha_p_SD}{Mean (M) and standard deviation 
+  \item{prior_alpha_p_M, prior_alpha_p_SD: Mean (M) and standard deviation 
   (SD) of a normal distribution describing plate-specific batch effects 
   (on log-scale).}
-  \item{prior_kappa_mu_M, prior_kappa_mu_SD}{Mean (M) and standard deviation 
+  \item{prior_kappa_mu_M, prior_kappa_mu_SD: Mean (M) and standard deviation 
   (SD) of a normal distribution describing the mean of the population of 
   well-specific shape (kappa) parameters.}
-  \item{prior_kappa_sigma_M, prior_kappa_sigma_SD}{Mean (M) and standard 
+  \item{prior_kappa_sigma_M, prior_kappa_sigma_SD: Mean (M) and standard 
   deviation (SD) of a normal distribution describing the standard deviation 
   of the population of well-specific shape (kappa) parameters.}
+}
+}
 }
 \details{
   This function constructs a hierarchical dataset by simulating values 
