@@ -86,10 +86,7 @@ process_input <- function(x) {
     x$well <- paste0(x$plate, '|', x$well, '|', x$group)
     x$plate_group <- paste0(x$plate, '|', x$group)
     x$well_id <- as.numeric(as.factor(x$well))
-    
-    # do we want to scale?
-    # x$sv <- x$v/max(x$v)
-    
+
     xs <- x[x$offset == 0,]
     xr <- x[x$offset == 1,]
     
@@ -127,7 +124,6 @@ process_input <- function(x) {
     x$well <- paste0(x$plate, '|', x$well, '|', x$group)
     x$well_id <- as.numeric(as.factor(x$well))
     
-    # x$sv <- x$v/max(x$v)
     x$plate_group <- paste0(x$plate, '|', x$group)
     x$plate_group_id <- as.numeric(as.factor(x$plate_group))
     

@@ -48,7 +48,7 @@ get_fit <- function(x, control) {
                             prior_mu_group_M=control$prior_mu_group_M,
                             prior_mu_group_SD=control$prior_mu_group_SD),
                   pars=pars,
-                  include =FALSE,
+                  include = FALSE,
                   chains=control$mcmc_chains,
                   cores=control$mcmc_cores,
                   iter=control$mcmc_steps,
@@ -87,30 +87,31 @@ get_summary <- function(x, f) {
   
   # par: alpha_p
   alpha_p <- data.frame(summary(f, par = "alpha_p")$summary)
-  alpha_p$plate_id <- 1:nrow(alpha_p)
+  alpha_p$plate_id <- seq_len(nrow(alpha_p))
   alpha_p <- merge(x = alpha_p, y = meta_plate, 
                    by = "plate_id", all.x = TRUE)
   
   # par: mu_group
   mu_group <- data.frame(summary(f, par = "mu_group")$summary)
-  mu_group$group_id <- 1:nrow(mu_group)
+  mu_group$group_id <- seq_len(nrow(mu_group))
   mu_group <- merge(x = mu_group, y = meta_group, by = "group_id", all.x = TRUE)
   
   # par: mu_plate_group
   mu_plate_group <- data.frame(summary(f, par = "mu_plate_group")$summary)
-  mu_plate_group$plate_group_id <- 1:nrow(mu_plate_group)
+  mu_plate_group$plate_group_id <- seq_len(nrow(mu_plate_group))
   mu_plate_group <- merge(x = mu_plate_group, y = meta_plate_group, 
                           by = "plate_group_id", all.x = TRUE)
   
   # par: mu
   mu_well <- data.frame(summary(f, par = "mu")$summary)
-  mu_well$well_id <- 1:nrow(mu_well)
+  mu_well$well_id <- seq_len(nrow(mu_well))
   mu_well <- merge(x = mu_well, y = meta_well, by = "well_id", all.x = TRUE)
   
   # par: kappa
   kappa_well <- data.frame(summary(f, par = "kappa")$summary)
-  kappa_well$well_id <- 1:nrow(kappa_well)
-  kappa_well <- merge(x = kappa_well, y = meta_well, by = "well_id", all.x = TRUE)
+  kappa_well$well_id <- seq_len(nrow(kappa_well))
+  kappa_well <- merge(x = kappa_well, y = meta_well, 
+                      by = "well_id", all.x = TRUE)
   
   # par: sigma_bio
   sigma_bio <- data.frame(summary(f, par = "sigma_bio")$summary)
@@ -122,7 +123,7 @@ get_summary <- function(x, f) {
   
   # par: y_hat_sample
   yhat <- data.frame(summary(f, par = "y_hat_sample")$summary)
-  yhat$well_id <- 1:nrow(yhat)
+  yhat$well_id <- seq_len(nrow(yhat))
   yhat <- merge(x = yhat, y = meta_well, by = "well_id", all.x = TRUE)
   
   return(list(alpha_p = alpha_p,

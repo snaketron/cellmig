@@ -72,7 +72,8 @@ priors with the following default values:
 \examples{
 f <- gen_full(control = list(N_biorep = 3, 
                              N_techrep = 3, 
-                             N_cell = 50, 
+                             N_cell = 50,
+                             N_group = 5,
                              prior_alpha_p_M = 1.7,
                              prior_alpha_p_SD = 1.0,
                              prior_kappa_mu_M = 1.7,

@@ -5,8 +5,8 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
     colnames(e) <- c("iter", "well_id", "yhat")
     q <- x$data$proc_x[, c("well_id", "compound", "dose", 
                            "group", "plate", "well")]
-    q <- q[duplicated(q)==F,]
-    e <- merge(x = e, y = q, all.x = T)
+    q <- q[duplicated(q)==FALSE,]
+    e <- merge(x = e, y = q, all.x = TRUE)
     
     if(wrap==FALSE) {
         g <- ggplot()+

@@ -1,17 +1,30 @@
 Package: cellmig
 Type: Package
-Title: Uncertainty-aware quantitative analysis of high-throughput live cell migration data
-Version: 0.0.16
-Authors@R: 
-    person(given = "Simo",  
-           family = "Kitanovski",
-           role = c("aut", "cre"),
-           email = "simo.kitanovski@uni-due.de")
-Description: cellmig employs Bayesian hierarchical modeling to separate biological signals from 
-    technical variation while explicitly quantifying uncertainty in cell migration velocity.
+Title: Uncertainty-aware quantitative analysis of high-throughput live cell 
+    migration data
+Version: 0.99.0
+Authors@R: c(
+    person("Simo", "Kitanovski", email = "simokitanovski@gmail.com", 
+    role = c("aut", "cre"), comment=c(ORCID="0000-0003-2909-5376")))
+Description: High-throughput tracking of cells with time-lapse microscopy 
+    followed by the acquisition of images at ﬁxed time intervals facilitates 
+    the analysis of cell migration across many wells treated under different 
+    biological conditions. These workflows generate considerable technical 
+    noise and biological variability, and therefore technical and biological 
+    replicates are necessary, leading to large, hierarchically structured 
+    datasets, i.e., cells are nested within technical replicates that are 
+    nested within biological replicates. Current statistical analyses of such 
+    data usually ignore the hierarchical structure of the data and fail to 
+    explicitly quantify uncertainty arising from technical or biological 
+    variability. To address this gap, we present cellmig, an R package 
+    implementing Bayesian hierarchical models for migration analysis. cellmig 
+    quantifies condition-specific velocity changes (e.g., drug effects) while 
+    modeling nested data structures and technical artifacts, providing 
+    uncertainty-aware estimates through credible intervals. It further enables 
+    synthetic data generation for experimental design optimization. 
 License: GPL-3 + file LICENSE
 Depends: 
-    R (>= 4.2.0)
+    R (>= 4.5.0)
 Imports:
     base,
     ggplot2,
@@ -33,7 +46,7 @@ Suggests:
     knitr
 Encoding: UTF-8
 NeedsCompilation: no
-biocViews: Visualization, Clustering, CellBiology, Software
+biocViews: CellBiology, Software, ExperimentalDesign, Bayesian
 BugReports: https://github.com/snaketron/cellmig/issues
 URL: https://github.com/snaketron/cellmig
 RoxygenNote: 7.3.1

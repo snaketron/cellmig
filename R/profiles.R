@@ -18,18 +18,18 @@ get_dose_response_profile <- function(x,
     
     # meta
     meta <- x$posteriors$mu_group[, c("group_id", "compound", "dose")]
-    meta <- meta[order(meta$group_id, decreasing = F),]
+    meta <- meta[order(meta$group_id, decreasing = FALSE),]
     meta <- meta[meta$group_id %in% gs, ]
     meta$group_id <- NULL
     
     # extract posterior
     e <- extract(x$f, par = "mu_group")$mu_group[, gs]
-    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), B), replace = TRUE),]
+    e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()
-    for(i in 1:nrow(e)) {
+    for(i in seq_len(nrow(e))) {
       
-      u <- data.frame(g = 1:ncol(e), mean = e[i, ])
+      u <- data.frame(g = seq_len(ncol(e)), mean = e[i, ])
       u <- cbind(u, meta)
       
       # hclust
@@ -75,7 +75,7 @@ get_dose_response_profile <- function(x,
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
     geom_tippoint(size = 2, fill = "white", shape = 21)+
-    geom_tiplab(color='black', as_ylab = T, align = TRUE)+
+    geom_tiplab(color='black', as_ylab = TRUE, align = TRUE)+
     layout_rectangular()+
     theme_bw(base_size = 10)+
     scale_x_continuous(labels = abs)+
@@ -157,10 +157,10 @@ get_treatment_profile <- function(x,
     
     # extract posterior
     e <- extract(x$f, par = "mu_group")$mu_group[, gs]
-    e <- e[sample(x = 1:nrow(e), size = min(nrow(e), B), replace = TRUE),]
+    e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()
-    for(i in 1:nrow(e)) {
+    for(i in seq_len(nrow(e))) {
       
       # hclust
       hc <- hclust(dist(e[i,], method = hc_dist), method = hc_link)
@@ -199,7 +199,7 @@ get_treatment_profile <- function(x,
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
     geom_tippoint(size = 2, fill = "white", shape = 21)+
-    geom_tiplab(color='black', as_ylab = T, align = TRUE)+
+    geom_tiplab(color='black', as_ylab = TRUE, align = TRUE)+
     layout_rectangular()+
     theme_bw(base_size = 10)+
     scale_x_continuous(labels = abs)+

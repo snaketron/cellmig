@@ -10,7 +10,7 @@
   gen_partial(control = list(N_biorep = 3, 
                              N_techrep = 3, 
                              N_cell = 50, 
-                             delta = c(0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),
+                             delta,
                              sigma_bio = 0.2, 
                              sigma_tech = 0.05, 
                              offset = 1,

@@ -212,8 +212,8 @@ control parameters:
 osd <- cellmig(x = sim_data,
                control = list(mcmc_warmup = 300,
                               mcmc_steps = 1000,
-                              mcmc_chains = 3,
-                              mcmc_cores = 3,
+                              mcmc_chains = 2,
+                              mcmc_cores = 2,
                               mcmc_algorithm = "NUTS",
                               adapt_delta = 0.8,
                               max_treedepth = 10))
@@ -308,7 +308,7 @@ str(y_f)
 ## Compare density of velocities from partially vs. fully generative models
 
 ```{r, fig.width=4, fig.height=4}
-w <- data.frame(v_f = y_f$y$v, v_p = y_p$y$v)
+w <- data.frame(v_f = y_f$y$v[1:2000], v_p = y_p$y$v[1:2000])
  ggplot(data = w)+
     geom_point(aes(x = v_f, y = v_p), size = 0.5)+
     geom_density_2d(aes(x = v_f, y = v_p), col = "orange")+

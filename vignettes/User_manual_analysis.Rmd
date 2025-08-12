@@ -18,44 +18,34 @@ knitr::opts_chunk$set(comment = FALSE,
                       message = FALSE)
 ```
 
-# Background
-
 ```{r}
 library(cellmig)
 library(ggplot2)
 library(ggforce)
 library(patchwork)
-library(skimr)
 ggplot2::theme_set(new = theme_bw(base_size = 10))
 ```
 
 # Background
 
-Cell migration is essential for many vital biological functions, for
-instance division or differentiation, and it impacts pathological
-processes including cancer metastasis. High-throughput tracking of cells
-with time-lapse microscopy followed by the acquisition of images at ﬁxed
-time intervals facilitates the analysis of cell velocity across many wells 
-treated under different biological conditions, followed by computational 
-image processing to extract quantitative cell velocities and to detect 
-changes following perturbations such as drug treatments. However, these 
-workflows generate considerable technical noise (e.g., imaging artifacts, 
-unprecise pipetting) and biological variability (e.g., cell-to-cell
-heterogeneity), and therefore technical and biological replicates are
-necessary, leading to large, hierarchically structured datasets: cells
-are nested within technical replicates that are nested within biological
-replicates.
+High-throughput tracking of cells with time-lapse microscopy followed by
+the acquisition of images at ﬁxed time intervals facilitates the
+analysis of cell migration across many wells treated under different
+biological conditions. These workflows generate considerable technical
+noise and biological variability, and therefore technical and biological
+replicates are necessary, leading to large, hierarchically structured
+datasets, i.e., cells are nested within technical replicates that are
+nested within biological replicates.
 
-Current statistical analyses of such data rely on qualitative approaches, 
-or inadequate statistical methods that usually ignore the hierarchical 
-structure of the data and fail to explicitly quantify uncertainty arising 
-from technical or biological variability. To address this gap, we present 
-cellmig, an R package implementing Bayesian hierarchical models for 
-migration analysis. cellmig quantifies condition-specific velocity changes 
-(e.g., drug effects) while modeling nested data structures and technical 
-artifacts, providing uncertainty-aware estimates through credible intervals. 
-It further enables synthetic data generation for experimental design
-optimization. 
+Current statistical analyses of such data usually ignore the
+hierarchical structure of the data and fail to explicitly quantify
+uncertainty arising from technical or biological variability. To address
+this gap, we present cellmig, an R package implementing Bayesian
+hierarchical models for migration analysis. cellmig quantifies
+condition-specific velocity changes (e.g., drug effects) while modeling
+nested data structures and technical artifacts, providing
+uncertainty-aware estimates through credible intervals. It further
+enables synthetic data generation for experimental design optimization.
 
 # Data
 
@@ -65,9 +55,9 @@ table.
 Each rows is a cell with the following features:
 
 -   well = unique well ID (w1, w2, w3, etc.).
--   plate = unique plate ID (p1, p2, p3, etc.). Each plate is a biological
-    replicate. A plate contains multiple wells, some of which are treated 
-    with the same compound and dose (technical replicates)
+-   plate = unique plate ID (p1, p2, p3, etc.). Each plate is a
+    biological replicate. A plate contains multiple wells, some of which
+    are treated with the same compound and dose (technical replicates)
 -   compound = compound name (c1, c2, c3, etc.)
 -   dose = compound concentration (0, 1, 5, 10, low, mid, high, etc.)
 -   v = Observed cell migration velocity (numeric)
@@ -92,14 +82,18 @@ In this vignette we will use simulated data from:
 -   combination of a compound and dose is a **treatment** ($t$)
     $\rightarrow$ 1, 2, ..., 42.
 
-
-Let's visualize the data. Each dot represents a cell with its velocity on the y-axis. Each facet corresponds to a compound. The x-axis represents the dose. 
-There are three plates, indicated by color. Four technical replicates (wells), analyzed on the same plate, are stacked next to each other.
+Let's visualize the data. Each dot represents a cell with its velocity
+on the y-axis. Each facet corresponds to a compound. The x-axis
+represents the dose. There are three plates, indicated by color. Four
+technical replicates (wells), analyzed on the same plate, are stacked
+next to each other.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
-  facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
-  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), size = 0.5)+
+  facet_wrap(facets = ~paste0("compound=", compound), 
+             scales = "free_y", ncol = 2)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
+            size = 0.5)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
@@ -117,7 +111,8 @@ ggplot(data = d)+
 ```{r, fig.width=7, fig.height=6}
 dm <- aggregate(v~well+plate+compound+dose, data = d, FUN = mean)
 ggplot(data = dm)+
-  facet_wrap(facets = ~paste0("compound=", compound), scales = "free_y", ncol = 2)+
+  facet_wrap(facets = ~paste0("compound=", compound), 
+             scales = "free_y", ncol = 2)+
   geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
             size = 1.5, alpha = 0.7)+
   theme_bw()+
@@ -133,24 +128,25 @@ ggplot(data = dm)+
 ```
 
 # Model fitting
+
 Next, we fit the Stan model employed by cellmig.
 
 ```{r, fig.width=7, fig.height=3.5}
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
                             mcmc_steps = 1000,
-                            mcmc_chains = 3,
-                            mcmc_cores = 3,
+                            mcmc_chains = 2,
+                            mcmc_cores = 2,
                             mcmc_algorithm = "NUTS",
                             adapt_delta = 0.8,
                             max_treedepth = 10))
 ```
 
-## What are the **overall treatment effects** (parameter $\delta$) on cell migration velocity?
+## What are the **overall treatment effects** (parameter $\delta$) on velocity?
 
-* Dot: Posterior mean of $\delta$
-* Error bar: 95% highest density interval (HDI) of $\delta$
-* $\exp(\delta)$: Fold change in cell velocity relative to control
+-   Dot: Posterior mean of $\delta$
+-   Error bar: 95% highest density interval (HDI) of $\delta$
+-   $\exp(\delta)$: Fold change in cell velocity relative to control
 
 ```{r, fig.width=6, fig.height=3.3}
 ggplot(data = o$posteriors$mu_group)+

@@ -40,8 +40,8 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
   
   ds <- vector(mode = "list", length = nrow(gmap)*nrow(gmap))
   ct <- 1
-  for(i in 1:nrow(gmap)) {
-    for(j in 1:nrow(gmap)) {
+  for(i in seq_len(nrow(gmap))) {
+    for(j in seq_len(nrow(gmap))) {
       d <- p[,gmap$group_id[i]]-p[,gmap$group_id[j]]
       pmax <- get_pmax(d)
       d_M <- mean(d)
@@ -133,8 +133,8 @@ get_violins <- function(x, from_groups, to_group, exponentiate = FALSE) {
     
     ds <- vector(mode = "list", length = nrow(gmap_from))
     ct <- 1
-    for(i in 1:nrow(gmap_from)) {
-        for(j in 1:nrow(gmap_to)) {
+    for(i in seq_len(nrow(gmap_from))) {
+        for(j in seq_len(nrow(gmap_to))) {
             
             d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
             pmax <- get_pmax(d)
@@ -208,14 +208,14 @@ get_pmax <- function(x) {
 get_hdi <- function(vec, hdi_level) {
   sortedPts <- sort(vec)
   ciIdxInc <- floor(hdi_level * length(sortedPts))
-  nCIs = length(sortedPts) - ciIdxInc
-  ciWidth = rep(0 , nCIs)
-  for (i in 1:nCIs) {
-    ciWidth[i] = sortedPts[i + ciIdxInc] - sortedPts[i]
+  nCIs <- length(sortedPts) - ciIdxInc
+  ciWidth <- rep(0 , nCIs)
+  for (i in seq_len(nCIs)) {
+    ciWidth[i] <- sortedPts[i + ciIdxInc] - sortedPts[i]
   }
-  HDImin = sortedPts[which.min(ciWidth)]
-  HDImax = sortedPts[which.min(ciWidth) + ciIdxInc]
-  HDIlim = c(HDImin, HDImax)
+  HDImin <- sortedPts[which.min(ciWidth)]
+  HDImax <- sortedPts[which.min(ciWidth) + ciIdxInc]
+  HDIlim <- c(HDImin, HDImax)
   return(HDIlim)
 }
 
