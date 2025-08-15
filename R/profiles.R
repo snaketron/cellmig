@@ -23,7 +23,7 @@ get_dose_response_profile <- function(x,
     meta$group_id <- NULL
     
     # extract posterior
-    e <- extract(x$f, par = "delta_t")$delta_t[, gs]
+    e <- extract(x$f, par = "mu_group")$mu_group[, gs]
     e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()
@@ -156,7 +156,7 @@ get_treatment_profile <- function(x,
     
     
     # extract posterior
-    e <- extract(x$f, par = "delta_t")$delta_t[, gs]
+    e <- extract(x$f, par = "mu_group")$mu_group[, gs]
     e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()

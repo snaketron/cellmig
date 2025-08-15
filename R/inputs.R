@@ -9,7 +9,7 @@ process_input <- function(x) {
       stop("x must be a data.frame")
     }
     if(nrow(x)<=1) {
-      stop("not enough rows in x")
+      stop("zero or one row in x")
     }
   }
 
@@ -55,6 +55,10 @@ process_input <- function(x) {
     if(any(is.na(x[,"compound"]))) {
       stop("column compound contains NAs")
     }
+    if(length(unique(x$compound))==1) {
+      stop("only one compound included")
+    }
+    
     if(any(is.na(x[,"dose"]))) {
       stop("column dose contains NAs")
     }
@@ -74,9 +78,11 @@ process_input <- function(x) {
       stop("column offset can contain only 0 or 1")
     }
   }
-
+  
   check_x(x=x)
   check_cols(x=x)
+  
+  
   
   org_x <- x
   
