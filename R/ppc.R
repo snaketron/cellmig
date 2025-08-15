@@ -1,5 +1,37 @@
 
 get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
+    
+    if(missing(x) || is.null(x)) {
+        stop("missing x")
+    }
+    if(missing(wrap) || is.null(wrap)) {
+        stop("missing wrap")
+    }
+    
+    if(length(wrap)!=1) {
+        stop("wrap must be TRUE or FALSE")
+    }
+    if(is.logical(wrap)==FALSE | is.na(wrap)) {
+        stop("wrap must be logical")
+    }
+
+    if(wrap) {
+        if(missing(ncol) || is.null(ncol)) {
+            stop("missing ncol")
+        }
+        if(length(ncol)!=1) {
+            stop("ncol must be positive integer")
+        }
+        if(is.numeric(ncol)==FALSE) {
+            stop("ncol must be positive integer")
+        }
+        if(ncol<=0 | is.na(ncol) | is.infinite(ncol)) {
+            stop("ncol must be positive integer")
+        }
+    }
+    
+    
+    
     e <- extract(object = x$fit, par = "y_hat_sample")$y_hat_sample
     e <- melt(data = e)
     colnames(e) <- c("iter", "well_id", "yhat")
@@ -49,6 +81,11 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
 
 
 get_ppc_means <- function(x) {
+    
+    if(missing(x) || is.null(x)) {
+        stop("missing x")
+    }
+    
     y <- aggregate(v~well_id, data = x$data$proc_x, FUN = mean)
     yhat <- x$posteriors$yhat
     y <- merge(x = y, y = yhat, by = "well_id")

@@ -46,7 +46,7 @@ Suggests:
     knitr
 Encoding: UTF-8
 NeedsCompilation: no
-biocViews: CellBiology, Software, ExperimentalDesign, Bayesian
+biocViews: SingleCell, CellBiology, Bayesian, ExperimentalDesign, Software
 BugReports: https://github.com/snaketron/cellmig/issues
 URL: https://github.com/snaketron/cellmig
 RoxygenNote: 7.3.1

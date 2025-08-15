@@ -40,11 +40,17 @@ nested within biological replicates.
 Current statistical analyses of such data usually ignore the
 hierarchical structure of the data and fail to explicitly quantify
 uncertainty arising from technical or biological variability. To address
-this gap, we present cellmig, an R package implementing Bayesian
-hierarchical models for migration analysis. cellmig quantifies
-condition-specific velocity changes (e.g., drug effects) while modeling
-nested data structures and technical artifacts, providing
-uncertainty-aware estimates through credible intervals.
+this gap, we present `r Biocpkg("cellmig")`, an R package implementing
+Bayesian hierarchical models for migration analysis.
+`r Biocpkg("cellmig")` quantifies condition-specific velocity changes
+(e.g., drug effects) while modeling nested data structures and technical
+artifacts, providing uncertainty-aware estimates through credible
+intervals.
+
+There are currently no Bioconductor packages providing specialized
+statistical methods for analyzing hierarchical high-throughput cell
+migration data. `r Biocpkg("cellmig")` addresses this gap and will
+represent a valuable addition to the ecosystem.
 
 # Data
 
@@ -82,11 +88,11 @@ In this vignette we will use simulated data from:
     $\rightarrow$ 1, 2, ..., 42.
 
 Let's visualize the data. Each dot represents a cell with its velocity
-on the y-axis. Each facet corresponds to a compound (e.g., specific 
-drug that may affect cellular velocity). The x-axis represents the 
-dose. There are three plates, indicated by color. Four technical replicates 
-(wells), analyzed on the same plate, are stacked next to each other and have
-the same color.
+on the y-axis. Each facet corresponds to a compound (e.g., specific drug
+that may affect cellular velocity). The x-axis represents the dose.
+There are three plates, indicated by color. Four technical replicates
+(wells), analyzed on the same plate, are stacked next to each other and
+have the same color.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
@@ -107,6 +113,7 @@ ggplot(data = d)+
 ```
 
 ## **Mean migration velocity** per well
+
 Alternatively, we can visualize the well-specific mean velocities to
 highlight plate-specific batch effects.
 
@@ -129,17 +136,20 @@ ggplot(data = dm)+
   annotation_logticks(base = 10, sides = "l")
 ```
 
-# ``cellmig`` analysis
-We will use this data to infer the **overall treatment effects** (parameter 
-$\delta_t$), relative to a control treatment (the offset) to correct for 
-plate-specific batch effects. At the same time, ``cellmig`` will quantify 
-many different features of the data using its model parameters (e.g., 
-variability between technical or biological replicates; or plate-specific 
-treatment effects ($\gamma_{pt}$)).
+# `cellmig` analysis
 
-## 1. Model fitting
-We fit the Stan model employed by `cellmig` with the control parameters
-defined in the list `control`.
+We will use this data to infer the **overall treatment effects**
+(parameter $\delta_t$), relative to a control treatment (the offset) to
+correct for plate-specific batch effects. At the same time,
+`r Biocpkg("cellmig")` will quantify many different features of the data
+using its model parameters (e.g., variability between technical or
+biological replicates; or plate-specific treatment effects
+($\gamma_{pt}$)).
+
+## Model fitting
+
+We fit the Stan model employed by `r Biocpkg("cellmig")` with the
+control parameters defined in the list `control`.
 
 ```{r, fig.width=7, fig.height=3.5}
 o <- cellmig(x = d,
@@ -154,9 +164,9 @@ o <- cellmig(x = d,
 
 ## What are the **overall treatment effects** ($\delta_t$) on velocity?
 
-To extract the means, medians, and 95% Highest Density Intervals (HDIs, 
-quantifying parameter value uncertainty) of $\delta_t$, we have to access 
-the data.frame `delta_t` in the output object `posteriors`:
+To extract the means, medians, and 95% Highest Density Intervals (HDIs,
+quantifying parameter value uncertainty) of $\delta_t$, we have to
+access the data.frame `delta_t` in the output object `posteriors`:
 
 ```{r}
 str(o$posteriors$delta_t)
@@ -168,7 +178,7 @@ It is better to visualize the mean $\delta_t$s and their 95% HDIs
 -   Error bar: 95% highest density interval (HDI) of $\delta$
 -   $\exp(\delta)$: Fold change in cell velocity relative to control
 
-As compound t=1 was selected as control (by setting offset=1), the 
+As compound t=1 was selected as control (by setting offset=1), the
 treatment effects of this compounds are not shown.
 
 ```{r, fig.width=6, fig.height=3.3}
@@ -182,17 +192,19 @@ ggplot(data = o$posteriors$delta_t)+
 ```
 
 ## Compare the dose-response `profiles` for different compounds
-For "rectangular datasets", i.e. datasets with multiple compounds 
-and overlapping doses, we can study the treatment dose-response 
-profiles by hierarchical clustering based on the complete posteriors 
-of $\delta_t$, account for uncertainty in this parameter.
 
-Panel A: dendrogram constructed by hierarchical clustering with average 
-linkage, based on euclidean distances between vectors of $\delta_t$ (shown 
-in panel B) of each compound (leaf) across doses. Branch support values 
-show branch robustness (label = 1000 implies this branch was encountered 
-in each of the 1000 dendrograms constructed from the posterior of $\delta_t$).
-Plate-specific treatment dose-responses based on parameters $\gamma_pt$.
+For "rectangular datasets", i.e. datasets with multiple compounds and
+overlapping doses, we can study the treatment dose-response profiles by
+hierarchical clustering based on the complete posteriors of $\delta_t$,
+account for uncertainty in this parameter.
+
+Panel A: dendrogram constructed by hierarchical clustering with average
+linkage, based on euclidean distances between vectors of $\delta_t$
+(shown in panel B) of each compound (leaf) across doses. Branch support
+values show branch robustness (label = 1000 implies this branch was
+encountered in each of the 1000 dendrograms constructed from the
+posterior of $\delta_t$). Plate-specific treatment dose-responses based
+on parameters $\gamma_pt$.
 
 -   Dot in panel B/C: Posterior mean of $\delta_t$ and $\gamma_pt$
 -   Error bar: 95% highest density interval (HDI)
@@ -202,15 +214,15 @@ get_dose_response_profile(x = o)+
   patchwork::plot_layout(widths = c(.7, 1, 4))
 ```
 
+## Compare the effects between treatment group
 
-# Compare the effects between treatment group
+Pairwise dot-plot comparison $\rightarrow$ x minus y axis
 
-## Pairwise dot-plot comparison $\rightarrow$ x minus y axis
-(Left panel) Differences in overall treatment effects. Log fold change 
-(LFC; described by parameter $\rho_{ij}$) between overall treatments 
-effects ($\delta_t$) of row ($i$) vs. column ($j$) treatment groups. 
-Tile colors and labels represent $\rho_{ij}$. (Right panel) Probability 
-of differential treatment effect described by parameter $\pi_{ij}$. Tile 
+(Left panel) Differences in overall treatment effects. Log fold change
+(LFC; described by parameter $\rho_{ij}$) between overall treatments
+effects ($\delta_t$) of row ($i$) vs. column ($j$) treatment groups.
+Tile colors and labels represent $\rho_{ij}$. (Right panel) Probability
+of differential treatment effect described by parameter $\pi_{ij}$. Tile
 colors and labels represent $\pi_{ij}$.
 
 -   x/y-axis treatment groups (combinations of compounds and doses)
@@ -241,25 +253,27 @@ u <- get_violins(x = o,
 u$plot
 ```
 
-# Posterior predictive checks (PPCs)
-To assess model validity, we performed posterior predictive checks, 
-which showed that the simulated data (pink violin) were consistent 
-with the observed data (black violins). Each dot is a cells.
+## Posterior predictive checks (PPCs)
+
+To assess model validity, we performed posterior predictive checks,
+which showed that the simulated data (pink violin) were consistent with
+the observed data (black violins). Each dot is a cells.
 
 ```{r, fig.width=5, fig.height=6}
-g <- get_ppc_violins(x = o)
+g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
 g+scale_y_log10()
 ```
-Using posterior predictive checks we compared the mean simulated velocity
-per well (y-axis) with the observed mean per well (x-axis). Each dot is a 
-well.
+
+Using posterior predictive checks we compared the mean simulated
+velocity per well (y-axis) with the observed mean per well (x-axis).
+Each dot is a well.
 
 ```{r, fig.width=4, fig.height=4}
 g <- get_ppc_means(x = o)
 g
 ```
 
-# Other model parameters
+## Inspecting other model parameters
 
 ```{r, fig.height=2, fig.width=6}
 g_alpha_p <- ggplot(data = o$posteriors$alpha_p)+
