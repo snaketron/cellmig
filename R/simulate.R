@@ -418,7 +418,7 @@ check_simulation_control <- function(control, partial) {
             stop("offset must be an integer")
         }
         if(o > length(x)) {
-            stop("offset must be an integer in the range 1 to length(deltas)")
+            stop("offset must be between 1 and length of delta")
         }
     }
     if(partial) {

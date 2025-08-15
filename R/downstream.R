@@ -27,7 +27,7 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
     stop("only one treatment groups provided, length(groups)>1")
   }
   
-  p <- extract(x$fit, par = "delta_t")$delta_t
+  p <- extract(x$fit, par = "mu_group")$mu_group
   if(ncol(p)==1) {
     stop("only one treatment group: nothing to compare")
   }
@@ -114,7 +114,7 @@ get_violins <- function(x, from_groups, to_group, exponentiate = FALSE) {
         stop("only one to_group allowed")
     }
     
-    p <- extract(x$fit, par = "delta_t")$delta_t
+    p <- extract(x$fit, par = "mu_group")$mu_group
     if(ncol(p)==1) {
         stop("only one treatment group: nothing to compare")
     }
