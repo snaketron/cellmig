@@ -241,7 +241,7 @@ ggplot(data = osd$posteriors$alpha_p)+
 #### Effect sizes ($\delta_t$)
 
 ```{r, fig.width=4, fig.height=2.5}
-ggplot(data = osd$posteriors$mu_group)+
+ggplot(data = osd$posteriors$delta_t)+
   geom_point(aes(y = group_id, x = mean))+
   geom_errorbarh(aes(y = group_id, x = mean, xmin = X2.5., xmax = X97.5.), 
                  height = 0.1)+

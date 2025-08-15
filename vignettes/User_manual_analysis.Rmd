@@ -78,14 +78,15 @@ In this vignette we will use simulated data from:
 -   **cells** per well with their migration velocity `v`
 -   wells are treated with **compounds** 1, 2, ..., 6 at **dose** 1, 2,
     ..., 7.
--   combination of a compound and dose is a **treatment** ($t$)
+-   combination of a compound and dose is a **treatment group** ($t$)
     $\rightarrow$ 1, 2, ..., 42.
 
 Let's visualize the data. Each dot represents a cell with its velocity
-on the y-axis. Each facet corresponds to a compound. The x-axis
-represents the dose. There are three plates, indicated by color. Four
-technical replicates (wells), analyzed on the same plate, are stacked
-next to each other.
+on the y-axis. Each facet corresponds to a compound (e.g., specific 
+drug that may affect cellular velocity). The x-axis represents the 
+dose. There are three plates, indicated by color. Four technical replicates 
+(wells), analyzed on the same plate, are stacked next to each other and have
+the same color.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
@@ -128,9 +129,16 @@ ggplot(data = dm)+
   annotation_logticks(base = 10, sides = "l")
 ```
 
-# Model fitting
+# ``cellmig`` analysis
+We will use this data to infer the **overall treatment effects** (parameter 
+$\delta_t$), relative to a control treatment (the offset) to correct for 
+plate-specific batch effects. At the same time, ``cellmig`` will quantify 
+many different features of the data using its model parameters (e.g., 
+variability between technical or biological replicates; or plate-specific 
+treatment effects ($\gamma_{pt}$)).
 
-Next, we fit the Stan model employed by `cellmig` with the control parameters
+## 1. Model fitting
+We fit the Stan model employed by `cellmig` with the control parameters
 defined in the list `control`.
 
 ```{r, fig.width=7, fig.height=3.5}
@@ -144,14 +152,27 @@ o <- cellmig(x = d,
                             max_treedepth = 10))
 ```
 
-## What are the **overall treatment effects** (parameter $\delta$) on velocity?
+## What are the **overall treatment effects** ($\delta_t$) on velocity?
 
--   Dot: Posterior mean of $\delta$
+To extract the means, medians, and 95% Highest Density Intervals (HDIs, 
+quantifying parameter value uncertainty) of $\delta_t$, we have to access 
+the data.frame `delta_t` in the output object `posteriors`:
+
+```{r}
+str(o$posteriors$delta_t)
+```
+
+It is better to visualize the mean $\delta_t$s and their 95% HDIs
+
+-   Dot: Posterior mean of $\delta_t$
 -   Error bar: 95% highest density interval (HDI) of $\delta$
 -   $\exp(\delta)$: Fold change in cell velocity relative to control
 
+As compound t=1 was selected as control (by setting offset=1), the 
+treatment effects of this compounds are not shown.
+
 ```{r, fig.width=6, fig.height=3.3}
-ggplot(data = o$posteriors$mu_group)+
+ggplot(data = o$posteriors$delta_t)+
   geom_line(aes(x = dose, y = mean, col = compound, group = compound))+
   geom_point(aes(x = dose, y = mean, col = compound))+
   geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5., 
@@ -162,9 +183,19 @@ ggplot(data = o$posteriors$mu_group)+
 
 ## Compare the dose-response `profiles` for different compounds
 For "rectangular datasets", i.e. datasets with multiple compounds 
-and overlapping doses, we can study the dose-response profiles by 
-hierarchical clustering based on the entire $\delta$ posteriors to 
-account for uncertainty.
+and overlapping doses, we can study the treatment dose-response 
+profiles by hierarchical clustering based on the complete posteriors 
+of $\delta_t$, account for uncertainty in this parameter.
+
+Panel A: dendrogram constructed by hierarchical clustering with average 
+linkage, based on euclidean distances between vectors of $\delta_t$ (shown 
+in panel B) of each compound (leaf) across doses. Branch support values 
+show branch robustness (label = 1000 implies this branch was encountered 
+in each of the 1000 dendrograms constructed from the posterior of $\delta_t$).
+Plate-specific treatment dose-responses based on parameters $\gamma_pt$.
+
+-   Dot in panel B/C: Posterior mean of $\delta_t$ and $\gamma_pt$
+-   Error bar: 95% highest density interval (HDI)
 
 ```{r, fig.width=9.5, fig.height=5}
 get_dose_response_profile(x = o)+

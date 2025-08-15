@@ -127,10 +127,10 @@ get_summary <- function(x, f) {
   yhat <- merge(x = yhat, y = meta_well, by = "well_id", all.x = TRUE)
   
   return(list(alpha_p = alpha_p,
-              mu_group = mu_group, 
-              mu_plate_group = mu_plate_group,
-              mu_well = mu_well,
-              kappa_well = kappa_well,
+              delta_t = mu_group, 
+              delta_tp = mu_plate_group,
+              well_mu = mu_well,
+              well_kappa = kappa_well,
               kappa_mu = kappa_mu,
               kappa_sigma = kappa_sigma,
               sigma_bio = sigma_bio,

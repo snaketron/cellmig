@@ -8,7 +8,7 @@ get_dose_response_profile <- function(x,
   
   get_boot <- function(x, hc_dist, hc_link, B) {
     
-    eg <- x$posteriors$mu_group
+    eg <- x$posteriors$delta_t
     gs <- eg$group_id
     
     # hclust
@@ -17,13 +17,13 @@ get_dose_response_profile <- function(x,
     main_ph <- as.phylo(x = hc)
     
     # meta
-    meta <- x$posteriors$mu_group[, c("group_id", "compound", "dose")]
+    meta <- x$posteriors$delta_t[, c("group_id", "compound", "dose")]
     meta <- meta[order(meta$group_id, decreasing = FALSE),]
     meta <- meta[meta$group_id %in% gs, ]
     meta$group_id <- NULL
     
     # extract posterior
-    e <- extract(x$f, par = "mu_group")$mu_group[, gs]
+    e <- extract(x$f, par = "delta_t")$delta_t[, gs]
     e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()
@@ -60,8 +60,8 @@ get_dose_response_profile <- function(x,
     return(list(main_ph = main_ph, boot_ph = boot_ph))
   }
   
-  eg <- x$posteriors$mu_group
-  es <- x$posteriors$mu_plate_group
+  eg <- x$posteriors$delta_t
+  es <- x$posteriors$delta_tp
   if(missing(select_gs)==FALSE) {
     if(any(!select_gs %in% unique(eg$group))) {
       stop("selected treatment groups not found in data")
@@ -137,7 +137,7 @@ get_treatment_profile <- function(x,
   
   get_boot <- function(x, hc_dist, hc_link, select_gs, B) {
     
-    eg <- x$posteriors$mu_group
+    eg <- x$posteriors$delta_t
     
     if(missing(select_gs)==FALSE) {
       if(any(!select_gs %in% unique(eg$group))) {
@@ -156,7 +156,7 @@ get_treatment_profile <- function(x,
     
     
     # extract posterior
-    e <- extract(x$f, par = "mu_group")$mu_group[, gs]
+    e <- extract(x$f, par = "delta_t")$delta_t[, gs]
     e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
     
     boot_ph <- c()

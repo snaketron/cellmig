@@ -64,12 +64,25 @@ A list containing:
 \itemize{
 \item \code{fit} = The fitted model as an rstan object.
 \item \code{data} = The raw and processed input data.
-\item \code{posteriors} = A summary of model parameters, including means 
+\item \code{posteriors}{ = A summary of model parameters, including means 
 and 95\% credible intervals.
+\itemize{
+    \item{alpha_p: batch effect on plate p}
+    \item{delta_t: overall treatment effects relative to the selected control}
+    \item{delta_pt: plate-specific treatment effects relative to the selected 
+    control}
+    \item{well_mu: mean of cell velocity distribution per well}
+    \item{well_kappa: shape of cell velocity distribution per well}
+    \item{kappa_mu, kappa_sigma: mean/standard deviation parameters of the
+    population of well_kappas}
+    \item{sigma_bio: variability between biological replicates}
+    \item{sigma_tech: variability between technical replicates}
+    \item{yhat: posterior predictions}
+    }
+}
 \item \code{control} = The list of input controls
 }
 }
-
 \examples{
 data(d, package = "cellmig")
 o <- cellmig(x = d,
