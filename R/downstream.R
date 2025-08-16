@@ -20,7 +20,7 @@ get_groups <- function(x) {
 
 
 
-get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
+get_pairs <- function(x, groups, exponentiate) {
   
   if(missing(x) || is.null(x)) {
     stop("missing x")
@@ -141,7 +141,7 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
 
 
 
-get_violins <- function(x, from_groups, to_group, exponentiate = FALSE) {
+get_violins <- function(x, from_groups, to_group, exponentiate) {
   
   if(missing(x) || is.null(x)) {
     stop("missing x")

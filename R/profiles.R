@@ -2,7 +2,7 @@
 get_dose_response_profile <- function(x,
                                       hc_link = "average",
                                       hc_dist = "euclidean",
-                                      groups = NA,
+                                      groups,
                                       B = 1000) {
   
   check_profile_inputs(x = x, hc_link = hc_link, hc_dist = hc_dist, B = B)
@@ -126,7 +126,7 @@ get_dose_response_profile <- function(x,
     geom_hline(yintercept = 0, linetype = "dashed", col = "gray")+
     facet_wrap(facets = compound~plate, 
                nrow = length(unique(q$compound)), 
-               switch = "y", scales = "free_y")+
+               strip.position = "top", scales = "free_y")+
     geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5.), 
                   width = 0, alpha = 0.5)+
     geom_line(aes(x = dose, y = mean))+

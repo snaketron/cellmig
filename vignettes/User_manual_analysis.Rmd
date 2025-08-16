@@ -229,7 +229,7 @@ colors and labels represent $\pi_{ij}$.
     negative $\rho$
 
 ```{r, fig.width=12, fig.height=6}
-u <- get_pairs(x = o)
+u <- get_pairs(x = o, exponentiate = FALSE)
 u$plot
 ```
 
@@ -247,7 +247,8 @@ u$plot
 get_groups(x = o)
 u <- get_violins(x = o, 
                  from_groups = get_groups(x = o)$group,
-                 to_group = "C2|D1")
+                 to_group = "C2|D1",
+                 exponentiate = FALSE)
 u$plot
 ```
 

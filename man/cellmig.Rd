@@ -64,7 +64,7 @@ A list containing:
 \itemize{
 \item \code{fit} = The fitted model as an rstan object.
 \item \code{data} = The raw and processed input data.
-\item \code{posteriors}{ = A summary of model parameters, including means 
+\item \code{posteriors} = A summary of model parameters, including means 
 and 95\% credible intervals.
 \itemize{
     \item{alpha_p: batch effect on plate p}
@@ -81,7 +81,6 @@ and 95\% credible intervals.
     }
 }
 \item \code{control} = The list of input controls
-}
 }
 \examples{
 data(d, package = "cellmig")

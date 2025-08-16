@@ -43,7 +43,8 @@ Imports:
     scales
 Suggests:
     BiocStyle,
-    knitr
+    knitr,
+    testthat
 Encoding: UTF-8
 NeedsCompilation: no
 biocViews: SingleCell, CellBiology, Bayesian, ExperimentalDesign, Software
