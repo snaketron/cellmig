@@ -2,8 +2,26 @@
 get_dose_response_profile <- function(x,
                                       hc_link = "average",
                                       hc_dist = "euclidean",
-                                      select_gs,
+                                      groups = NA,
                                       B = 1000) {
+  
+  check_profile_inputs(x = x, hc_link = hc_link, hc_dist = hc_dist, B = B)
+  
+  gmap <- get_groups(x = x)
+  if(missing(groups)) {
+    warning("groups not specified, we will use all groups")
+    groups <- gmap$group
+  }
+  if(any(is.na(groups))|any(is.nan(groups))) {
+    warning("groups not specified, we will use all groups")
+    groups <- gmap$group
+  }
+  if(any(is.character(groups)==FALSE)) {
+    warning("groups must be characters")
+  }
+  if(length(groups)==1) {
+    stop("only one treatment groups provided, length(groups)>1")
+  }
   
   
   get_boot <- function(x, hc_dist, hc_link, B) {
@@ -62,13 +80,11 @@ get_dose_response_profile <- function(x,
   
   eg <- x$posteriors$delta_t
   es <- x$posteriors$delta_tp
-  if(missing(select_gs)==FALSE) {
-    if(any(!select_gs %in% unique(eg$group))) {
-      stop("selected treatment groups not found in data")
-    }
-    eg <- eg[eg$group %in% select_gs, ]
-    es <- es[es$group %in% select_gs, ]
+  if(any(!groups %in% unique(eg$group))) {
+    stop("selected groups not found in data")
   }
+  eg <- eg[eg$group %in% groups, ]
+  es <- es[es$group %in% groups, ]
   
   bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link, B = B)
   
@@ -132,18 +148,21 @@ get_dose_response_profile <- function(x,
 get_treatment_profile <- function(x, 
                                   hc_link = "average", 
                                   hc_dist = "euclidean",
-                                  select_gs,
+                                  groups,
                                   B = 1000) {
   
-  get_boot <- function(x, hc_dist, hc_link, select_gs, B) {
+  
+  check_profile_inputs(x = x, hc_link = hc_link, hc_dist = hc_dist, B = B)
+  
+  get_boot <- function(x, hc_dist, hc_link, groups, B) {
     
     eg <- x$posteriors$delta_t
     
-    if(missing(select_gs)==FALSE) {
-      if(any(!select_gs %in% unique(eg$group))) {
+    if(missing(groups)==FALSE) {
+      if(any(!groups %in% unique(eg$group))) {
         stop("selected treatment groups not found in data")
       }
-      eg <- eg[eg$group %in% select_gs, ]
+      eg <- eg[eg$group %in% groups, ]
     }
     
     # hclust -> main tree
@@ -193,8 +212,25 @@ get_treatment_profile <- function(x,
     return(list(main_ph = main_ph, boot_ph = boot_ph))
   }
   
+  gmap <- get_groups(x = x)
+  if(missing(groups)) {
+    warning("groups not specified, we will use all groups")
+    groups <- gmap$group
+  }
+  if(any(is.na(groups))|any(is.nan(groups))) {
+    warning("groups not specified, we will use all groups")
+    groups <- gmap$group
+  }
+  if(any(is.character(groups)==FALSE)) {
+    warning("groups must be characters")
+  }
+  if(length(groups)==1) {
+    stop("only one treatment groups provided, length(groups)>1")
+  }
+  
+  
   bt <- get_boot(x = x, hc_dist = hc_dist, hc_link = hc_link,
-                 select_gs = select_gs, B = B)
+                 groups = groups, B = B)
   
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
@@ -209,3 +245,63 @@ get_treatment_profile <- function(x,
   tree <- revts(tree)
   return(tree)
 }
+
+
+check_profile_inputs <- function(x, hc_link, hc_dist, B) {
+  if(missing(x) || is.null(x)) {
+    stop("missing x")
+  }
+  if(is.list(x) == FALSE) {
+    stop("wrong x")
+  }
+  if(any(names(x)=="posteriors")==FALSE) {
+    stop("wrong x")
+  }
+  
+  
+  if(missing(hc_link)) {
+    stop("hclust_method input not found")
+  }
+  if(length(hc_link)!=1) {
+    stop("hclust_method must be one of: ward.D, single, complete, 
+    average, mcquitty, median, centroid or ward.D2")
+  }
+  if(is.character(hc_link)==FALSE) {
+    stop("hclust_method must be one of: ward.D, single, complete, 
+    average, mcquitty, median, centroid or ward.D2")
+  }
+  if(!hc_link %in% c("ward.D", "ward.D2", "single", 
+                     "complete", "average", "mcquitty",
+                     "median", "centroid")) {
+    stop("hc_link must be one of: ward.D, single, complete, 
+    average, mcquitty, median, centroid or ward.D2")
+  }
+  
+  if(missing(hc_dist)) {
+    stop("hc_dist input not found")
+  }
+  if(length(hc_dist)!=1) {
+    stop("hc_dist must be one of: euclidean or manhattan")
+  }
+  if(is.character(hc_dist)==FALSE) {
+    stop("hc_dist must be one of: euclidean or manhattan")
+  }
+  if(!hc_dist %in% c("euclidean", "manhattan")) {
+    stop("hc_dist must be one of: euclidean or manhattan")
+  }
+  
+  
+  if(length(B) != 1) {
+    stop("B must be a positive integer > 0")
+  }
+  if(!is.numeric(B)) {
+    stop("B must be a positive integer > 0")
+  }
+  if(is.finite(x = B) == FALSE) {
+    stop("B must be a positive integer > 0")
+  }
+  if(as.integer(x = B) <= 0) {
+    stop("B must be a positive integer > 0")
+  }
+}
+

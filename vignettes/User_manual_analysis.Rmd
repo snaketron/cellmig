@@ -149,17 +149,15 @@ biological replicates; or plate-specific treatment effects
 ## Model fitting
 
 We fit the Stan model employed by `r Biocpkg("cellmig")` with the
-control parameters defined in the list `control`.
+control parameters defined in the list `control`. There are many other
+input parameters in `control`, check the `cellmig` function documentation.
 
 ```{r, fig.width=7, fig.height=3.5}
 o <- cellmig(x = d,
-             control = list(mcmc_warmup = 300,
-                            mcmc_steps = 1000,
-                            mcmc_chains = 2,
-                            mcmc_cores = 2,
-                            mcmc_algorithm = "NUTS",
-                            adapt_delta = 0.8,
-                            max_treedepth = 10))
+             control = list(mcmc_warmup = 300, # nr. of MCMC warmup step?
+                            mcmc_steps = 1000, # nr. of MCMC iteration steps?
+                            mcmc_chains = 2,   # nr. of MCMC chains
+                            mcmc_cores = 2))   # nr. of MCMC cores
 ```
 
 ## What are the **overall treatment effects** ($\delta_t$) on velocity?

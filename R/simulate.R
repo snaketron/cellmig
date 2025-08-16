@@ -133,7 +133,6 @@ gen_partial <- function(control = list(N_biorep = 3,
         
         return(list(yhat = yhat, pars = pars, meta = meta))
     }
-    
     check_simulation_control(control = control, partial = TRUE)
     control <- get_control(control_in = control)
     yhat <- get_sim(control = control)
@@ -298,25 +297,28 @@ check_simulation_control <- function(control, partial) {
             stop("control must be a list")
         }
         if(all(names(control) %in% names(control_in))==FALSE) {
-            stop("control has wrong elements")
+            stop("control has missing elements")
         }
     }
     check_control(control_in = control, partial)
-    
     check_N <- function(y, par) {
         if(missing(y) || is.null(y)) {
             str <- paste0(par, " is missing or NULL")
-            stop(str)
-        }
-        if(is.na(y)) {
-            str <- paste0(par, " is NA")
             stop(str)
         }
         if(length(y)!=1) {
             str <- paste0(par, " must have length of 1")
             stop(str)
         }
+        if(is.na(y)) {
+            str <- paste0(par, " is NA")
+            stop(str)
+        }
         if(is.numeric(y)==FALSE) {
+            str <- paste0(par, " must be numeric")
+            stop(str)
+        }
+        if(is.infinite(y)) {
             str <- paste0(par, " must be numeric")
             stop(str)
         }

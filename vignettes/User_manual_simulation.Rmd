@@ -29,25 +29,29 @@ ggplot2::theme_set(new = theme_bw(base_size = 10))
 
 # Background
 
-igh-throughput cell migration assays generate complex, hierarchically
+High-throughput cell migration assays generate complex, hierarchically
 structured datasets with inherent technical noise and biological
 variability. To accurately quantify treatment effects on cell migration
 velocity, it is essential to account for these sources of variation and
 to design experiments that provide sufficient statistical power. The
-`cellmig` R package implements a Bayesian hierarchical model for
-analyzing such data, and it includes functionality for simulating
+`r Biocpkg("ClustIRR")` R package implements a Bayesian hierarchical model 
+for analyzing such data. See the "User manual" vignette to understand the
+key functionalities of `r Biocpkg("ClustIRR")`.
+
+Furthermore, `r Biocpkg("ClustIRR")` includes functionality for simulating
 synthetic datasets. These simulations are invaluable for experimental
 planning, allowing researchers to assess how different experimental
 designs (e.g., varying numbers of biological replicates, technical
 replicates, or cells per well) affect the precision of treatment effect
 estimates.
 
-This vignette demonstrates how to use `cellmig` to simulate cell
-migration data under a partially generative model. We simulate data
-based on realistic parameter values derived from experimental data and
-then analyze the simulated data using `cellmig` to recover the
+This vignette demonstrates how to use `r Biocpkg("ClustIRR")` to simulate 
+cell migration data under a partially generative model. These functionalities
+are documented in this vignette. In short, we simulate data based on 
+realistic parameter values derived from experimental data and
+then analyze the simulated data using `r Biocpkg("ClustIRR")` to recover the
 parameters. This process validates the model and illustrates how
-simulation can guide experimental design.
+simulation can guide experimental design and power analysis.
 
 # Data simulation from **partially generative** model
 
@@ -110,7 +114,7 @@ the fourth treatment group, which has $\delta_t = 0$).
 
 ## Generates dataframe with simulated velocities
 
-We use the `gen_partial` function from `cellmig` to simulate the data.
+We use the `gen_partial` function from `r Biocpkg("ClustIRR")` to simulate the data.
 The function requires a control list specifying the experimental design
 and model parameters.
 
@@ -188,10 +192,10 @@ ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
   scale_color_grey(name = "plate")
 ```
 
-### Analyzing simulated data with `cellmig`
+### Analyzing simulated data with `r Biocpkg("ClustIRR")`
 
 The simulated data must be formatted to match the input requirements of
-`cellmig`. Specifically, we need to convert some columns to character
+`r Biocpkg("ClustIRR")`. Specifically, we need to convert some columns to character
 and add an `offset` column indicating the reference treatment.
 
 ```{r, fig.width=7, fig.height=3.5}
@@ -205,7 +209,7 @@ sim_data$offset <- 0
 sim_data$offset[sim_data$group=="4"] <- 1
 ```
 
-We now analyze the simulated data using `cellmig` with the following
+We now analyze the simulated data using `r Biocpkg("ClustIRR")` with the following
 control parameters:
 
 ```{r, fig.width=7, fig.height=3.5}
@@ -262,9 +266,9 @@ plot(osd$fit, par = c("sigma_bio", "sigma_tech"))
 
 
 # Data simulation from **fully generative** model 
-We can also use `cellmig` to generate cell velocities from the prior 
-distributions of the parameters $\rightarrow$ data from prior predictive 
-distribution
+We can also use `r Biocpkg("ClustIRR")` to generate cell velocities from 
+the prior distributions of the parameters $\rightarrow$ data from prior 
+predictive distribution.
 
 In this scenario, the parameters, such as $\delta_t$, will not be fixed to
 point values but rather generated from their priors.

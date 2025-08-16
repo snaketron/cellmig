@@ -2,8 +2,18 @@
 
 
 get_groups <- function(x) {
-  m <- x$posteriors$delta_t[, c("group_id", "group",
-                        "compound", "dose")]
+  
+  if(missing(x) || is.null(x)) {
+    stop("missing x")
+  }
+  if(is.list(x) == FALSE) {
+    stop("wrong x")
+  }
+  if(any(names(x)=="posteriors")==FALSE) {
+    stop("wrong x")
+  }
+  
+  m <- x$posteriors$delta_t[, c("group_id", "group", "compound", "dose")]
   
   return(m)
 }
@@ -11,6 +21,28 @@ get_groups <- function(x) {
 
 
 get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
+  
+  if(missing(x) || is.null(x)) {
+    stop("missing x")
+  }
+  if(is.list(x) == FALSE) {
+    stop("wrong x")
+  }
+  if(any(names(x)=="posteriors")==FALSE) {
+    stop("wrong x")
+  }
+  
+  if(missing(exponentiate) || is.null(exponentiate)) {
+    stop("missing exponentiate")
+  }
+  if(length(exponentiate) != 1) {
+    stop("exponentiate must be have length one")
+  }
+  if(is.logical(exponentiate)==FALSE) {
+    stop("exponentiate must be logical")
+  }
+  
+  
   gmap <- get_groups(x = x)
   if(missing(groups)) {
     warning("groups not specified, we will use all groups")
@@ -110,85 +142,106 @@ get_pairs <- function(x, groups = NA, exponentiate = FALSE) {
 
 
 get_violins <- function(x, from_groups, to_group, exponentiate = FALSE) {
-    if(length(to_group)!=1) {
-        stop("only one to_group allowed")
+  
+  if(missing(x) || is.null(x)) {
+    stop("missing x")
+  }
+  if(is.list(x) == FALSE) {
+    stop("wrong x")
+  }
+  if(any(names(x)=="posteriors")==FALSE) {
+    stop("wrong x")
+  }
+  
+  if(missing(exponentiate) || is.null(exponentiate)) {
+    stop("missing exponentiate")
+  }
+  if(length(exponentiate) != 1) {
+    stop("exponentiate must be have length one")
+  }
+  if(is.logical(exponentiate)==FALSE) {
+    stop("exponentiate must be logical")
+  }
+  
+  if(length(to_group)!=1) {
+    stop("only one to_group allowed")
+  }
+  
+  p <- extract(x$fit, par = "mu_group")$mu_group
+  if(ncol(p)==1) {
+    stop("only one treatment group: nothing to compare")
+  }
+  
+  gmap <- get_groups(x = x)
+  
+  if(all(from_groups %in% gmap$group)==FALSE) {
+    stop("unknown group in from_groups")
+  }
+  if(all(to_group %in% gmap$group)==FALSE) {
+    stop("unknown group in to_group")
+  }
+  
+  gmap_from <- gmap[gmap$group %in% from_groups,]
+  gmap_to <- gmap[gmap$group %in% to_group,]
+  
+  ds <- vector(mode = "list", length = nrow(gmap_from))
+  ct <- 1
+  for(i in seq_len(nrow(gmap_from))) {
+    for(j in seq_len(nrow(gmap_to))) {
+      
+      d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
+      pmax <- get_pmax(d)
+      ds[[ct]] <- data.frame(rho = d,
+                             group_id_x = gmap_from$group_id[i], 
+                             group_id_y = gmap_to$group_id[j], 
+                             group_x = gmap_from$group[i], 
+                             group_y = gmap_to$group[j], 
+                             compound = gmap_from$compound[i], 
+                             dose = gmap_from$dose[i],
+                             pmax = pmax)
+      ct <- ct + 1
     }
-    
-    p <- extract(x$fit, par = "mu_group")$mu_group
-    if(ncol(p)==1) {
-        stop("only one treatment group: nothing to compare")
-    }
-    
-    gmap <- get_groups(x = x)
-    
-    if(all(from_groups %in% gmap$group)==FALSE) {
-        stop("unknown group in from_groups")
-    }
-    if(all(to_group %in% gmap$group)==FALSE) {
-        stop("unknown group in to_group")
-    }
-    
-    gmap_from <- gmap[gmap$group %in% from_groups,]
-    gmap_to <- gmap[gmap$group %in% to_group,]
-    
-    ds <- vector(mode = "list", length = nrow(gmap_from))
-    ct <- 1
-    for(i in seq_len(nrow(gmap_from))) {
-        for(j in seq_len(nrow(gmap_to))) {
-            
-            d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
-            pmax <- get_pmax(d)
-            ds[[ct]] <- data.frame(rho = d,
-                                   group_id_x = gmap_from$group_id[i], 
-                                   group_id_y = gmap_to$group_id[j], 
-                                   group_x = gmap_from$group[i], 
-                                   group_y = gmap_to$group[j], 
-                                   compound = gmap_from$compound[i], 
-                                   dose = gmap_from$dose[i],
-                                   pmax = pmax)
-            ct <- ct + 1
-        }
-    }
-    ds <- do.call(rbind, ds)
-    ds$contrast <- paste0(ds$group_x, "-vs-", ds$group_y) 
-    ds$contrast <- factor(x = ds$contrast, 
-                          levels = paste0(from_groups, "-vs-", to_group))
-    
-    ds_pmax <- ds[duplicated(ds[, c("group_x", "group_y")])==FALSE,]
-    
-    if(exponentiate==FALSE) {
-      g <- ggplot(data = ds)+
-        facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
-        geom_hline(yintercept = 0, linetype = "dashed")+
-        geom_violin(aes(x = dose, y = rho), 
-                    col = "steelblue", fill = "steelblue", alpha = 0.7)+
-        geom_text(data = ds_pmax,
-                  aes(x = dose, y = max(ds$rho)+0.15, 
-                      label = round(x = pmax, digits = 2)), size = 2.25)+
-        theme_bw(base_size = 10)+
-        theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
-        xlab(label = 'Dose')+
-        ylab(label = expression("LFC ("*rho*")"))+
-        ggtitle(label = paste0("treatments / ", to_group))
-    } else {
-      g <- ggplot(data = ds)+
-        facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
-        geom_hline(yintercept = 1, linetype = "dashed")+
-        geom_violin(aes(x = dose, y = exp(rho)), 
-                    col = "steelblue", fill = "steelblue", alpha = 0.7)+
-        geom_text(data = ds_pmax,
-                  aes(x = dose, y = max(exp(ds$rho))+0.15, 
-                      label = round(x = pmax, digits = 2)), size = 2.25)+
-        theme_bw(base_size = 10)+
-        theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
-        xlab(label = 'Dose')+
-        ylab(label = expression("FC ("*rho*"')"))+
-        ggtitle(label = paste0("treatments / ", to_group))
-    }
-    
-    g
-    
-    return(list(ds = ds, plot = g))
+  }
+  ds <- do.call(rbind, ds)
+  ds$contrast <- paste0(ds$group_x, "-vs-", ds$group_y) 
+  ds$contrast <- factor(x = ds$contrast, 
+                        levels = paste0(from_groups, "-vs-", to_group))
+  
+  ds_pmax <- ds[duplicated(ds[, c("group_x", "group_y")])==FALSE,]
+  
+  if(exponentiate==FALSE) {
+    g <- ggplot(data = ds)+
+      facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
+      geom_hline(yintercept = 0, linetype = "dashed")+
+      geom_violin(aes(x = dose, y = rho), 
+                  col = "steelblue", fill = "steelblue", alpha = 0.7)+
+      geom_text(data = ds_pmax,
+                aes(x = dose, y = max(ds$rho)+0.15, 
+                    label = round(x = pmax, digits = 2)), size = 2.25)+
+      theme_bw(base_size = 10)+
+      theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
+      xlab(label = 'Dose')+
+      ylab(label = expression("LFC ("*rho*")"))+
+      ggtitle(label = paste0("treatments / ", to_group))
+  } else {
+    g <- ggplot(data = ds)+
+      facet_wrap(facets = ~compound, scales = "free_x", nrow = 1)+
+      geom_hline(yintercept = 1, linetype = "dashed")+
+      geom_violin(aes(x = dose, y = exp(rho)), 
+                  col = "steelblue", fill = "steelblue", alpha = 0.7)+
+      geom_text(data = ds_pmax,
+                aes(x = dose, y = max(exp(ds$rho))+0.15, 
+                    label = round(x = pmax, digits = 2)), size = 2.25)+
+      theme_bw(base_size = 10)+
+      theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
+      xlab(label = 'Dose')+
+      ylab(label = expression("FC ("*rho*"')"))+
+      ggtitle(label = paste0("treatments / ", to_group))
+  }
+  
+  g
+  
+  return(list(ds = ds, plot = g))
 }
 
 
