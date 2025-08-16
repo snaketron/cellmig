@@ -79,8 +79,8 @@ and 95\% credible intervals.
     \item{sigma_tech: variability between technical replicates}
     \item{yhat: posterior predictions}
     }
-}
 \item \code{control} = The list of input controls
+}
 }
 \examples{
 data(d, package = "cellmig")
