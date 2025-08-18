@@ -34,22 +34,22 @@ structured datasets with inherent technical noise and biological
 variability. To accurately quantify treatment effects on cell migration
 velocity, it is essential to account for these sources of variation and
 to design experiments that provide sufficient statistical power. The
-`r Biocpkg("ClustIRR")` R package implements a Bayesian hierarchical model 
+`r Biocpkg("cellmig")` R package implements a Bayesian hierarchical model 
 for analyzing such data. See the "User manual" vignette to understand the
-key functionalities of `r Biocpkg("ClustIRR")`.
+key functionalities of `r Biocpkg("cellmig")`.
 
-Furthermore, `r Biocpkg("ClustIRR")` includes functionality for simulating
+Furthermore, `r Biocpkg("cellmig")` includes functionality for simulating
 synthetic datasets. These simulations are invaluable for experimental
 planning, allowing researchers to assess how different experimental
 designs (e.g., varying numbers of biological replicates, technical
 replicates, or cells per well) affect the precision of treatment effect
 estimates.
 
-This vignette demonstrates how to use `r Biocpkg("ClustIRR")` to simulate 
+This vignette demonstrates how to use `r Biocpkg("cellmig")` to simulate 
 cell migration data under a partially generative model. These functionalities
 are documented in this vignette. In short, we simulate data based on 
 realistic parameter values derived from experimental data and
-then analyze the simulated data using `r Biocpkg("ClustIRR")` to recover the
+then analyze the simulated data using `r Biocpkg("cellmig")` to recover the
 parameters. This process validates the model and illustrates how
 simulation can guide experimental design and power analysis.
 
@@ -114,8 +114,8 @@ the fourth treatment group, which has $\delta_t = 0$).
 
 ## Generates dataframe with simulated velocities
 
-We use the `gen_partial` function from `r Biocpkg("ClustIRR")` to simulate the data.
-The function requires a control list specifying the experimental design
+We use the `gen_partial` function from `r Biocpkg("cellmig")` to simulate the 
+data. The function requires a control list specifying the experimental design
 and model parameters.
 
 ```{r}
@@ -192,11 +192,11 @@ ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
   scale_color_grey(name = "plate")
 ```
 
-### Analyzing simulated data with `r Biocpkg("ClustIRR")`
+### Analyzing simulated data with `r Biocpkg("cellmig")`
 
 The simulated data must be formatted to match the input requirements of
-`r Biocpkg("ClustIRR")`. Specifically, we need to convert some columns to character
-and add an `offset` column indicating the reference treatment.
+`r Biocpkg("cellmig")`. Specifically, we need to convert some columns to 
+character and add an `offset` column indicating the reference treatment.
 
 ```{r, fig.width=7, fig.height=3.5}
 sim_data <- y_p$y
@@ -209,8 +209,8 @@ sim_data$offset <- 0
 sim_data$offset[sim_data$group=="4"] <- 1
 ```
 
-We now analyze the simulated data using `r Biocpkg("ClustIRR")` with the following
-control parameters:
+We now analyze the simulated data using `r Biocpkg("cellmig")` with the 
+following control parameters:
 
 ```{r, fig.width=7, fig.height=3.5}
 osd <- cellmig(x = sim_data,
@@ -266,7 +266,7 @@ plot(osd$fit, par = c("sigma_bio", "sigma_tech"))
 
 
 # Data simulation from **fully generative** model 
-We can also use `r Biocpkg("ClustIRR")` to generate cell velocities from 
+We can also use `r Biocpkg("cellmig")` to generate cell velocities from 
 the prior distributions of the parameters $\rightarrow$ data from prior 
 predictive distribution.
 
@@ -324,6 +324,90 @@ w <- data.frame(v_f = y_f$y$v[1:2000], v_p = y_p$y$v[1:2000])
     theme_bw(base_size = 10)
 ```
 
+# Power analysis
+How many biological replicates do we need to capture certain effect size 
+($\delta$)? Similar question can be asked in order to optimize the number 
+of technical replicates or the number of cells per well.
+
+
+```{r, eval = FALSE, message=FALSE, warning=FALSE}
+# Constants
+N_bioreps <- c(3, 6, 9)
+N_sim <- 10
+true_deltas <- c(-0.3, -0.15, 0, 0.2, 0.4)
+offset <- 3
+
+# power analysis
+deltas <- vector(mode = "list", length = length(N_bioreps)*N_sim)
+i <- 1
+for(N_biorep in N_bioreps) {
+  for(b in 1:N_sim) {
+    # simulate data
+    y_p <- gen_partial(control = list(N_biorep = N_biorep, 
+                                      N_techrep = 3, 
+                                      N_cell = 40, 
+                                      delta = true_deltas,
+                                      sigma_bio = 0.1, 
+                                      sigma_tech = 0.05, 
+                                      offset = offset,
+                                      prior_alpha_p_M = 1.7,
+                                      prior_alpha_p_SD = 0.1,
+                                      prior_kappa_mu_M = 1.7,
+                                      prior_kappa_mu_SD = 0.1,
+                                      prior_kappa_sigma_M = 0,
+                                      prior_kappa_sigma_SD = 0.1))
+    
+    # format simulated data to be used as input in cellmig
+    sim_data <- y_p$y
+    sim_data$well <- as.character(sim_data$well)
+    sim_data$compound <- as.character(sim_data$compound)
+    sim_data$plate <- as.character(sim_data$plate)
+    sim_data$offset <- 0
+    sim_data$offset[sim_data$group==offset] <- 1
+    
+    # run cellmig
+    o <- cellmig(x = sim_data,
+                   control = list(mcmc_warmup = 300,
+                                  mcmc_steps = 1000,
+                                  mcmc_chains = 1,
+                                  mcmc_cores = 1,
+                                  mcmc_algorithm = "NUTS",
+                                  adapt_delta = 0.8,
+                                  max_treedepth = 10))
+    
+    delta <- o$posteriors$delta_t
+    delta$b <- b
+    delta$N_biorep <- N_biorep
+    delta$true_deltas <- true_deltas[-offset]
+    delta$TP <- (delta$X2.5. <= delta$true_deltas & 
+                   delta$X97.5. >= delta$true_deltas) &
+      !(delta$X2.5. <= 0 & delta$X97.5. >= 0)
+    deltas[[i]] <- delta
+    i <- i + 1
+  }
+}
+
+rm(i, delta, o, sim_data, y_p, b, N_biorep, offset, true_deltas)
+
+deltas <- do.call(rbind, deltas)
+```
+
+What do you see? For Large effect ($|\delta_t|>>0$) we need few biological 
+replicates to capture the true effect and not the null effect ($\delta_t=0$),
+i.e., in nearly all simulations we have a true positive. For smaller effects,
+this is not the case, and we probably need many more biological replicates
+to each a high true positive rate.
+
+```{r, eval = FALSE, fig.height=3, fig.width = 6}
+ggplot(data = aggregate(TP~N_biorep+true_deltas, data = deltas, FUN = sum))+
+  geom_point(aes(x = N_biorep, y = TP, col = abs(true_deltas), 
+                 group = as.factor(true_deltas)), size = 2, alpha = 0.5)+
+  geom_line(aes(x = N_biorep, y = TP, col = abs(true_deltas), 
+                group = as.factor(true_deltas)), alpha = 0.5)+
+  ylab(label = "Number of true positives (TPs)")+
+  scale_color_distiller(name = expression("|"*delta[t]*"|"), palette = "Spectral")+
+  theme_bw(base_size = 10)
+```
 
 
 # Session Info

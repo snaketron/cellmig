@@ -11,7 +11,7 @@
                              N_techrep = 3, 
                              N_cell = 50, 
                              delta,
-                             sigma_bio = 0.2, 
+                             sigma_bio = 0.1, 
                              sigma_tech = 0.05, 
                              offset = 1,
                              prior_alpha_p_M = 1.7,
