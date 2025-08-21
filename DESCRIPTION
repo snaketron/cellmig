@@ -47,7 +47,8 @@ Suggests:
     testthat
 Encoding: UTF-8
 NeedsCompilation: no
-biocViews: SingleCell, CellBiology, Bayesian, ExperimentalDesign, Software
+biocViews: SingleCell, CellBiology, Bayesian, ExperimentalDesign, 
+    Software, BatchEffect
 BugReports: https://github.com/snaketron/cellmig/issues
 URL: https://github.com/snaketron/cellmig
 RoxygenNote: 7.3.1

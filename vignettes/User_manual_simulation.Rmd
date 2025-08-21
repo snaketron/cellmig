@@ -214,8 +214,8 @@ following control parameters:
 
 ```{r, fig.width=7, fig.height=3.5}
 osd <- cellmig(x = sim_data,
-               control = list(mcmc_warmup = 300,
-                              mcmc_steps = 1000,
+               control = list(mcmc_warmup = 250,
+                              mcmc_steps = 800,
                               mcmc_chains = 2,
                               mcmc_cores = 2,
                               mcmc_algorithm = "NUTS",
@@ -329,6 +329,13 @@ How many biological replicates do we need to capture certain effect size
 ($\delta$)? Similar question can be asked in order to optimize the number 
 of technical replicates or the number of cells per well.
 
+The code below takes considerable time to be executed. This is because we 
+generate N_biorep times N_sim datasets and fit a model. To avoid this during
+R-pacakge checks, the following chunks will not be evaluated. Do this 
+yourselves.
+
+**Important note**: using multicore execution you can considerably speed-up 
+this analysis!
 
 ```{r, eval = FALSE, message=FALSE, warning=FALSE}
 # Constants
@@ -405,7 +412,7 @@ ggplot(data = aggregate(TP~N_biorep+true_deltas, data = deltas, FUN = sum))+
   geom_line(aes(x = N_biorep, y = TP, col = abs(true_deltas), 
                 group = as.factor(true_deltas)), alpha = 0.5)+
   ylab(label = "Number of true positives (TPs)")+
-  scale_color_distiller(name = expression("|"*delta[t]*"|"), palette = "Spectral")+
+  scale_color_distiller(name = expression("|"*delta[t]*"|"),palette="Spectral")+
   theme_bw(base_size = 10)
 ```
 
