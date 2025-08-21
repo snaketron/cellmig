@@ -86,11 +86,11 @@ and 95\% credible intervals.
 data(d, package = "cellmig")
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
-                    mcmc_steps = 1000,
-                    mcmc_chains = 2,
-                    mcmc_cores = 2,
-                    mcmc_algorithm = "NUTS",
-                    adapt_delta = 0.8,
-                    max_treedepth = 10))
+                            mcmc_steps = 800,
+                            mcmc_chains = 2,
+                            mcmc_cores = 2,
+                            mcmc_algorithm = "NUTS",
+                            adapt_delta = 0.8,
+                            max_treedepth = 10))
 str(o)
 }

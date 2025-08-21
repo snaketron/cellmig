@@ -51,7 +51,7 @@ data(d, package = "cellmig")
 # Run cellmig with MCMC sampling
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 300,
-                            mcmc_steps = 1000,
+                            mcmc_steps = 800,
                             mcmc_chains = 2,
                             mcmc_cores = 2,
                             mcmc_algorithm = "NUTS",
