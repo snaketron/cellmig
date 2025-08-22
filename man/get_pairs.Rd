@@ -54,8 +54,8 @@ may also have a wide 95\% HDI, including possibilities for positive or
 negative change.
 }
 \examples{
-data(d, package = "cellmig")
-o <- cellmig(x = d,
+data(d_mini, package = "cellmig")
+o <- cellmig(x = d_mini,
              control = list(mcmc_warmup = 200,
                             mcmc_steps = 500,
                             mcmc_chains = 2,

@@ -24,8 +24,8 @@
   \item{dose}{Dose level of the compound.}
 }
 \examples{
-data(d, package = "cellmig")
-o <- cellmig(x = d,
+data(d_mini, package = "cellmig")
+o <- cellmig(x = d_mini,
              control = list(mcmc_warmup = 200,
                             mcmc_steps = 500,
                             mcmc_chains = 2,

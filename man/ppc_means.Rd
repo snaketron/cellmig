@@ -46,10 +46,10 @@ The function follows these steps:
 
 \examples{
 # Load example dataset
-data(d, package = "cellmig")
+data(d_mini, package = "cellmig")
 
 # Run cellmig with MCMC sampling
-o <- cellmig(x = d,
+o <- cellmig(x = d_mini,
              control = list(mcmc_warmup = 200,
                             mcmc_steps = 500,
                             mcmc_chains = 2,
