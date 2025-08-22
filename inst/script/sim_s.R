@@ -31,5 +31,6 @@ d$offset[d$compound=="C1"] <- 1
 
 save(d, file = "data/d.RData", compress = TRUE)
 
-d_mini <- d[d$dose %in% c("D3", "D4", "D5"),]
+d_mini <- d[d$compound %in% c("C1", "C2", "C3", "C4") & 
+                d$dose %in% c("D3", "D4", "D5"),]
 save(d_mini, file = "data/d_mini.RData", compress = TRUE)
