@@ -1,47 +1,13 @@
 
-
-
 get_groups <- function(x) {
-  
-  if(missing(x) || is.null(x)) {
-    stop("missing x")
-  }
-  if(is.list(x) == FALSE) {
-    stop("wrong x")
-  }
-  if(any(names(x)=="posteriors")==FALSE) {
-    stop("wrong x")
-  }
-  
+  check_generic(y = x)
   m <- x$posteriors$delta_t[, c("group_id", "group", "compound", "dose")]
-  
   return(m)
 }
 
-
-
 get_pairs <- function(x, groups, exponentiate) {
-  
-  if(missing(x) || is.null(x)) {
-    stop("missing x")
-  }
-  if(is.list(x) == FALSE) {
-    stop("wrong x")
-  }
-  if(any(names(x)=="posteriors")==FALSE) {
-    stop("wrong x")
-  }
-  
-  if(missing(exponentiate) || is.null(exponentiate)) {
-    stop("missing exponentiate")
-  }
-  if(length(exponentiate) != 1) {
-    stop("exponentiate must be have length one")
-  }
-  if(is.logical(exponentiate)==FALSE) {
-    stop("exponentiate must be logical")
-  }
-  
+  check_generic(y = x)
+  check_logical(y = exponentiate, par = "exponentiate")
   
   gmap <- get_groups(x = x)
   if(missing(groups)) {
@@ -95,7 +61,6 @@ get_pairs <- function(x, groups, exponentiate) {
     }
   }
   ds <- do.call(rbind, ds)
-  
   ds$group_x <- factor(x = ds$group_x, levels = groups)
   ds$group_y <- factor(x = ds$group_y, levels = groups)
   
@@ -133,35 +98,12 @@ get_pairs <- function(x, groups, exponentiate) {
       xlab(label = '')+
       ylab(label = '')
   }
-  
-  plot <- g|g_pi
-  
-  return(list(ds = ds, plot = plot))
+  return(list(ds = ds, plot = g|g_pi))
 }
 
-
-
 get_violins <- function(x, from_groups, to_group, exponentiate) {
-  
-  if(missing(x) || is.null(x)) {
-    stop("missing x")
-  }
-  if(is.list(x) == FALSE) {
-    stop("wrong x")
-  }
-  if(any(names(x)=="posteriors")==FALSE) {
-    stop("wrong x")
-  }
-  
-  if(missing(exponentiate) || is.null(exponentiate)) {
-    stop("missing exponentiate")
-  }
-  if(length(exponentiate) != 1) {
-    stop("exponentiate must be have length one")
-  }
-  if(is.logical(exponentiate)==FALSE) {
-    stop("exponentiate must be logical")
-  }
+  check_generic(y = x)
+  check_logical(y = exponentiate, par = "exponentiate")
   
   if(length(to_group)!=1) {
     stop("only one to_group allowed")
@@ -173,7 +115,6 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
   }
   
   gmap <- get_groups(x = x)
-  
   if(all(from_groups %in% gmap$group)==FALSE) {
     stop("unknown group in from_groups")
   }
@@ -188,7 +129,6 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
   ct <- 1
   for(i in seq_len(nrow(gmap_from))) {
     for(j in seq_len(nrow(gmap_to))) {
-      
       d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
       pmax <- get_pmax(d)
       ds[[ct]] <- data.frame(rho = d,
@@ -206,7 +146,6 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
   ds$contrast <- paste0(ds$group_x, "-vs-", ds$group_y) 
   ds$contrast <- factor(x = ds$contrast, 
                         levels = paste0(from_groups, "-vs-", to_group))
-  
   ds_pmax <- ds[duplicated(ds[, c("group_x", "group_y")])==FALSE,]
   
   if(exponentiate==FALSE) {
@@ -215,8 +154,7 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
       geom_hline(yintercept = 0, linetype = "dashed")+
       geom_violin(aes(x = dose, y = rho), 
                   col = "steelblue", fill = "steelblue", alpha = 0.7)+
-      geom_text(data = ds_pmax,
-                aes(x = dose, y = max(ds$rho)+0.15, 
+      geom_text(data = ds_pmax, aes(x = dose, y = max(ds$rho)+0.15, 
                     label = round(x = pmax, digits = 2)), size = 2.25)+
       theme_bw(base_size = 10)+
       theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
@@ -229,8 +167,7 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
       geom_hline(yintercept = 1, linetype = "dashed")+
       geom_violin(aes(x = dose, y = exp(rho)), 
                   col = "steelblue", fill = "steelblue", alpha = 0.7)+
-      geom_text(data = ds_pmax,
-                aes(x = dose, y = max(exp(ds$rho))+0.15, 
+      geom_text(data = ds_pmax, aes(x = dose, y = max(exp(ds$rho))+0.15, 
                     label = round(x = pmax, digits = 2)), size = 2.25)+
       theme_bw(base_size = 10)+
       theme(strip.text.x = element_text(margin = margin(0.03,0,0.03,0,"cm")))+
@@ -238,37 +175,5 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
       ylab(label = expression("FC ("*rho*"')"))+
       ggtitle(label = paste0("treatments / ", to_group))
   }
-  
-  g
-  
   return(list(ds = ds, plot = g))
 }
-
-
-
-get_pmax <- function(x) {
-  if(all(x==0)) {
-    return(0)
-  }
-  l <- length(x)
-  return(2*max(sum(x<0)/l, sum(x>0)/l)-1)
-}
-
-# Description:
-# Computes HDI for vector vec and hdi_level (e.g. 0.95)
-# Taken (and renamed) from "Doing Bayesian Analysis", section 25.2.3 R code
-# for computing HDI of a MCMC sample
-get_hdi <- function(vec, hdi_level) {
-  sortedPts <- sort(vec)
-  ciIdxInc <- floor(hdi_level * length(sortedPts))
-  nCIs <- length(sortedPts) - ciIdxInc
-  ciWidth <- rep(0 , nCIs)
-  for (i in seq_len(nCIs)) {
-    ciWidth[i] <- sortedPts[i + ciIdxInc] - sortedPts[i]
-  }
-  HDImin <- sortedPts[which.min(ciWidth)]
-  HDImax <- sortedPts[which.min(ciWidth) + ciIdxInc]
-  HDIlim <- c(HDImin, HDImax)
-  return(HDIlim)
-}
-
