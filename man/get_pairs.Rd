@@ -57,7 +57,7 @@ negative change.
 data(d, package = "cellmig")
 o <- cellmig(x = d,
              control = list(mcmc_warmup = 200,
-                            mcmc_steps = 700,
+                            mcmc_steps = 500,
                             mcmc_chains = 2,
                             mcmc_cores = 2,
                             mcmc_algorithm = "NUTS",
