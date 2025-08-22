@@ -43,8 +43,8 @@ o <- cellmig(x = d_mini,
                             
 str(get_groups(x = o))
 u <- get_violins(x = o, 
-                 from_groups = c("C2|D1", "C2|D2"),
-                 to_group = "C3|D1",
+                 from_groups = c("C2|D3", "C2|D4"),
+                 to_group = "C3|D3",
                  exponentiate = FALSE)
 }
 \seealso{
