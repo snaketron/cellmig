@@ -1,2 +1,5 @@
 Changes in version 0.99.0 (12 Aug, 2025)
 + Submitted to Bioconductor
+
+Changes in version 0.99.9 (25 Aug, 2025)
++ Bugs fixed, code has no errors/warnings on devel
