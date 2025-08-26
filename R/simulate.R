@@ -81,7 +81,7 @@ check_sim_control <- function(control, partial) {
     check_sd(y = control$prior_kappa_sigma_SD, par="prior_kappa_sigma_SD")
     
     check_loc(y = control$prior_alpha_p_M, par = "prior_alpha_p_M")
-    check_sd(y = control$prior_kappa_mu_M, par = "prior_kappa_mu_M")
+    check_loc(y = control$prior_kappa_mu_M, par = "prior_kappa_mu_M")
     check_sd(y = control$prior_kappa_sigma_M, par = "prior_kappa_sigma_M")
     
     if(partial) {

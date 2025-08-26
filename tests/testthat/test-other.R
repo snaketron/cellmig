@@ -38,5 +38,8 @@ test_that("test ppc.R correct", {
                regexp = "ncol must be positive integer")
   expect_error(get_ppc_violins(x = o, wrap = TRUE, ncol = NULL),
                regexp = "missing ncol")
+  
+  
+  expect_no_error(get_ppc_violins(x = o, wrap = TRUE, ncol = 1))
 })
 

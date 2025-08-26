@@ -39,6 +39,14 @@ test_that("x parameter takes column values", {
   d$offset[d$offset==1] <- Inf
   expect_error(cellmig(x = d),
                regexp = "column offset can contain only 0 or 1")
+  
+  data("d_mini", package = "cellmig")
+  d_mini$offset <- 0
+  expect_no_error(cellmig(x = d_mini,
+                       control = list(mcmc_warmup = 200,
+                                      mcmc_steps = 900,
+                                      mcmc_chains = 1,
+                                      mcmc_cores = 1)))
 })
 
 

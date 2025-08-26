@@ -33,12 +33,12 @@ check_sd <- function(y, par) {
         str <- paste0(par, " is missing or NULL")
         stop(str)
     }
-    if(is.na(y)) {
-        str <- paste0(par, " is NA")
-        stop(str)
-    }
     if(length(y)!=1) {
         str <- paste0(par, " must have length of 1")
+        stop(str)
+    }
+    if(is.na(y)) {
+        str <- paste0(par, " is NA")
         stop(str)
     }
     if(is.numeric(y)==FALSE) {
@@ -49,21 +49,29 @@ check_sd <- function(y, par) {
         str <- paste0(par, " must be >0")
         stop(str)
     }
+    if(is.infinite(y)) {
+        str <- paste0(par, " must be numeric")
+        stop(str)
+    }
 }
 check_loc <- function(y, par) {
     if(missing(y) || is.null(y)) {
         str <- paste0(par, " is missing or NULL")
         stop(str)
     }
-    if(is.na(y)) {
-        str <- paste0(par, " is NA")
-        stop(str)
-    }
     if(length(y)!=1) {
         str <- paste0(par, " must have length of 1")
         stop(str)
     }
+    if(is.na(y)) {
+        str <- paste0(par, " is NA")
+        stop(str)
+    }
     if(is.numeric(y)==FALSE) {
+        str <- paste0(par, " must be numeric")
+        stop(str)
+    }
+    if(is.infinite(y)) {
         str <- paste0(par, " must be numeric")
         stop(str)
     }
@@ -73,11 +81,11 @@ check_delta <- function(x, o) {
     if(missing(x) || is.null(x)) {
         stop("delta is missing or NULL")
     }
-    if(any(is.na(x) | is.infinite(x))) {
-        stop("some deltas are NA")
-    }
     if(length(x)<=1) {
         stop("delta must have length > 1")
+    }
+    if(any(is.na(x) | is.infinite(x))) {
+        stop("some deltas are NA")
     }
     if(any(is.numeric(x)==FALSE)) {
         stop("delta must be numeric")
@@ -88,11 +96,11 @@ check_delta <- function(x, o) {
     if(missing(o) || is.null(o)) {
         stop("offset is missing or NULL")
     }
-    if(is.na(o)) {
-        stop("offset is NA")
-    }
     if(length(o)!=1) {
         stop("offset must have length of 1")
+    }
+    if(is.na(o)) {
+        stop("offset is NA")
     }
     if(is.numeric(o)==FALSE) {
         stop("offset must be numberic")
