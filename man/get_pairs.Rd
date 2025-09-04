@@ -16,12 +16,15 @@ A data.frame with the following data in each row (comparison):
 \itemize{
 \item treatment group x
 \item treatment group y
-\item \eqn{\delta_M} = mean delta
-\item \eqn{\delta_M}, \eqn{\delta_{L95}}, \eqn{\delta_{H95}} = mean, lower 
+\item \eqn{\rho_M} = mean rho
+\item \eqn{\rho_M}, \eqn{\rho_{L95}}, \eqn{\rho_{H95}} = mean, lower 
 bound and upper bound of the difference between the migration effects of 
 treatments x and y
 \item \eqn{\pi} = probability of differential effects
 }
+
+Two heatmaps (ggplot2 objects) showing \eqn{\rho} (plot_rho) and \eqn{\pi} 
+(plot_pi) between treatments (interpretation: rows vs. columns). 
 }
 \description{
 The function \code{get_pairs} compares the overall treatment group effects 
@@ -34,22 +37,22 @@ the function \code{cellmig}.
 For a pair of treatment groups, \code{get_pairs} compares extracts the 
 posterior distributions of their cell migration effects, and then compute 
 an absolute difference between the posteriors. The result is another 
-posterior distribution (\eqn{\delta}), with L95 and H95 as the lower and 
-upper bounds of the 95\% highest density interval of \eqn{\delta}.
+posterior distribution (\eqn{\rho}), with L95 and H95 as the lower and 
+upper bounds of the 95\% highest density interval of \eqn{\rho}.
 
-\eqn{\pi} is estimated as: \eqn{\pi=2\cdot\max{(\int_{-\infty}^{0} \delta,
-\int_{0}^{+\infty} \delta)}-1}.
+\eqn{\pi} is estimated as: \eqn{\pi=2\cdot\max{(\int_{-\infty}^{0} \rho,
+\int_{0}^{+\infty} \rho)}-1}.
 
-For treatment groups, i and j, where \eqn{\delta<0} and the 95\% HDIs of
-\eqn{\delta} lie mostly or completely below 0 (0 = null effect), we have
+For treatment groups, i and j, where \eqn{\rho<0} and the 95\% HDIs of
+\eqn{\rho} lie mostly or completely below 0 (0 = null effect), we have
 strong evidence of lower cell migration effect in treatment i compared to
-j. On the other hand, for treatment groups, i and j, where \eqn{\delta} and 
-the 95\% HDI of \eqn{\delta} lie mostly or completely above 0, we have strong 
+j. On the other hand, for treatment groups, i and j, where \eqn{\rho} and 
+the 95\% HDI of \eqn{\rho} lie mostly or completely above 0, we have strong 
 evidence of higher cell migration effect in treatment i compared to j. 
 Distributions with the 95\% HDIs more or less centered around 0 indicate 
-that there is no evidence for a clear differnce in the cell migration effects
+that there is no evidence for a clear difference in the cell migration effects
 between the treatment groups. Note that unclear evidence is not equivalent 
-to no change, because for a treatment group with \eqn{\delta\approx 0} we 
+to no change, because for a treatment group with \eqn{\rho\approx 0} we 
 may also have a wide 95\% HDI, including possibilities for positive or 
 negative change.
 }

@@ -159,7 +159,6 @@ get_boot_drp <- function(x, hc_dist, hc_link, B) {
   eg <- x$posteriors$delta_t
   gs <- eg$group_id
   
-  # hclust
   q <- acast(data = eg, formula = compound~dose, value.var = "mean")
   hc <- hclust(dist(q, method = hc_dist), method = hc_link)
   main_ph <- as.phylo(x = hc)
@@ -174,26 +173,15 @@ get_boot_drp <- function(x, hc_dist, hc_link, B) {
   e <- extract(x$f, par = "mu_group")$mu_group[, gs]
   e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
   
-  boot_ph <- c()
-  for(i in seq_len(nrow(e))) {
-    
+  boot_phs <- lapply(seq_len(nrow(e)), function(i) {
     u <- data.frame(g = seq_len(ncol(e)), mean = e[i, ])
     u <- cbind(u, meta)
-    
-    # hclust
-    q <- acast(data = eg, formula = compound~dose, value.var = "mean")
+    q <- acast(data = u, formula = compound~dose, value.var = "mean")
     hc <- hclust(dist(q, method = hc_dist), method = hc_link)
-    ph <- as.phylo(x = hc)
-    
-    if(i == 1) {
-      boot_ph <- ph
-    }
-    else {
-      boot_ph <- c(boot_ph, ph)
-    }
-  }
+    return(as.phylo(x = hc))
+  })
   
-  clades <- prop.clades(phy = main_ph, x = boot_ph, part = NULL,
+  clades <- prop.clades(phy = main_ph, x = c(boot_phs), part = NULL,
                         rooted = is.rooted(main_ph))
   
   # add bootstrap
@@ -205,7 +193,7 @@ get_boot_drp <- function(x, hc_dist, hc_link, B) {
     main_ph$node.label[na_nodes] <- 0
   }
   
-  return(list(main_ph = main_ph, boot_ph = boot_ph))
+  return(list(main_ph = main_ph, boot_ph = c(boot_phs)))
 }
 
 get_boot_tp <- function(x, hc_dist, hc_link, groups, B) {
@@ -227,30 +215,18 @@ get_boot_tp <- function(x, hc_dist, hc_link, groups, B) {
   hc <- hclust(dist(v, method = hc_dist), method = hc_link)
   main_ph <- as.phylo(x = hc)
   
-  
   # extract posterior
   e <- extract(x$f, par = "mu_group")$mu_group[, gs]
   e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
   
-  boot_ph <- c()
-  for(i in seq_len(nrow(e))) {
-    
-    # hclust
+  boot_phs <- lapply(X = seq_len(nrow(e)), FUN = function(i) {
     hc <- hclust(dist(e[i,], method = hc_dist), method = hc_link)
-    ph <- as.phylo(x = hc)
-    
-    if(i == 1) {
-      boot_ph <- ph
-    }
-    else {
-      boot_ph <- c(boot_ph, ph)
-    }
-  }
+    return(as.phylo(x = hc))
+  })
   
-  clades <- prop.clades(phy = main_ph, x = boot_ph, part = NULL,
+  clades <- prop.clades(phy = main_ph, x = c(boot_phs), part = NULL,
                         rooted = is.rooted(main_ph))
   
-  # add bootstrap
   main_ph$node.label <- clades
   
   if(all(main_ph$tip.label == gs)) {
@@ -263,5 +239,5 @@ get_boot_tp <- function(x, hc_dist, hc_link, groups, B) {
     main_ph$node.label[na_nodes] <- 0
   }
   
-  return(list(main_ph = main_ph, boot_ph = boot_ph))
+  return(list(main_ph = main_ph, boot_ph = c(boot_phs)))
 }

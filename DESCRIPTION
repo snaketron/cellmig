@@ -2,7 +2,7 @@ Package: cellmig
 Type: Package
 Title: Uncertainty-aware quantitative analysis of high-throughput live cell 
     migration data
-Version: 0.99.10
+Version: 0.99.11
 Authors@R: c(
     person("Simo", "Kitanovski", email = "simokitanovski@gmail.com", 
     role = c("aut", "cre"), comment=c(ORCID="0000-0003-2909-5376")))
@@ -28,9 +28,9 @@ Imports:
     ggplot2,
     ggforce,
     ggtree,
+    patchwork,
     ape,
     methods,
-    patchwork,
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
     reshape2,

@@ -157,12 +157,13 @@ get_hdi <- function(vec, hdi_level) {
     sortedPts <- sort(vec)
     ciIdxInc <- floor(hdi_level * length(sortedPts))
     nCIs <- length(sortedPts) - ciIdxInc
-    ciWidth <- rep(0 , nCIs)
-    for (i in seq_len(nCIs)) {
-        ciWidth[i] <- sortedPts[i + ciIdxInc] - sortedPts[i]
-    }
+    # vapply is preferred for type safety
+    ciWidth <- vapply(seq_len(nCIs), function(i) {
+        sortedPts[i + ciIdxInc] - sortedPts[i]
+    }, numeric(1))
     HDImin <- sortedPts[which.min(ciWidth)]
     HDImax <- sortedPts[which.min(ciWidth) + ciIdxInc]
     HDIlim <- c(HDImin, HDImax)
     return(HDIlim)
 }
+

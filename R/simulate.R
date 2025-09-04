@@ -111,10 +111,7 @@ get_sim_control <- function(control_in, partial) {
         if(all(names(control_in) %in% names(control)) == FALSE) {
             stop("unrecognized elements found in control")
         }
-        ns <- names(control_in)
-        for (i in seq_len(length(control_in))) {
-            control[[ns[i]]] <- control_in[[ns[i]]]
-        }
+        control[names(control_in)] <- control_in
         control$N_group <- length(control$delta)
         control$N_plate <- control$N_biorep
         control$N_well_reps <- control$N_techrep
@@ -136,10 +133,7 @@ get_sim_control <- function(control_in, partial) {
         if(all(names(control_in) %in% names(control)) == FALSE) {
             stop("unrecognized elements found in control")
         }
-        ns <- names(control_in)
-        for (i in seq_len(length(control_in))) {
-            control[[ns[i]]] <- control_in[[ns[i]]]
-        }
+        control[names(control_in)] <- control_in
         control$N_plate <- control$N_biorep
         control$N_well_reps <- control$N_techrep
         control$offset <- 1
@@ -150,68 +144,63 @@ get_sim_control <- function(control_in, partial) {
 get_partial_sim_data <- function(control) {
     control$N_group <- length(control$delta)
     control$N_well <- control$N_biorep*control$N_group*control$N_techrep
-    yhat <- vector(mode = "list", length = control$N_well)
-    kappa <- numeric(length = control$N_well)
-    mu <- numeric(length = control$N_well)
-    mu_well <- numeric(length = control$N_well)
+    
+    well_grid <- expand.grid(g = seq_len(control$N_group),
+                             p = seq_len(control$N_biorep),
+                             w = seq_len(control$N_techrep))
+    mu_plate_group <- t(vapply(X = seq_len(control$N_group), 
+                               FUN = function(g) {
+                                   return(rnorm(n = control$N_biorep, 
+                                                mean = control$delta[g], 
+                                                sd = control$sigma_bio))
+                               }, FUN.VALUE = numeric(control$N_biorep)))
+    
     kappa_mu <- rnorm(n = 1, mean = control$prior_kappa_mu_M, 
                       sd = control$prior_kappa_mu_SD)
     kappa_sigma <- abs(rnorm(n = 1, mean = control$prior_kappa_sigma_M, 
                              sd = control$prior_kappa_sigma_SD))
-    alpha_p <- rnorm(n = control$N_biorep, mean = control$prior_alpha_p_M,
+    alpha_p <- rnorm(n = control$N_biorep, mean = control$prior_alpha_p_M, 
                      sd = control$prior_alpha_p_SD)
-    mu_plate_group <- matrix(data = NA, nrow = control$N_group, 
-                             ncol = control$N_biorep)
-    meta <- c()
-    well_id <- 1
-    for(g in seq_len(control$N_group)) {
-        mu_plate_group[g,] <- rnorm(n = control$N_biorep, mean=control$delta[g],
-                                    sd = control$sigma_bio)
-        for(p in seq_len(control$N_biorep)) {
-            for(w in seq_len(control$N_techrep)) {
-                if(g==control$offset) {
-                    mu_well[well_id] <- rnorm(n = 1, mean = alpha_p[p], 
-                                              sd = control$sigma_tech)
-                }
-                if(g!=control$offset) {
-                    mu_well[well_id] <- rnorm(n = 1,
-                                              mean = alpha_p[p] + 
-                                                  mu_plate_group[g,p], 
-                                              sd = control$sigma_tech)
-                }
-                kappa[well_id] <- exp(rnorm(n = 1, mean = kappa_mu, 
-                                            sd = kappa_sigma))
-                
-                mu[well_id] <- exp(mu_well[well_id])
-                y <- rgamma(n = control$N_cell, shape = kappa[well_id], 
-                            rate = kappa[well_id]/mu[well_id])
-                yhat[[well_id]] <- data.frame(v = y, well = well_id, plate = p, 
-                                              group = g, compound = g, dose="X")
-                meta <- rbind(meta, data.frame(w = well_id, g = g, p = p))
-                well_id <- well_id + 1
-            }
+    
+    
+    # Use mapply to compute for each well
+    results <- mapply(function(g, p, w, well_id) {
+        if(g == control$offset) {
+            mu_well <- rnorm(n = 1, mean = alpha_p[p], sd = control$sigma_tech)
+        } else {
+            mu_well <- rnorm(n = 1, mean = alpha_p[p] + mu_plate_group[g, p], 
+                             sd = control$sigma_tech)
         }
-    }
-    pars <- list(alpha_p = alpha_p, mu_plate_group = mu_plate_group, mu = mu,
-                 mu_well = mu_well, kappa = kappa)
-    return(list(yhat = do.call(rbind, yhat), pars = pars, meta = meta))
+        kappa <- exp(rnorm(n = 1, mean = kappa_mu, sd = kappa_sigma))
+        mu <- exp(mu_well)
+        y <- rgamma(n = control$N_cell, shape = kappa, rate = kappa/mu)
+        list(yhat = data.frame(v = y, well = well_id, plate = p, group = g, 
+                               compound = g, dose = "X"),
+             meta = data.frame(w = well_id, g = g, p = p),
+             mu_well = mu_well,
+             kappa = kappa,
+             mu = mu)
+    }, well_grid$g, well_grid$p, well_grid$w, seq_len(nrow(well_grid)), 
+    SIMPLIFY = FALSE)
+    
+    yhat <- do.call(rbind, lapply(results, `[[`, "yhat"))
+    meta <- do.call(rbind, lapply(results, `[[`, "meta"))
+    mu_well <- vapply(X = results, `[[`, "mu_well", FUN.VALUE = numeric(1))
+    kappa <- vapply(X = results, `[[`, "kappa", FUN.VALUE = numeric(1))
+    mu <- vapply(X = results, `[[`, "mu", FUN.VALUE = numeric(1))
+    
+    pars <- list(alpha_p = alpha_p, mu_plate_group = mu_plate_group, 
+                 mu = mu, mu_well = mu_well, kappa = kappa)
+    return(list(yhat = yhat, pars = pars, meta = meta))
 }
 
 get_meta_control <- function(control) {
-    wi <- 1
-    m <- c()
-    for(g in seq_len(control$N_group)) {
-        for(p in seq_len(control$N_plate)) {
-            for(w in seq_len(control$N_well_reps)) {
-                m <- rbind(m, data.frame(well_id = wi, 
-                                         group_id = g, 
-                                         plate_id = p,
-                                         trep_id = w))
-                wi <- wi + 1
-            }
-        }
-    }
-    return(m)
+    meta <- expand.grid(group_id = seq_len(control$N_group),
+                        plate_id = seq_len(control$N_plate),
+                        trep_id  = seq_len(control$N_well_reps))
+    meta$well_id <- seq_len(nrow(meta))
+    meta <- meta[, c("well_id", "group_id", "plate_id", "trep_id")]
+    return(meta)
 }
 
 check_control_list <- function(control_in, partial) {

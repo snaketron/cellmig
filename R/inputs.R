@@ -38,9 +38,7 @@ process_control <- function(control_in) {
   }
 
   ns <- names(control_in)
-  for (i in seq_len(length(control_in))) {
-    control[[ns[i]]] <- control_in[[ns[i]]]
-  }
+  control[names(control_in)] <- control_in
 
   check_positive_integer(y = control$mcmc_chains, par = "mcmc_chains")
   check_positive_integer(y = control$mcmc_cores, par = "mcmc_cores")

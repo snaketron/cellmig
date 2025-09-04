@@ -36,37 +36,33 @@ get_pairs <- function(x, groups, exponentiate) {
   gmap <- gmap[gmap$group %in% groups,]
   gmap <- gmap[match(groups, gmap$group),]
   
-  ds <- vector(mode = "list", length = nrow(gmap)*nrow(gmap))
-  ct <- 1
-  for(i in seq_len(nrow(gmap))) {
-    for(j in seq_len(nrow(gmap))) {
-      d <- p[,gmap$group_id[i]]-p[,gmap$group_id[j]]
-      pmax <- get_pmax(d)
-      d_M <- mean(d)
-      d_HDI <- get_hdi(vec = d, hdi_level = 0.95)
-      ds[[ct]] <- data.frame(group_id_x = gmap$group_id[i], 
-                             group_id_y = gmap$group_id[j], 
-                             group_x = gmap$group[i], 
-                             group_y = gmap$group[j], 
-                             compound = gmap$compound[i], 
-                             dose = gmap$dose[i],
-                             rho_M = d_M,
-                             rho_L95 = d_HDI[1],
-                             rho_H95 = d_HDI[2],
-                             rho_M_exp = exp(d_M),
-                             rho_L95_exp = exp(d_HDI[1]),
-                             rho_H95_exp = exp(d_HDI[2]),
-                             pmax = pmax)
-      ct <- ct + 1
-    }
-  }
-  ds <- do.call(rbind, ds)
+  idx <- expand.grid(i = seq_len(nrow(gmap)), j = seq_len(nrow(gmap)))
+  
+  ds <- do.call(rbind, mapply(FUN = function(i, j) {
+    d <- p[, gmap$group_id[i]] - p[, gmap$group_id[j]]
+    pmax <- get_pmax(d)
+    d_M <- mean(d)
+    d_HDI <- get_hdi(vec = d, hdi_level = 0.95)
+    return(data.frame(group_id_x = gmap$group_id[i], 
+                      group_id_y = gmap$group_id[j], 
+                      group_x = gmap$group[i], 
+                      group_y = gmap$group[j], 
+                      compound = gmap$compound[i], 
+                      dose = gmap$dose[i],
+                      rho_M = d_M,
+                      rho_L95 = d_HDI[1],
+                      rho_H95 = d_HDI[2],
+                      rho_M_exp = exp(d_M),
+                      rho_L95_exp = exp(d_HDI[1]),
+                      rho_H95_exp = exp(d_HDI[2]),
+                      pmax = pmax))}, 
+    idx$i, idx$j, SIMPLIFY = FALSE))
   ds$group_x <- factor(x = ds$group_x, levels = groups)
   ds$group_y <- factor(x = ds$group_y, levels = groups)
   
   g_pi <- ggplot(data = ds)+
-    geom_tile(aes(x = group_x, y = group_y, fill = pmax), col = "white")+
-    geom_text(aes(x = group_x, y = group_y, 
+    geom_tile(aes(y = group_x, x = group_y, fill = pmax), col = "white")+
+    geom_text(aes(y = group_x, x = group_y, 
                   label = round(x = pmax, digits = 2)), size = 2)+
     scale_fill_gradient(name = expression(pi), low = "white",high = "darkgray")+
     theme_bw(base_size = 10)+
@@ -76,8 +72,8 @@ get_pairs <- function(x, groups, exponentiate) {
   
   if(exponentiate==FALSE) {
     g <- ggplot(data = ds)+
-      geom_tile(aes(x = group_x, y = group_y, fill = rho_M), col = "white")+
-      geom_text(aes(x = group_x, y = group_y, 
+      geom_tile(aes(y = group_x, x = group_y, fill = rho_M), col = "white")+
+      geom_text(aes(y = group_x, x = group_y, 
                     label = round(x = rho_M, digits = 1)), size = 2)+
       scale_fill_distiller(name = expression(rho), palette = "Spectral")+
       scale_radius(name = expression(rho))+
@@ -88,8 +84,8 @@ get_pairs <- function(x, groups, exponentiate) {
   } 
   else {
     g <- ggplot(data = ds)+
-      geom_tile(aes(x = group_x, y = group_y, fill = rho_M_exp), col = "white")+
-      geom_text(aes(x = group_x, y = group_y, 
+      geom_tile(aes(y = group_x, x = group_y, fill = rho_M_exp), col = "white")+
+      geom_text(aes(y = group_x, x = group_y, 
                     label = round(x = rho_M_exp, digits = 1)), size = 2)+
       scale_fill_distiller(name = expression(rho*"'"), palette = "Spectral")+
       scale_radius(name = expression(rho*"'"))+
@@ -98,7 +94,7 @@ get_pairs <- function(x, groups, exponentiate) {
       xlab(label = '')+
       ylab(label = '')
   }
-  return(list(ds = ds, plot = g|g_pi))
+  return(list(ds = ds, plot_rho = g, plot_pi = g_pi))
 }
 
 get_violins <- function(x, from_groups, to_group, exponentiate) {
@@ -125,24 +121,20 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
   gmap_from <- gmap[gmap$group %in% from_groups,]
   gmap_to <- gmap[gmap$group %in% to_group,]
   
-  ds <- vector(mode = "list", length = nrow(gmap_from))
-  ct <- 1
-  for(i in seq_len(nrow(gmap_from))) {
-    for(j in seq_len(nrow(gmap_to))) {
-      d <- p[,gmap_from$group_id[i]]-p[,gmap_to$group_id[j]]
-      pmax <- get_pmax(d)
-      ds[[ct]] <- data.frame(rho = d,
-                             group_id_x = gmap_from$group_id[i], 
-                             group_id_y = gmap_to$group_id[j], 
-                             group_x = gmap_from$group[i], 
-                             group_y = gmap_to$group[j], 
-                             compound = gmap_from$compound[i], 
-                             dose = gmap_from$dose[i],
-                             pmax = pmax)
-      ct <- ct + 1
-    }
-  }
-  ds <- do.call(rbind, ds)
+  idx <- expand.grid(i = seq_len(nrow(gmap_from)), j = seq_len(nrow(gmap_to)))
+  ds <- do.call(rbind, mapply(function(i, j) {
+    d <- p[, gmap_from$group_id[i]] - p[, gmap_to$group_id[j]]
+    pmax <- get_pmax(d)
+    return(data.frame(rho = d,
+                      group_id_x = gmap_from$group_id[i], 
+                      group_id_y = gmap_to$group_id[j], 
+                      group_x = gmap_from$group[i], 
+                      group_y = gmap_to$group[j], 
+                      compound = gmap_from$compound[i], 
+                      dose = gmap_from$dose[i],
+                      pmax = pmax))
+  }, idx$i, idx$j, SIMPLIFY = FALSE))
+  
   ds$contrast <- paste0(ds$group_x, "-vs-", ds$group_y) 
   ds$contrast <- factor(x = ds$contrast, 
                         levels = paste0(from_groups, "-vs-", to_group))

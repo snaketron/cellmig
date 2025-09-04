@@ -53,6 +53,17 @@ then analyze the simulated data using `r Biocpkg("cellmig")` to recover the
 parameters. This process validates the model and illustrates how
 simulation can guide experimental design and power analysis.
 
+
+# Installation
+To install this package, start R (version "4.5") and enter:
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("cellmig")
+```
+
 # Data simulation from **partially generative** model
 
 We simulate data for an experiment with the following design:
@@ -331,7 +342,7 @@ of technical replicates or the number of cells per well.
 
 The code below takes considerable time to be executed. This is because we 
 generate N_biorep times N_sim datasets and fit a model. To avoid this during
-R-pacakge checks, the following chunks will not be evaluated. Do this 
+R-package checks, the following chunks will not be evaluated. Do this 
 yourselves.
 
 **Important note**: using multicore execution you can considerably speed-up 
