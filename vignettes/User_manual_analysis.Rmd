@@ -55,7 +55,7 @@ represent a valuable addition to the ecosystem.
 # Installation
 To install this package, start R (version "4.5") and enter:
 
-```{r}
+```{r, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
