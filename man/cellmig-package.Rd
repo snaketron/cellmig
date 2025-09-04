@@ -1,5 +1,6 @@
-\name{cellmig-pkg}
-\alias{cellmig-pkg}
+\docType{package}
+\name{cellmig-package}
+\alias{cellmig-package}
 \title{cellmig: quantifying cell migration with hierarchical Bayesian models}
 \description{
 \code{cellmig} implements Bayesian hierarchical models for migration analysis
