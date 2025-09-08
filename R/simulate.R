@@ -15,12 +15,8 @@ gen_partial <- function(control = list(N_biorep = 3,
     
     check_sim_control(control = control, partial = TRUE)
     control <- get_sim_control(control_in = control, partial = TRUE)
-    yhat <- get_partial_sim_data(control = control)
-    
-    return(list(y = yhat$yhat, 
-                par = yhat$pars, 
-                meta = yhat$meta, 
-                control = control))
+    o <- get_partial_sim_data(control = control)
+    return(list(y = o$yhat, par = o$pars, meta = o$meta, control = control))
 }
 
 gen_full <- function(control = list(N_biorep = 3, 
@@ -70,7 +66,7 @@ gen_full <- function(control = list(N_biorep = 3,
 }
 
 check_sim_control <- function(control, partial) {
-    check_control_list(control_in = control, partial)
+    check_control_list(control_in = control, partial = partial)
     
     check_positive_integer(y = control$N_biorep, par = "N_biorep")
     check_positive_integer(y = control$N_techrep, par = "N_techrep")
@@ -102,12 +98,7 @@ check_sim_control <- function(control, partial) {
 
 get_sim_control <- function(control_in, partial) {
     if(partial) {
-        control <- list(N_biorep = 3, N_techrep = 3, N_cell = 50, 
-                        delta = c(0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),
-                        sigma_bio = 0.2, sigma_tech = 0.05, offset = 1,
-                        prior_alpha_p_M = 1.7, prior_alpha_p_SD = 0.5,
-                        prior_kappa_mu_M = 1.7, prior_kappa_mu_SD = 0.5,
-                        prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 0.3)
+        control <- get_default_control_partial_sim()
         if(all(names(control_in) %in% names(control)) == FALSE) {
             stop("unrecognized elements found in control")
         }
@@ -116,27 +107,15 @@ get_sim_control <- function(control_in, partial) {
         control$N_plate <- control$N_biorep
         control$N_well_reps <- control$N_techrep
         control$mu_group <- control$delta
-        control$prior_sigma_bio_M <- 0.0
-        control$prior_sigma_bio_SD <- 0.0
-        control$prior_sigma_tech_M <- 0.0
-        control$prior_sigma_tech_SD <- 0.0
-        control$prior_mu_group_M <- 0.0
-        control$prior_mu_group_SD <- 0.0
-    } else {
-        control <- list(N_biorep = 3, N_techrep = 3, N_cell = 50, N_group = 5,
-                        prior_alpha_p_M = 1.7, prior_alpha_p_SD = 1.0,
-                        prior_kappa_mu_M = 1.7, prior_kappa_mu_SD = 1.0,
-                        prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1.0,
-                        prior_sigma_bio_M = 0.0, prior_sigma_bio_SD = 1.0,
-                        prior_sigma_tech_M = 0.0, prior_sigma_tech_SD = 1.0,
-                        prior_mu_group_M = 0.0, prior_mu_group_SD = 1.0)
+    } 
+    else {
+        control <- get_default_control_full_sim()
         if(all(names(control_in) %in% names(control)) == FALSE) {
             stop("unrecognized elements found in control")
         }
         control[names(control_in)] <- control_in
         control$N_plate <- control$N_biorep
         control$N_well_reps <- control$N_techrep
-        control$offset <- 1
     }
     return(control)
 }
@@ -204,32 +183,45 @@ get_meta_control <- function(control) {
 }
 
 check_control_list <- function(control_in, partial) {
+    control <- get_default_control_full_sim()
     if(partial) {
-        control <- list(N_biorep = NA, N_techrep = NA, N_cell = NA, 
-                        delta = NA, sigma_bio = NA, sigma_tech = NA, 
-                        offset = NA, 
-                        prior_alpha_p_M = NA, prior_alpha_p_SD = NA, 
-                        prior_kappa_mu_M = NA, prior_kappa_mu_SD = NA,
-                        prior_kappa_sigma_M = NA, prior_kappa_sigma_SD = NA)
-    } else {
-        control <- list(N_biorep = 3, N_techrep = 3, N_cell = 50, 
-                        N_group = 5,
-                        prior_alpha_p_M = 1.7, prior_alpha_p_SD = 1.0,
-                        prior_kappa_mu_M = 1.7, prior_kappa_mu_SD = 1.0,
-                        prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1.0,
-                        prior_sigma_bio_M = 0.0, prior_sigma_bio_SD = 1.0,
-                        prior_sigma_tech_M = 0.0, prior_sigma_tech_SD = 1.0,
-                        prior_mu_group_M = 0.0, prior_mu_group_SD = 1.0)
+        control <- get_default_control_partial_sim()
     }
     
     # if missing control_in -> use default values
-    if(missing(control_in) || is.null(control_in)) {
-        stop("missing control")
-    }
-    if(is.list(control_in) == FALSE) {
-        stop("control must be a list")
-    }
-    if(all(names(control) %in% names(control_in))==FALSE) {
+    check_missing(y = control_in, par = "control_in")
+    check_list(y = control_in, par = "control_in")
+    if(all(names(control_in) %in% names(control))==FALSE) {
         stop("control has missing elements")
     }
 }
+
+get_default_control_partial_sim <- function() {
+    control <- list(N_biorep = 3, N_techrep = 3, N_cell = 50, 
+                    delta = c(0, -0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),
+                    sigma_bio = 0.2, sigma_tech = 0.05, offset = 1,
+                    prior_alpha_p_M = 1.7, prior_alpha_p_SD = 0.5,
+                    prior_kappa_mu_M = 1.7, prior_kappa_mu_SD = 0.5,
+                    prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 0.3,
+                    prior_sigma_bio_M = 0.0,
+                    prior_sigma_bio_SD = 0.0,
+                    prior_sigma_tech_M = 0.0,
+                    prior_sigma_tech_SD = 0.0,
+                    prior_mu_group_M = 0.0,
+                    prior_mu_group_SD = 0.0)
+    return(control)
+}
+
+get_default_control_full_sim <- function() {
+    control <- list(N_biorep = 3, N_techrep = 3, N_cell = 50, 
+                    N_group = 5,
+                    prior_alpha_p_M = 1.7, prior_alpha_p_SD = 1.0,
+                    prior_kappa_mu_M = 1.7, prior_kappa_mu_SD = 1.0,
+                    prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1.0,
+                    prior_sigma_bio_M = 0.0, prior_sigma_bio_SD = 1.0,
+                    prior_sigma_tech_M = 0.0, prior_sigma_tech_SD = 1.0,
+                    prior_mu_group_M = 0.0, prior_mu_group_SD = 1.0,
+                    offset = 1)
+    return(control)
+}
+

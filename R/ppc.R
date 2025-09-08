@@ -1,36 +1,20 @@
 
 get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
     
-    if(missing(x) || is.null(x)) {
-        stop("missing x")
-    }
-    if(missing(wrap) || is.null(wrap)) {
-        stop("missing wrap")
-    }
-    
-    if(length(wrap)!=1) {
-        stop("wrap must be TRUE or FALSE")
-    }
-    if(is.logical(wrap)==FALSE | is.na(wrap)) {
-        stop("wrap must be logical")
-    }
+    check_missing(y = x, par = "x")
+    check_missing(y = wrap, par = "wrap")
+    check_length_one(y = wrap, par = "wrap")
+    check_logical_val(y = wrap, par = "wrap")
+    check_na_val(y = wrap, par = "wrap")
 
     if(wrap) {
-        if(missing(ncol) || is.null(ncol)) {
-            stop("missing ncol")
-        }
-        if(length(ncol)!=1) {
-            stop("ncol must be positive integer")
-        }
-        if(is.numeric(ncol)==FALSE) {
-            stop("ncol must be positive integer")
-        }
-        if(ncol<=0 | is.na(ncol) | is.infinite(ncol)) {
-            stop("ncol must be positive integer")
-        }
+        check_missing(y = ncol, par = "ncol")
+        check_length_one(y = ncol, par = "ncol")
+        check_numeric_val(y = ncol, par = "ncol")
+        check_positive_integer(y = ncol, par = "ncol")
+        check_na_val(y = ncol, par = "ncol")
+        check_inf_val(y = ncol, par = "ncol")
     }
-    
-    
     
     e <- extract(object = x$fit, par = "y_hat_sample")$y_hat_sample
     e <- melt(data = e)
@@ -79,12 +63,8 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
     return(g)
 }
 
-
 get_ppc_means <- function(x) {
-    
-    if(missing(x) || is.null(x)) {
-        stop("missing x")
-    }
+    check_missing(y = x, par = "x")
     
     y <- aggregate(v~well_id, data = x$data$proc_x, FUN = mean)
     yhat <- x$posteriors$yhat

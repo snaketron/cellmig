@@ -22,7 +22,6 @@ get_dose_response_profile <- function(x,
   if(length(groups)==1) {
     stop("only one treatment groups provided, length(groups)>1")
   }
-
   eg <- x$posteriors$delta_t
   es <- x$posteriors$delta_tp
   if(any(!groups %in% unique(eg$group))) {
@@ -100,7 +99,6 @@ get_treatment_profile <- function(x,
   if(length(groups)==1) {
     stop("only one treatment groups provided, length(groups)>1")
   }
-  
   bt <- get_boot_tp(x = x, hc_dist = hc_dist, hc_link = hc_link,
                     groups = groups, B = B)
   
@@ -117,16 +115,14 @@ get_treatment_profile <- function(x,
   return(revts(tree))
 }
 
-check_profile_inputs <- function(x, hc_link, hc_dist, B) {
+check_profile_inputs <- function(x, 
+                                 hc_link, 
+                                 hc_dist, 
+                                 B) {
   check_generic(y = x)
   
-  if(missing(hc_link)) {
-    stop("hclust_method input not found")
-  }
-  if(length(hc_link)!=1) {
-    stop("hclust_method must be one of: ward.D, single, complete, 
-    average, mcquitty, median, centroid or ward.D2")
-  }
+  check_missing(y = hc_link, par = "hc_link")
+  check_length_one(y = hc_link, par = "hc_link")
   if(is.character(hc_link)==FALSE) {
     stop("hclust_method must be one of: ward.D, single, complete, 
     average, mcquitty, median, centroid or ward.D2")
@@ -138,12 +134,8 @@ check_profile_inputs <- function(x, hc_link, hc_dist, B) {
     average, mcquitty, median, centroid or ward.D2")
   }
   
-  if(missing(hc_dist)) {
-    stop("hc_dist input not found")
-  }
-  if(length(hc_dist)!=1) {
-    stop("hc_dist must be one of: euclidean or manhattan")
-  }
+  check_missing(y = hc_dist, par = "hc_dist")
+  check_length_one(y = hc_dist, par = "hc_dist")
   if(is.character(hc_dist)==FALSE) {
     stop("hc_dist must be one of: euclidean or manhattan")
   }
@@ -154,7 +146,10 @@ check_profile_inputs <- function(x, hc_link, hc_dist, B) {
   check_positive_integer(y = B, par = "B")
 }
 
-get_boot_drp <- function(x, hc_dist, hc_link, B) {
+get_boot_drp <- function(x, 
+                         hc_dist, 
+                         hc_link, 
+                         B) {
   
   eg <- x$posteriors$delta_t
   gs <- eg$group_id
@@ -196,7 +191,10 @@ get_boot_drp <- function(x, hc_dist, hc_link, B) {
   return(list(main_ph = main_ph, boot_ph = c(boot_phs)))
 }
 
-get_boot_tp <- function(x, hc_dist, hc_link, groups, B) {
+get_boot_tp <- function(x, 
+                        hc_dist, 
+                        hc_link, 
+                        groups, B) {
   
   eg <- x$posteriors$delta_t
   

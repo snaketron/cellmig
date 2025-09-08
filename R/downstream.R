@@ -7,7 +7,7 @@ get_groups <- function(x) {
 
 get_pairs <- function(x, groups, exponentiate) {
   check_generic(y = x)
-  check_logical(y = exponentiate, par = "exponentiate")
+  check_logical_val(y = exponentiate, par = "exponentiate")
   
   gmap <- get_groups(x = x)
   if(missing(groups)) {
@@ -18,13 +18,10 @@ get_pairs <- function(x, groups, exponentiate) {
     warning("groups not specified, we will use all groups")
     groups <- gmap$group
   }
-  if(any(is.character(groups)==FALSE)) {
-    warning("groups must be characters")
-  }
+  check_character_vec(y = groups, par = "groups")
   if(length(groups)==1) {
     stop("only one treatment groups provided, length(groups)>1")
   }
-  
   p <- extract(x$fit, par = "mu_group")$mu_group
   if(ncol(p)==1) {
     stop("only one treatment group: nothing to compare")
@@ -99,12 +96,9 @@ get_pairs <- function(x, groups, exponentiate) {
 
 get_violins <- function(x, from_groups, to_group, exponentiate) {
   check_generic(y = x)
-  check_logical(y = exponentiate, par = "exponentiate")
-  
-  if(length(to_group)!=1) {
-    stop("only one to_group allowed")
-  }
-  
+  check_logical_val(y = exponentiate, par = "exponentiate")
+  check_length_one(y = to_group, par = "to_group")
+
   p <- extract(x$fit, par = "mu_group")$mu_group
   if(ncol(p)==1) {
     stop("only one treatment group: nothing to compare")

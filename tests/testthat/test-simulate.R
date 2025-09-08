@@ -414,7 +414,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "control has missing elements")
+               regexp = "N_biorep is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = -1, 
                                        N_techrep = 3,
                                        N_cell = 50,
@@ -518,7 +518,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "control has missing elements")
+               regexp = "N_techrep is missing or NULL")
   expect_error(gen_full(control = list(N_techrep = -1, 
                                        N_biorep = 3,
                                        N_cell = 50,
@@ -573,7 +573,7 @@ test_that("get_full with wrong control entries", {
   
   
   expect_error(gen_full(control = list(N_biorep = 3,
-                                       N_tech = 3,
+                                       N_techrep = 3,
                                        N_cell = NA, 
                                        N_group = 5,
                                        prior_alpha_p_M = 1.7,
@@ -588,9 +588,9 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "control has missing elements")
+               regexp = "N_cell is NA")
   expect_error(gen_full(control = list(N_biorep = 3,
-                                       N_tech = 3,
+                                       N_techrep = 3,
                                        N_cell = NULL,
                                        N_group = 5,
                                        prior_alpha_p_M = 1.7,
@@ -605,7 +605,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "control has missing elements")
+               regexp = "N_cell is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
                                        N_group = 5,
@@ -621,7 +621,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "control has missing elements")
+               regexp = "N_cell is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
                                        N_cell = -1,

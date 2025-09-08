@@ -136,3 +136,4 @@ test_that("profiles functions with invalid inputs", {
                                      hc_dist = c("average", "complete"),
                                      groups = groups))
 })
+

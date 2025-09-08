@@ -1,18 +1,14 @@
 
 process_input <- function(x) {
-
+  
   check_x <- function(x) {
-    if(missing(x)) {
-      stop("missing x")
-    }
-    if(is.data.frame(x)==FALSE) {
-      stop("x must be a data.frame")
-    }
+    check_missing(y = x, par = "x")
+    check_dataframe(y = x, par = "x")
     if(nrow(x)<=1) {
       stop("zero or one row in x")
     }
   }
-
+  
   check_x(x=x)
   check_input_columns(x=x)
   
@@ -27,19 +23,16 @@ process_control <- function(control_in) {
   control <- get_default_control()
   
   # if missing control_in -> use default values
-  if(missing(control_in) || is.null(control_in)) {
-    return(control)
-  }
-  if(is.list(control_in) == FALSE) {
-    stop("control must be a list")
-  }
+  check_missing(y = control_in, par = "control_in")
+  check_list(y = control_in, par = "control_in")
+  
   if(all(names(control_in) %in% names(control)) == FALSE) {
     stop("unrecognized elements found in control")
   }
-
+  
   ns <- names(control_in)
   control[names(control_in)] <- control_in
-
+  
   check_positive_integer(y = control$mcmc_chains, par = "mcmc_chains")
   check_positive_integer(y = control$mcmc_cores, par = "mcmc_cores")
   check_positive_integer(y = control$mcmc_steps, par = "mcmc_steps")
@@ -47,7 +40,7 @@ process_control <- function(control_in) {
   
   check_mcmc_steps(mcmc_steps = control$mcmc_steps, 
                    mcmc_warmup = control$mcmc_warmup)
-
+  
   return(control)
 }
 
@@ -57,7 +50,7 @@ check_mcmc_steps <- function(mcmc_steps, mcmc_warmup) {
      as.integer(x = mcmc_warmup) < 100) {
     stop("mcmc_steps >= 500 & mcmc_warmup >= 100.")
   }
-
+  
   if(as.integer(x = mcmc_steps) <= as.integer(x = mcmc_warmup)) {
     stop("mcmc_steps > mcmc_warmup")
   }
@@ -86,70 +79,34 @@ get_default_control <- function() {
 }
 
 check_input_columns <- function(x) {
-    if(!"compound" %in% colnames(x)) {
-      stop("x does not have a column compound")
-    }
-    if(!"dose" %in% colnames(x)) {
-      stop("x does not have a column dose")
-    }
-    if(!"well" %in% colnames(x)) {
-      stop("x does not have a column well")
-    }
-    if(!"plate" %in% colnames(x)) {
-      stop("x does not have a column plate")
-    }
-    if(!"v" %in% colnames(x)) {
-      stop("x does not have a column v")
-    }
-    if(!"offset" %in% colnames(x)) {
-      stop("x does not have a column offset")
-    }
-    
-    if(is.character(x[,"compound"])==FALSE) {
-      stop("column compound must be character")
-    }
-    if(is.character(x[,"dose"])==FALSE) {
-      stop("column dose must be character")
-    }
-    if(is.character(x[,"well"])==FALSE) {
-      stop("column well must be character")
-    }
-    if(is.character(x[,"plate"])==FALSE) {
-      stop("column plate must be character")
-    }
-    if(is.numeric(x[,"v"])==FALSE) {
-      stop("column v must be numeric")
-    }
-    if(is.numeric(x[,"offset"])==FALSE) {
-      stop("column offset must be numeric")
-    }
-    
-    if(any(is.na(x[,"compound"]))) {
-      stop("column compound contains NAs")
-    }
-    if(length(unique(x$compound))==1) {
-      stop("only one compound included")
-    }
-    
-    if(any(is.na(x[,"dose"]))) {
-      stop("column dose contains NAs")
-    }
-    if(any(is.na(x[,"plate"]))) {
-      stop("column plate contains NAs")
-    }
-    if(any(is.na(x[,"well"]))) {
-      stop("column well contains NAs")
-    }
-    if(any(is.na(x[,"v"]))) {
-      stop("column v contains NAs")
-    }
-    if(any(is.na(x[,"offset"]))) {
-      stop("column offset contains NAs")
-    }
-    if(all(x[,"offset"] %in% c(0,1))==FALSE) {
-      stop("column offset can contain only 0 or 1")
-    }
+  check_x_in_y(x = "compound", y = colnames(x), e = "compund not found in x")
+  check_x_in_y(x = "dose", y = colnames(x), e = "dose not found in x")
+  check_x_in_y(x = "well", y = colnames(x), e = "well not found in x")
+  check_x_in_y(x = "plate", y = colnames(x), e = "plate not found in x")
+  check_x_in_y(x = "v", y = colnames(x), e = "v not found in x")
+  check_x_in_y(x = "offset", y = colnames(x), e = "offset not found in x")
+  
+  check_character_vec(y = x[,"compound"], par = "compound")
+  check_character_vec(y = x[,"dose"], par = "dose")
+  check_character_vec(y = x[,"well"], par = "well")
+  check_character_vec(y = x[,"plate"], par = "plate")
+  check_numeric_vec(y = x[,"v"], par = "v")
+  check_numeric_vec(y = x[,"offset"], par = "offset")
+  
+  check_na_vec(y = x[,"compound"], par = "compound")
+  if(length(unique(x$compound))==1) {
+    stop("only one compound included")
   }
+  check_na_vec(y = x[,"dose"], par = "dose")
+  check_na_vec(y = x[,"plate"], par = "plate")
+  check_na_vec(y = x[,"well"], par = "well")
+  check_na_vec(y = x[,"v"], par = "v")
+  check_na_vec(y = x[,"offset"], par = "offset")
+  
+  if(all(x[,"offset"] %in% c(0,1))==FALSE) {
+    stop("column offset can contain only 0 or 1")
+  }
+}
 
 get_input_with_offset <- function(x) {
   org_x <- x

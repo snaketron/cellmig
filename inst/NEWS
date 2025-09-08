@@ -6,3 +6,7 @@ Changes in version 0.99.9 (25 Aug, 2025)
 
 Changes in version 0.99.11 (4 Sep, 2025)
 + First set of revisions addressing reviewer's remarks
+
+Changes in version 0.99.14 (5 Sep, 2025)
++ More efficient loops
++ Less repetitive code

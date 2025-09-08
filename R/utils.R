@@ -1,24 +1,9 @@
 check_positive_integer <- function(y, par) {
-    if(missing(y) || is.null(y)) {
-        str <- paste0(par, " is missing or NULL")
-        stop(str)
-    }
-    if(length(y)!=1) {
-        str <- paste0(par, " must have length of 1")
-        stop(str)
-    }
-    if(is.na(y)) {
-        str <- paste0(par, " is NA")
-        stop(str)
-    }
-    if(is.numeric(y)==FALSE) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
-    if(is.infinite(y)) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
+    check_missing(y = y, par = par)
+    check_length_one(y = y, par = par)
+    check_na_val(y = y, par = par)
+    check_numeric_val(y = y, par = par)
+    check_inf_val(y = y, par = par)
     if(y <= 0) {
         str <- paste0(par, " must be >0")
         stop(str)
@@ -29,82 +14,38 @@ check_positive_integer <- function(y, par) {
     }
 }
 check_sd <- function(y, par) {
-    if(missing(y) || is.null(y)) {
-        str <- paste0(par, " is missing or NULL")
-        stop(str)
-    }
-    if(length(y)!=1) {
-        str <- paste0(par, " must have length of 1")
-        stop(str)
-    }
-    if(is.na(y)) {
-        str <- paste0(par, " is NA")
-        stop(str)
-    }
-    if(is.numeric(y)==FALSE) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
+    check_missing(y = y, par = par)
+    check_length_one(y = y, par = par)
+    check_numeric_val(y = y, par = par)
+    check_na_val(y = y, par = par)
     if(y < 0) {
         str <- paste0(par, " must be >0")
         stop(str)
     }
-    if(is.infinite(y)) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
+    check_inf_val(y = y, par = par)
 }
 check_loc <- function(y, par) {
-    if(missing(y) || is.null(y)) {
-        str <- paste0(par, " is missing or NULL")
-        stop(str)
-    }
-    if(length(y)!=1) {
-        str <- paste0(par, " must have length of 1")
-        stop(str)
-    }
-    if(is.na(y)) {
-        str <- paste0(par, " is NA")
-        stop(str)
-    }
-    if(is.numeric(y)==FALSE) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
-    if(is.infinite(y)) {
-        str <- paste0(par, " must be numeric")
-        stop(str)
-    }
+    check_missing(y = y, par = par)
+    check_length_one(y = y, par = par)
+    check_na_val(y = y, par = par)
+    check_numeric_val(y = y, par = par)
+    check_inf_val(y = y, par = par)
 }
 check_delta <- function(x, o) {
-    # delta
-    if(missing(x) || is.null(x)) {
-        stop("delta is missing or NULL")
-    }
+    check_missing(y = x, par = "delta")
     if(length(x)<=1) {
         stop("delta must have length > 1")
     }
     if(any(is.na(x) | is.infinite(x))) {
         stop("some deltas are NA")
     }
-    if(any(is.numeric(x)==FALSE)) {
-        stop("delta must be numeric")
-    }
-    
+    check_numeric_vec(y = x, par = "delta")
     
     # offset
-    if(missing(o) || is.null(o)) {
-        stop("offset is missing or NULL")
-    }
-    if(length(o)!=1) {
-        stop("offset must have length of 1")
-    }
-    if(is.na(o)) {
-        stop("offset is NA")
-    }
-    if(is.numeric(o)==FALSE) {
-        stop("offset must be numberic")
-    }
+    check_missing(y = o, par = "offset")
+    check_length_one(y = o, par = "offset")
+    check_na_val(y = o, par = "offset")
+    check_numeric_val(y = o, par = "offset")
     if(o <= 0) {
         stop("offset must be greater than 0")
     }
@@ -115,29 +56,89 @@ check_delta <- function(x, o) {
         stop("offset must be between 1 and length of delta")
     }
 }
-check_logical <- function(y, par) {
+check_generic <- function(y) {
+    check_missing(y = y, par = "x")
+    check_list(y = y, par = "x")
+    if(any(names(y)=="posteriors")==FALSE) {
+        stop("wrong y")
+    }
+}
+
+check_missing <- function(y, par) {
     if(missing(y) || is.null(y)) {
         str <- paste0(par, " is missing or NULL")
         stop(str)
     }
-    if(length(y) != 1) {
-        str <- paste0(par, " must be have length one")
-        stop(str)
-    }
-    if(is.logical(y)==FALSE) {
-        str <- paste0(par, " must be logcal")
+}
+check_length_one <- function(y, par) {
+    if(length(y)!=1) {
+        str <- paste0(par, " must have length of 1")
         stop(str)
     }
 }
-check_generic <- function(y) {
-    if(missing(y) || is.null(y)) {
-        stop("missing x")
-    }
+check_list <- function(y, par) {
     if(is.list(y) == FALSE) {
-        stop("wrong x")
+        str <- paste0(par, " must be list")
+        stop(str)
     }
-    if(any(names(y)=="posteriors")==FALSE) {
-        stop("wrong y")
+}
+check_dataframe <- function(y, par) {
+    if(is.data.frame(y) == FALSE) {
+        str <- paste0(par, " must be data.frame")
+        stop(str)
+    }
+}
+check_numeric_val <- function(y, par) {
+    if(is.numeric(y)==FALSE) {
+        str <- paste0(par, " must be numeric")
+        stop(str)
+    }
+}
+check_numeric_vec <- function(y, par) {
+    if(any(is.numeric(y)==FALSE)) {
+        str <- paste0(par, " must be numeric")
+        stop(str)
+    }
+}
+check_inf_val <- function(y, par) {
+    if(is.infinite(y)) {
+        str <- paste0(par, " is infinite")
+        stop(str)
+    }
+}
+check_na_val <- function(y, par) {
+    if(is.na(y)) {
+        str <- paste0(par, " is NA")
+        stop(str)
+    }
+}
+check_na_vec <- function(y, par) {
+    if(any(is.na(y))) {
+        str <- paste0(par, " contains NA")
+        stop(str)
+    }
+}
+check_logical_val <- function(y, par) {
+    if(is.logical(y) == FALSE) {
+        str <- paste0(par, " must be logical")
+        stop(str)
+    }
+}
+check_character_val <- function(y, par) {
+    if(is.character(y) == FALSE) {
+        str <- paste0(par, " must be character")
+        stop(str)
+    }
+}
+check_character_vec <- function(y, par) {
+    if(any(is.character(y)) == FALSE) {
+        str <- paste0(par, " must be character")
+        stop(str)
+    }
+}
+check_x_in_y <- function(x, y, e) {
+    if(!x %in% y) {
+        stop(e)
     }
 }
 
@@ -166,4 +167,5 @@ get_hdi <- function(vec, hdi_level) {
     HDIlim <- c(HDImin, HDImax)
     return(HDIlim)
 }
+
 
