@@ -189,8 +189,8 @@ check_control_list <- function(control_in, partial) {
     }
     
     # if missing control_in -> use default values
-    check_missing(y = control_in, par = "control_in")
-    check_list(y = control_in, par = "control_in")
+    check_missing(y = control_in, par = "control")
+    check_list(y = control_in, par = "control")
     if(all(names(control_in) %in% names(control))==FALSE) {
         stop("control has missing elements")
     }

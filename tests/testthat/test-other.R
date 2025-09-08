@@ -2,14 +2,13 @@
 
 test_that("test ppc.R error", {
   expect_error(get_ppc_means(), 
-               regexp = "missing x")
+               regexp = "x is missing or NULL")
   expect_error(get_ppc_means(x = NULL), 
-               regexp = "missing x")
-  
+               regexp = "x is missing or NULL")
   expect_error(get_ppc_violins(), 
-               regexp = "missing x")
+               regexp = "x is missing or NULL")
   expect_error(get_ppc_violins(x = NULL), 
-               regexp = "missing x")
+               regexp = "x is missing or NULL")
 })
 
 
@@ -24,20 +23,18 @@ test_that("test ppc.R correct", {
   expect_no_error(get_ppc_means(x = o))
   expect_no_error(get_ppc_violins(x = o, wrap = FALSE))
   
-  expect_error(get_ppc_violins(x = o, wrap = TRUE),
-               regexp = "missing ncol")
+  expect_no_error(get_ppc_violins(x = o, wrap = TRUE))
   expect_error(get_ppc_violins(x = o, wrap = NULL), 
-               regexp = "missing wrap")
-  expect_error(get_ppc_violins(x = o, ncol = NULL),
-               regexp = "missing wrap")
+               regexp = "wrap is missing or NULL")
+  expect_no_error(get_ppc_violins(x = o, ncol = NULL))
   expect_error(get_ppc_violins(x = o, wrap = TRUE, ncol = -1),
-               regexp = "ncol must be positive integer")
+               regexp = "ncol must be >0")
   expect_error(get_ppc_violins(x = o, wrap = TRUE, ncol = TRUE),
-               regexp = "ncol must be positive integer")
+               regexp = "ncol must be numeric")
   expect_error(get_ppc_violins(x = o, wrap = TRUE, ncol = NA),
-               regexp = "ncol must be positive integer")
+               regexp = "ncol must be numeric")
   expect_error(get_ppc_violins(x = o, wrap = TRUE, ncol = NULL),
-               regexp = "missing ncol")
+               regexp = "ncol is missing or NULL")
   
   
   expect_no_error(get_ppc_violins(x = o, wrap = TRUE, ncol = 1))

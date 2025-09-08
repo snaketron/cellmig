@@ -2,15 +2,15 @@
 
 test_that("x parameter takes invalid", {
   expect_error(cellmig(), 
-               regexp = "missing x")
+               regexp = "x is missing or NULL")
   expect_error(cellmig(x = NULL), 
-               regexp = "x must be a data.frame")
+               regexp = "x is missing or NULL")
   expect_error(cellmig(x = NA), 
-               regexp = "x must be a data.frame")
+               regexp = "x must be data.frame")
   expect_error(cellmig(x = 0), 
-               regexp = "x must be a data.frame")
+               regexp = "x must be data.frame")
   expect_error(cellmig(x = F), 
-               regexp = "x must be a data.frame")
+               regexp = "x must be data.frame")
   expect_error(cellmig(x = data.frame()), 
                regexp = "zero or one row in x")
 })
@@ -45,8 +45,8 @@ test_that("x parameter takes column values", {
   expect_no_error(cellmig(x = d_mini,
                        control = list(mcmc_warmup = 200,
                                       mcmc_steps = 900,
-                                      mcmc_chains = 1,
-                                      mcmc_cores = 1)))
+                                      mcmc_chains = 2,
+                                      mcmc_cores = 2)))
 })
 
 

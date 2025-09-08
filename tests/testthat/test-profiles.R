@@ -10,7 +10,7 @@ test_that("profiles functions with invalid inputs", {
   groups <- get_groups(x = o)$group
   expect_error(get_dose_response_profile(x = o, groups = groups),
                regexp = "must have n >= 2 objects to cluster")
-  expect_error(get_dose_response_profile(), regexp = "missing x")
+  expect_error(get_dose_response_profile(), regexp = "x is missing or NULL")
   expect_error(get_dose_response_profile(x = o, 
                                          groups = groups))
   expect_error(get_dose_response_profile(x = o, 
@@ -40,7 +40,7 @@ test_that("profiles functions with invalid inputs", {
   
 
   expect_no_error(get_treatment_profile(x = o, groups = groups))
-  expect_error(get_treatment_profile(), regexp = "missing x")
+  expect_error(get_treatment_profile(), regexp = "x is missing or NULL")
   expect_error(get_treatment_profile(x = o, 
                                      hc_link = NA,
                                      groups = groups))
@@ -82,7 +82,7 @@ test_that("profiles functions with invalid inputs", {
   
   
   expect_no_error(get_dose_response_profile(x = o, groups = groups))
-  expect_error(get_dose_response_profile(), regexp = "missing x")
+  expect_error(get_dose_response_profile(), regexp = "x is missing or NULL")
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = NA,
                                          groups = groups))
@@ -110,7 +110,7 @@ test_that("profiles functions with invalid inputs", {
   
   
   expect_no_error(get_treatment_profile(x = o, groups = groups))
-  expect_error(get_treatment_profile(), regexp = "missing x")
+  expect_error(get_treatment_profile(), regexp = "x is missing or NULL")
   expect_error(get_treatment_profile(x = o, 
                                      hc_link = NA,
                                      groups = groups))

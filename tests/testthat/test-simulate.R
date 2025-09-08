@@ -61,11 +61,11 @@ test_that("get_partial with invalid control", {
                regexp = "offset must be between 1 and length of delta")
   
   expect_error(gen_partial(control = NA),
-               regexp = "control must be a list")
+               regexp = "control must be list")
   expect_error(gen_partial(control = NULL),
-               regexp = "missing control")
+               regexp = "control is missing or NULL")
   expect_error(gen_partial(control = NA),
-               regexp = "control must be a list")
+               regexp = "control must be list")
   
   
   
@@ -222,7 +222,7 @@ test_that("get_partial with invalid control", {
                                           prior_kappa_mu_SD = 0.5,
                                           prior_kappa_sigma_M = Inf,
                                           prior_kappa_sigma_SD = 0.3)),
-               regexp = "prior_kappa_sigma_M must be numeric")
+               regexp = "prior_kappa_sigma_M is infinite")
   expect_error(gen_partial(control = list(N_biorep = 3, 
                                           N_techrep = 3, 
                                           N_cell = 50, 
@@ -250,7 +250,7 @@ test_that("get_partial with invalid control", {
                                           prior_kappa_mu_SD = 0.5,
                                           prior_kappa_sigma_M = NA,
                                           prior_kappa_sigma_SD = 0.3)),
-               regexp = "prior_kappa_sigma_M is NA")
+               regexp = "prior_kappa_sigma_M must be numeric")
   
   
   expect_no_error(gen_partial(control = list(N_biorep = 3, 
@@ -307,7 +307,7 @@ test_that("get_partial with invalid control", {
                                           prior_kappa_mu_SD = 0.5,
                                           prior_kappa_sigma_M = 0,
                                           prior_kappa_sigma_SD = Inf)),
-               regexp = "prior_kappa_sigma_SD must be numeric")
+               regexp = "prior_kappa_sigma_SD is infinite")
   expect_error(gen_partial(control = list(N_biorep = 3, 
                                           N_techrep = 3, 
                                           N_cell = 50, 
@@ -321,7 +321,7 @@ test_that("get_partial with invalid control", {
                                           prior_kappa_mu_SD = 0.5,
                                           prior_kappa_sigma_M = 0,
                                           prior_kappa_sigma_SD = NA)),
-               regexp = "prior_kappa_sigma_SD is NA")
+               regexp = "prior_kappa_sigma_SD must be numeric")
   
   
   expect_error(gen_partial(control = list(N_biorep = 3, 
@@ -357,11 +357,11 @@ test_that("get_partial with invalid control", {
 test_that("get_full with simple controls", {
   expect_no_error(gen_full())
   expect_error(gen_full(control = NA),
-               regexp = "control must be a list")
+               regexp = "control must be list")
   expect_error(gen_full(control = NULL),
-               regexp = "missing control")
+               regexp = "control is missing or NULL")
   expect_error(gen_full(control = NA),
-               regexp = "control must be a list")
+               regexp = "control must be list")
 })
 
 test_that("get_full with wrong control entries", {
@@ -465,7 +465,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "N_biorep must be numeric")
+               regexp = "N_biorep is infinite")
   
   
   
@@ -569,7 +569,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "N_techrep must be numeric")
+               regexp = "N_techrep is infinite")
   
   
   expect_error(gen_full(control = list(N_biorep = 3,
@@ -672,10 +672,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_tech_SD = 1,
                                        prior_mu_group_M = 0,
                                        prior_mu_group_SD = 1)),
-               regexp = "N_cell must be numeric")
-  
-  
-  
+               regexp = "N_cell is infinite")
   
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
