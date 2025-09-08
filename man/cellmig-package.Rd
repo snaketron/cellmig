@@ -23,7 +23,7 @@ Useful links:
 \author{
 Authors and maintainers:
 \itemize{
-  \item Simo Kitanovski \email{simokitanovski@uni-due.de} 
+  \item Simo Kitanovski \email{simokitanovski@gmail.com} 
   (\href{https://orcid.org/0000-0003-2909-5376}{ORCID})
 }
 }
