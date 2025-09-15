@@ -1,35 +1,46 @@
 # cellmig: Uncertainty-aware quantitative analysis of high-throughput live cell migration data
 
-# Overview
+# Background
 
-Cell imaging enables us to profile the migration speeds of cells under various 
-treatment conditions, such as different chemical compounds at varying doses, 
-and across distinct biological states, like cancerous versus healthy cells. 
-However, these experiments are typically costly, which limits the number of 
-biological replicates that can be included. Additionally, cell migration 
-readouts are often noisy and susceptible to batch effects. As a result, the 
-estimates of cell migration speeds tend to be highly uncertain, a challenge 
-further exacerbated by the use of suboptimal statistical methods.
+High-throughput tracking of cells with time-lapse microscopy followed by
+the acquisition of images at ﬁxed time intervals facilitates the
+analysis of cell migration across many wells treated under different
+biological conditions. These workflows generate considerable technical
+noise and biological variability, and therefore technical and biological
+replicates are necessary, leading to large, hierarchically structured
+datasets, i.e., cells are nested within technical replicates that are
+nested within biological replicates.
 
-cellmig addresses these issues by implementing hierarchical Bayesian models 
-designed to handle noisy and sparse cell migration data. It accounts for 
-potential batch effects and provides robust quantitative estimates of cell 
-speeds in each sample, while also facilitating differential migration analysis 
-across different treatments. Additionally, cellmig includes tools that assist 
-in planning future experiments, answering critical questions such as: "How many 
-replicates and cells are needed to reliably detect a given effect?"
+Current statistical analyses of such data usually ignore the
+hierarchical structure of the data and fail to explicitly quantify
+uncertainty arising from technical or biological variability. To address
+this gap, we present **cellmig**, an R package implementing
+Bayesian hierarchical models for migration analysis.
+**cellmig** quantifies condition-specific velocity changes
+(e.g., drug effects) while modeling nested data structures and technical
+artifacts, providing uncertainty-aware estimates through credible
+intervals.
 
-# How to use cellmig
+Furthermore, **cellmig** includes functionality for simulating
+synthetic datasets. These simulations are invaluable for experimental
+planning, allowing researchers to assess how different experimental
+designs (e.g., varying numbers of biological replicates, technical
+replicates, or cells per well) affect the precision of treatment effect
+estimates.
 
-To install this package, start R and enter:
 
-``` r
-library("devtools")
-devtools::install_github("snaketron/cellmig")
+# Installation
+To install this package, start R (version "4.5") and enter:
+
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("cellmig")
 ```
 
 Case studies are provided in the directory /vignettes
 
-# Workflow & output
 
-![alt text](inst/extdata/logo.png)
+# How to cite
+bioRxiv preprint doi: https://doi.org/10.1101/2025.06.12.659342
