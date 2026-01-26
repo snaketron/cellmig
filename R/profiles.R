@@ -149,20 +149,29 @@ check_profile_inputs <- function(x,
 get_boot_drp <- function(x, 
                          hc_dist, 
                          hc_link, 
+                         groups,
                          B) {
+    
+    eg <- x$posteriors$delta_t
+    
+    if(missing(groups)==FALSE) {
+        if(any(!groups %in% unique(eg$group))) {
+            stop("selected treatment groups not found in data")
+        }
+        eg <- eg[eg$group %in% groups, ]
+        
+        # meta
+        meta <- eg[, c("group_id", "compound", "dose")]
+        meta <- meta[order(meta$group_id, decreasing = FALSE),]
+    }
+    
+    eg <- x$posteriors$delta_t
   
-  eg <- x$posteriors$delta_t
-  gs <- eg$group_id
-  
-  q <- acast(data = eg, formula = compound~dose, value.var = "mean")
-  hc <- hclust(dist(q, method = hc_dist), method = hc_link)
-  main_ph <- as.phylo(x = hc)
-  
-  # meta
-  meta <- x$posteriors$delta_t[, c("group_id", "compound", "dose")]
-  meta <- meta[order(meta$group_id, decreasing = FALSE),]
-  meta <- meta[meta$group_id %in% gs, ]
-  meta$group_id <- NULL
+    q <- acast(data = eg, formula = compound~dose, value.var = "mean")
+    hc <- hclust(dist(q, method = hc_dist), method = hc_link)
+    main_ph <- as.phylo(x = hc)
+    
+    
   
   # extract posterior
   e <- extract(x$f, par = "mu_group")$mu_group[, gs]
@@ -194,7 +203,8 @@ get_boot_drp <- function(x,
 get_boot_tp <- function(x, 
                         hc_dist, 
                         hc_link, 
-                        groups, B) {
+                        groups, 
+                        B) {
   
   eg <- x$posteriors$delta_t
   
