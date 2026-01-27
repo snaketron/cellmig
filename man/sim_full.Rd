@@ -1,18 +1,19 @@
 \name{gen_full}
 \alias{gen_full}
-\title{Simulating data from fully generative Bayesian model}
+\title{Simulate data from a fully generative hierarchical Bayesian model}
 \description{
-  Simulates cell velocities based on a hierarchical model using a Stan model,
-  where some of the model parameters are drawn from their prior distributions.
+Simulates cell migration speed data from a hierarchical Bayesian model
+implemented in Stan, where model parameters are drawn from their prior
+distributions.
 }
 \usage{
   gen_full(control = list(N_biorep = 3, 
                           N_techrep = 3,
                           N_cell = 50,
                           N_group = 5,
-                          prior_alpha_p_M = 1.7,
+                          prior_alpha_p_M = -0.5,
                           prior_alpha_p_SD = 1,
-                          prior_kappa_mu_M = 1.7,
+                          prior_kappa_mu_M = 1.5,
                           prior_kappa_mu_SD = 1,
                           prior_kappa_sigma_M = 0,
                           prior_kappa_sigma_SD = 1,
@@ -24,49 +25,52 @@
                           prior_delta_t_SD = 1))
 }
 \arguments{
-  \item{control}{A list configuring the MCMC sampling algorithm, and parameter
-priors with the following default values:
+\item{control}{
+A named list specifying simulation settings and prior distributions.
+Default values are:
 \itemize{
-  \item{N_biorep: Number of plates (biological replicates) in the simulation.}
-  \item{N_techrep: Number of technical replicates: wells on a plate treated 
-  with the same treatment.}
-  \item{N_cell: Number of cells per well.}
-  \item{prior_alpha_p_M, prior_alpha_p_SD: Mean (M) and standard deviation 
-  (SD) of a normal distribution describing plate-specific batch effects 
-  (on log-scale).}
-  \item{prior_kappa_mu_M, prior_kappa_mu_SD: Mean (M) and standard deviation 
-  (SD) of a normal distribution describing the mean of the population of 
-  well-specific shape (kappa) parameters.}
-  \item{prior_kappa_sigma_M, prior_kappa_sigma_SD: Mean (M) and standard 
-  deviation (SD) of a normal distribution describing the standard deviation 
-  of the population of well-specific shape (kappa) parameters.}
-  \item{prior_sigma_bio_M,  prior_sigma_bio_SD: Mean (M) and standard 
-  deviation (SD) of a normal distribution describing the variability of 
-  overall treatment effects between biological replicates.}
-  \item{prior_sigma_tech_M,  prior_sigma_tech_SD: Mean (M) and standard 
-  deviation (SD) of a normal distribution describing the variability of
-  treatment effects between technical replicates.}
-  \item{prior_delta_t_M, prior_delta_t_SD: Mean (M) and standard 
-  deviation (SD) of a normal distribution describing the population of overall 
-  treatment effects.}
+  \item \code{N_biorep}: Number of biological replicates (plates).
+  \item \code{N_techrep}: Number of technical replicates (wells per plate
+  receiving the same treatment).
+  \item \code{N_cell}: Number of cells per well.
+  \item \code{N_group}: Number of treatment groups.
+  \item \code{prior_alpha_p_M}, \code{prior_alpha_p_SD}:
+  Mean and standard deviation of the normal prior for plate-specific
+  batch effects (log-scale).
+  \item \code{prior_kappa_mu_M}, \code{prior_kappa_mu_SD}:
+  Mean and standard deviation of the normal prior for the population mean
+  of well-specific Gamma shape parameters.
+  \item \code{prior_kappa_sigma_M}, \code{prior_kappa_sigma_SD}:
+  Mean and standard deviation of the normal prior for the population
+  standard deviation of well-specific Gamma shape parameters.
+  \item \code{prior_sigma_bio_M}, \code{prior_sigma_bio_SD}:
+  Mean and standard deviation of the normal prior describing variability
+  in treatment effects between biological replicates.
+  \item \code{prior_sigma_tech_M}, \code{prior_sigma_tech_SD}:
+  Mean and standard deviation of the normal prior describing variability
+  in treatment effects between technical replicates.
+  \item \code{prior_delta_t_M}, \code{prior_delta_t_SD}:
+  Mean and standard deviation of the normal prior for overall treatment
+  effects.
 }
 }
 }
 \details{
-  This function constructs a hierarchical dataset by simulating values 
-  using a partially generative Stan model. It generates metadata for each 
-  well and simulates data using the `sampling` function from the `rstan` 
-  package.
+The function constructs a hierarchical synthetic dataset by simulating
+cell migration speed values from a fully generative Stan model. Metadata
+for plates, wells, treatment groups, and replicates are generated, and
+cell-level observations are simulated using the \code{sampling} function
+from the \pkg{rstan} package.
 }
 \value{
-  A data.frame containing cells as rows with:
-  \itemize{
-    \item{v = Simulated cell velocity.}
-    \item{well_id = Unique well identifier.}
-    \item{group_id = Experimental group identifier.}
-    \item{plate_id = Biological replicate (plate) identifier.}
-    \item{trep_id = Technical replicate identifier.}
-  }
+A data frame with one row per cell and the following columns:
+\describe{
+  \item{\code{v}}{Simulated cell migration speed.}
+  \item{\code{well_id}}{Unique well identifier.}
+  \item{\code{group_id}}{Treatment group identifier.}
+  \item{\code{plate_id}}{Biological replicate (plate) identifier.}
+  \item{\code{trep_id}}{Technical replicate identifier.}
+}
 }
 \examples{
 f <- gen_full(control = list(N_biorep = 3, 

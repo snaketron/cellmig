@@ -29,40 +29,21 @@ ggplot2::theme_set(new = theme_bw(base_size = 10))
 
 # Background
 
-High-throughput cell migration assays generate complex, hierarchically
-structured datasets with inherent technical noise and biological
-variability. To accurately quantify treatment effects on cell migration
-velocity, it is essential to account for these sources of variation and
-to design experiments that provide sufficient statistical power. The
-`r Biocpkg("cellmig")` R package implements a Bayesian hierarchical model 
-for analyzing such data. See the "User manual" vignette to understand the
-key functionalities of `r Biocpkg("cellmig")`.
-
-Furthermore, `r Biocpkg("cellmig")` includes functionality for simulating
-synthetic datasets. These simulations are invaluable for experimental
-planning, allowing researchers to assess how different experimental
-designs (e.g., varying numbers of biological replicates, technical
-replicates, or cells per well) affect the precision of treatment effect
-estimates.
-
 This vignette demonstrates how to use `r Biocpkg("cellmig")` to simulate 
-cell migration data under a partially generative model. These functionalities
-are documented in this vignette. In short, we simulate data based on 
-realistic parameter values derived from experimental data and
-then analyze the simulated data using `r Biocpkg("cellmig")` to recover the
-parameters. This process validates the model and illustrates how
-simulation can guide experimental design and power analysis.
+cell migration speed data under *partially* and *fully* generative models. 
 
+The *partially* generative model simulates cell migration speed from a 
+hierarchical Bayesian model implemented in Stan, where some model parameters 
+(e.g., derived from experimental data) are fixed by the user and the remaining 
+parameters are drawn from their prior distributions.
 
-# Installation
-To install this package, start R (version "4.5") and enter:
+The *fully* generative model simulates cell migration speed from a hierarchical 
+Bayesian model implemented in Stan, where model parameters are drawn from their 
+prior distributions.
 
-```{r, eval=FALSE}
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+These simulation functionalities are useful for validating the model, exploring
+parameter variability, and guiding experimental design and power analysis.
 
-BiocManager::install("cellmig")
-```
 
 # Data simulation from **partially generative** model
 
@@ -106,7 +87,7 @@ the fourth treatment group, which has $\delta_t = 0$).
 
 ### Setting $\kappa_w$
 
-The velocities in each well are gamma distributed, and the gamma
+The speed in each well are gamma distributed, and the gamma
 distribution is defined by a rate and shape parameter. The shape
 parameter for well $w$, $\kappa_w$, controls the form or skewness of the
 distribution and, to some extent, the variability in the data. Larger 
@@ -126,7 +107,7 @@ to small values (e.g., set in `control` `prior_kappa_mu_SD`=0.01 and
 `prior_kappa_sigma_SD`).
 
 
-## Generates dataframe with simulated velocities
+## Generates dataframe with simulated speeds
 
 We use the `gen_partial` function from `r Biocpkg("cellmig")` to simulate the 
 data. The function requires a control list specifying the experimental design
@@ -158,7 +139,7 @@ str(y_p$y)
 
 The output is a dataframe with columns:
 
--   `v`: Cell velocity
+-   `v`: Cell speed
 
 -   `well`: Well identifier
 
@@ -172,7 +153,7 @@ The output is a dataframe with columns:
 
 **Visualizing the simulated data**
 
-We can visualize the simulated cell velocities using scatter plots, with
+We can visualize the simulated cell speeds using scatter plots, with
 points jittered by well and colored by plate.
 
 ```{r, fig.width=7, fig.height=3}
@@ -189,7 +170,7 @@ ggplot(data = y_p$y)+
   scale_y_log10()
 ```
 
-Alternatively, we can visualize the well-specific mean velocities to
+Alternatively, we can visualize the well-specific mean speeds to
 highlight plate-specific batch effects:
 
 ```{r, fig.width=7, fig.height=3}
@@ -280,7 +261,7 @@ plot(osd$fit, par = c("sigma_bio", "sigma_tech"))
 
 
 # Data simulation from **fully generative** model 
-We can also use `r Biocpkg("cellmig")` to generate cell velocities from 
+We can also use `r Biocpkg("cellmig")` to generate cell speeds from 
 the prior distributions of the parameters $\rightarrow$ data from prior 
 predictive distribution.
 
@@ -323,16 +304,16 @@ str(y_f)
 
 
 
-## Compare density of velocities from partially vs. fully generative models
+## Compare density of speeds from partially vs. fully generative models
 
 ```{r, fig.width=4, fig.height=4}
 w <- data.frame(v_f = y_f$y$v[1:2000], v_p = y_p$y$v[1:2000])
  ggplot(data = w)+
     geom_point(aes(x = v_f, y = v_p), size = 0.5)+
     geom_density_2d(aes(x = v_f, y = v_p), col = "orange")+
-    scale_x_log10(name = "Velocity from fully generative model", 
+    scale_x_log10(name = "Speed from fully generative model", 
                   limits = c(0.01, 10^4))+
-    scale_y_log10(name = "Velocity from partially generative model", 
+    scale_y_log10(name = "Speed from partially generative model", 
                   limits = c(0.01, 10^4))+
     annotation_logticks(base = 10, sides = "lb")+
     theme_bw(base_size = 10)

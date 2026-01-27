@@ -1,5 +1,6 @@
 ---
-title: "cellmig: quantifying cell migration with hierarchical Bayesian models"
+title: "cellmig: quantifying cell migration speed with 
+hierarchical Bayesian models"
 author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
 output:
   BiocStyle::html_document
@@ -27,29 +28,25 @@ ggplot2::theme_set(new = theme_bw(base_size = 10))
 
 # Background
 
-High-throughput tracking of cells with time-lapse microscopy followed by
-the acquisition of images at ﬁxed time intervals facilitates the
+High-throughput tracking of cells with time-lapse microscopy enables the
 analysis of cell migration across many wells treated under different
-biological conditions. These workflows generate considerable technical
-noise and biological variability, and therefore technical and biological
-replicates are necessary, leading to large, hierarchically structured
-datasets, i.e., cells are nested within technical replicates that are
-nested within biological replicates.
+conditions. Such experiments generate substantial technical and biological
+variability, making technical and biological replicates necessary. This
+leads to hierarchically structured datasets: cells are nested within
+technical replicates, which in turn are nested within biological replicates.
 
-Current statistical analyses of such data usually ignore the
-hierarchical structure of the data and fail to explicitly quantify
-uncertainty arising from technical or biological variability. To address
-this gap, we present `r Biocpkg("cellmig")`, an R package implementing
-Bayesian hierarchical models for migration analysis.
-`r Biocpkg("cellmig")` quantifies condition-specific velocity changes
-(e.g., drug effects) while modeling nested data structures and technical
-artifacts, providing uncertainty-aware estimates through credible
-intervals.
+Most current statistical analyses ignore the hierarchical structure and
+do not explicitly quantify uncertainty from technical or biological
+variability. The Bioconductor package `r Biocpkg("cellmig")` addresses this
+gap by implementing Bayesian hierarchical models for cell migration
+analysis. It quantifies condition-specific changes in migration speed
+(e.g., drug effects) while modeling nested data structures, producing
+uncertainty-aware estimates through credible intervals.
 
-There are currently no Bioconductor packages providing specialized
-statistical methods for analyzing hierarchical high-throughput cell
-migration data. `r Biocpkg("cellmig")` addresses this gap and will
-represent a valuable addition to the ecosystem.
+Currently, there are no other Bioconductor packages specialized 
+for hierarchical high-throughput cell migration data analysis. 
+`r Biocpkg("cellmig")` addresses this gap and integrates naturally into 
+the Bioconductor ecosystem.
 
 
 # Installation
@@ -68,7 +65,7 @@ BiocManager::install("cellmig")
 This is how a typical cell migration data looks like $\rightarrow$ a
 table.
 
-Each rows is a cell with the following features:
+Each row is a **cell** with the following features:
 
 -   well = unique well ID (w1, w2, w3, etc.).
 -   plate = unique plate ID (p1, p2, p3, etc.). Each plate is a
@@ -76,7 +73,7 @@ Each rows is a cell with the following features:
     are treated with the same compound and dose (technical replicates)
 -   compound = compound name (c1, c2, c3, etc.)
 -   dose = compound concentration (0, 1, 5, 10, low, mid, high, etc.)
--   v = Observed cell migration velocity (numeric)
+-   v = Observed cell migration speed (numeric) in micrometers per minute
 -   offset = binary (0 or 1). Indicates whether a treatment should be
     used for batch correction across plates. By default offset = 0 (no
     correction). Set to 1 for specific treatment groups (compound x
@@ -92,18 +89,18 @@ In this vignette we will use simulated data from:
 
 -   **plates** ($p$): 1, 2, ... , 3
 -   **wells** ($w$): 1, 2, ... , 378
--   **cells** per well with their migration velocity `v`
+-   **cells** per well with their migration speed `v`
 -   wells are treated with **compounds** 1, 2, ..., 6 at **dose** 1, 2,
     ..., 7.
 -   combination of a compound and dose is a **treatment group** ($t$)
     $\rightarrow$ 1, 2, ..., 42.
 
-Let's visualize the data. Each dot represents a cell with its velocity
-on the y-axis. Each facet corresponds to a compound (e.g., specific drug
-that may affect cellular velocity). The x-axis represents the dose.
-There are three plates, indicated by color. Four technical replicates
-(wells), analyzed on the same plate, are stacked next to each other and
-have the same color.
+
+# Visualizing raw cell speed
+
+Each dot represents a cell; y-axis is velocity. Facets represent compounds,
+x-axis represents dose. Plate is indicated by color. Technical replicates
+(wells) are stacked next to each other and have the same color.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
@@ -114,7 +111,7 @@ ggplot(data = d)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  ylab(label = "migration velocity")+
+  ylab(label = "migration speed")+
   xlab(label = '')+
   scale_color_grey()+
   guides(color = guide_legend(override.aes = list(size = 3)))+
@@ -123,10 +120,9 @@ ggplot(data = d)+
   annotation_logticks(base = 10, sides = "l")
 ```
 
-## **Mean migration velocity** per well
+## **Mean migration speed** per well
 
-Alternatively, we can visualize the well-specific mean velocities to
-highlight plate-specific batch effects.
+VIsualizing mean speed within wells highlights plate-specific batch effects.
 
 ```{r, fig.width=7, fig.height=6}
 dm <- aggregate(v~well+plate+compound+dose, data = d, FUN = mean)
@@ -138,7 +134,7 @@ ggplot(data = dm)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  ylab(label = "migration velocity")+
+  ylab(label = "migration speed")+
   xlab(label = '')+
   scale_color_grey()+
   guides(color = guide_legend(override.aes = list(size = 3)))+
@@ -171,7 +167,7 @@ o <- cellmig(x = d,
                             mcmc_cores = 2))   # nr. of MCMC cores
 ```
 
-## What are the **overall treatment effects** ($\delta_t$) on velocity?
+## What are the **overall treatment effects** ($\delta_t$) on speed?
 
 To extract the means, medians, and 95% Highest Density Intervals (HDIs,
 quantifying parameter value uncertainty) of $\delta_t$, we have to
@@ -181,11 +177,14 @@ access the data.frame `delta_t` in the output object `posteriors`:
 str(o$posteriors$delta_t)
 ```
 
+
+## Visualizing $\delta_t$
+
 It is better to visualize the mean $\delta_t$s and their 95% HDIs
 
 -   Dot: Posterior mean of $\delta_t$
 -   Error bar: 95% highest density interval (HDI) of $\delta$
--   $\exp(\delta)$: Fold change in cell velocity relative to control
+-   $\exp(\delta)$: Fold change in cell speed relative to control
 
 As compound t=1 was selected as control (by setting offset=1), the
 treatment effects of this compounds are not shown.
@@ -200,7 +199,7 @@ ggplot(data = o$posteriors$delta_t)+
   theme(legend.position = "top")
 ```
 
-## Compare the dose-response `profiles` for different compounds
+## Dose-response `profiles`
 
 For "rectangular datasets", i.e. datasets with multiple compounds and
 overlapping doses, we can study the treatment dose-response profiles by
@@ -223,7 +222,7 @@ get_dose_response_profile(x = o)+
   patchwork::plot_layout(widths = c(.7, 1, 4))
 ```
 
-## Compare the effects between treatment group
+## Pairwise comparisons of treatment effects
 
 Pairwise dot-plot comparison $\rightarrow$ x minus y axis
 
@@ -244,7 +243,7 @@ u <- get_pairs(x = o, exponentiate = FALSE)
 u$plot
 ```
 
-## Violin plot based comparison
+## Violin plots of pairwise differences
 
 -   from_groups: vector of treatment groups to consider (combinations of
     compounds and doses)
@@ -255,7 +254,11 @@ u$plot
     negative $\rho$
 
 ```{r, fig.width=7, fig.height=2.5}
-get_groups(x = o)
+str(get_groups(x = o))
+```
+
+
+```{r, fig.width=7, fig.height=2.5}
 u <- get_violins(x = o, 
                  from_groups = get_groups(x = o)$group,
                  to_group = "C2|D1",
@@ -265,17 +268,19 @@ u$plot
 
 ## Posterior predictive checks (PPCs)
 
+### Compare simulated data to observed data at the **cell level**
 To assess model validity, we performed posterior predictive checks,
 which showed that the simulated data (pink violin) were consistent with
-the observed data (black violins). Each dot is a cells.
+the observed data (black violins). Each dot is a cell.
 
 ```{r, fig.width=6, fig.height=6}
 g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
 g+scale_y_log10()
 ```
 
+### Compare mean velocity per well
 Using posterior predictive checks we compared the mean simulated
-velocity per well (y-axis) with the observed mean per well (x-axis).
+speed per well (y-axis) with the observed mean per well (x-axis).
 Each dot is a well.
 
 ```{r, fig.width=4, fig.height=4}
@@ -283,7 +288,7 @@ g <- get_ppc_means(x = o)
 g
 ```
 
-## Inspecting other model parameters
+## Other model parameters
 
 ```{r, fig.height=2, fig.width=6}
 g_alpha_p <- ggplot(data = o$posteriors$alpha_p)+
