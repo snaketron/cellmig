@@ -33,8 +33,8 @@ gen_full <- function(control = list(N_biorep = 3,
                                     prior_sigma_bio_SD = 1.0,
                                     prior_sigma_tech_M = 0.0,
                                     prior_sigma_tech_SD = 1.0,
-                                    prior_mu_group_M = 0.0,
-                                    prior_mu_group_SD = 1.0)) {
+                                    prior_delta_t_M = 0.0,
+                                    prior_delta_t_SD = 1.0)) {
     
     check_sim_control(control = control, partial = FALSE)
     control <- get_sim_control(control_in = control, partial = FALSE)
@@ -90,8 +90,8 @@ check_sim_control <- function(control, partial) {
         check_sd(y = control$prior_sigma_bio_SD, par = "prior_sigma_bio_SD")
         check_sd(y = control$prior_sigma_tech_M, par = "prior_sigma_tech_M")
         check_sd(y = control$prior_sigma_tech_SD, par = "prior_sigma_tech_SD")
-        check_sd(y = control$prior_mu_group_SD, par = "prior_mu_group_SD")
-        check_sd(y = control$prior_mu_group_M, par = "prior_mu_group_M")
+        check_sd(y = control$prior_delta_t_SD, par = "prior_delta_t_SD")
+        check_sd(y = control$prior_delta_t_M, par = "prior_delta_t_M")
         check_positive_integer(y = control$N_group, par = "N_group")
     }
 }
@@ -106,7 +106,7 @@ get_sim_control <- function(control_in, partial) {
         control$N_group <- length(control$delta)
         control$N_plate <- control$N_biorep
         control$N_well_reps <- control$N_techrep
-        control$mu_group <- control$delta
+        control$delta_t <- control$delta
     } 
     else {
         control <- get_default_control_full_sim()
@@ -207,8 +207,8 @@ get_default_control_partial_sim <- function() {
                     prior_sigma_bio_SD = 0.0,
                     prior_sigma_tech_M = 0.0,
                     prior_sigma_tech_SD = 0.0,
-                    prior_mu_group_M = 0.0,
-                    prior_mu_group_SD = 0.0)
+                    prior_delta_t_M = 0.0,
+                    prior_delta_t_SD = 0.0)
     return(control)
 }
 
@@ -220,7 +220,7 @@ get_default_control_full_sim <- function() {
                     prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1.0,
                     prior_sigma_bio_M = 0.0, prior_sigma_bio_SD = 1.0,
                     prior_sigma_tech_M = 0.0, prior_sigma_tech_SD = 1.0,
-                    prior_mu_group_M = 0.0, prior_mu_group_SD = 1.0,
+                    prior_delta_t_M = 0.0, prior_delta_t_SD = 1.0,
                     offset = 1)
     return(control)
 }

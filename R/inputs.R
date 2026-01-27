@@ -74,8 +74,8 @@ get_default_control <- function() {
               prior_kappa_mu_SD = 1.0,
               prior_kappa_sigma_M = 0.0,
               prior_kappa_sigma_SD = 1.0,
-              prior_mu_group_M = 0.0,
-              prior_mu_group_SD = 1.0))
+              prior_delta_t_M = 0.0,
+              prior_delta_t_SD = 1.0))
 }
 
 check_input_columns <- function(x) {

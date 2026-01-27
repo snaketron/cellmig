@@ -6,37 +6,40 @@
 Example dataset \code{d}
 }
 \description{
-This dataset \code{d} contains simulated cell migration speed data from an 
-imaginery experiment. It includes migration speed values (column \code{v}) 
-for different samples (column \code{sample}) treated with chemical compounds 
-(column \code{compound}) administered at a dost (column \code{dose}) on
-experimental plate with identifier (column \code{plate}). The dataset 
-\code{d_mini} contains a subset of \code{d} with only four of the compounds 
-(C1 to C4) and three doses (D3, D5, and D5).
+The dataset \code{d} contains simulated cell migration speed data from an
+imaginary experiment. It includes cell migration speed measurements
+(column \code{v}) for individual cells measured in different wells,
+treated with chemical compounds (\code{compound}) at varying doses
+(\code{dose}) and measured on experimental plates (\code{plate}).
+
+The dataset \code{d_mini} is a reduced subset of \code{d}, containing data
+for four compounds (C1--C4) and three doses.
 }
 \usage{
 data("d", package = "cellmig")
+data(d_mini, package = "cellmig")
 }
 \format{
-  A data frame with 6,300 (cells) observations with the following features.
+  A data frame with cells (rows) having with the following features.
   \describe{
-    \item{\code{v}}{a numeric vector with cell migration speeds}
-    \item{\code{well}}{a character vector}
-    \item{\code{compound}}{a character vector}
-    \item{\code{dose}}{a character vector}
-    \item{\code{plate}}{a character vector}
-    \item{\code{offset}}{indicator: 1 = control, 0 = non-control. Used for
-    batch correction}
+    \item{\code{v}}{Numeric. Cell migration speed (micrometers per minute).}
+    \item{\code{well}}{Character. Well identifier.}
+    \item{\code{compound}}{Character. Compound identifier.}
+    \item{\code{dose}}{Character. Treatment dose.}
+    \item{\code{plate}}{Character. Plate identifier.}
+    \item{\code{offset}}{Integer (0 or 1). Indicates control samples used for 
+    batch correction across plates (1 = control, 0 = non-control).}
   }
 }
 \details{
-The code used to generate this data is in  inst/script/sim_s.R
+Both datasets were generated using a simulation script located at
+\code{inst/scripts/sim_s.R}.
 }
 \source{
-The code used to generate this data is in  inst/script/sim_s.R
+Simulated data generated using \code{inst/scripts/sim_s.R}.
 }
 \references{
-The code used to generate this data is in  inst/script/sim_s.R
+Simulated data generated using \code{inst/scripts/sim_s.R}.
 }
 \examples{
 data(d, package = "cellmig")

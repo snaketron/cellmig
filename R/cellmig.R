@@ -45,8 +45,8 @@ get_fit <- function(x, control) {
                             prior_kappa_mu_SD=control$prior_kappa_mu_SD,
                             prior_kappa_sigma_M=control$prior_kappa_sigma_M,
                             prior_kappa_sigma_SD=control$prior_kappa_sigma_SD,
-                            prior_mu_group_M=control$prior_mu_group_M,
-                            prior_mu_group_SD=control$prior_mu_group_SD),
+                            prior_delta_t_M=control$prior_delta_t_M,
+                            prior_delta_t_SD=control$prior_delta_t_SD),
                   pars=pars,
                   include = FALSE,
                   chains=control$mcmc_chains,
@@ -91,16 +91,16 @@ get_summary <- function(x, f) {
   alpha_p <- merge(x = alpha_p, y = meta_plate, 
                    by = "plate_id", all.x = TRUE)
   
-  # par: mu_group
-  mu_group <- data.frame(summary(f, par = "mu_group")$summary)
-  mu_group$group_id <- seq_len(nrow(mu_group))
-  mu_group <- merge(x = mu_group, y = meta_group, by = "group_id", all.x = TRUE)
+  # par: delta_t
+  delta_t <- data.frame(summary(f, par = "delta_t")$summary)
+  delta_t$group_id <- seq_len(nrow(delta_t))
+  delta_t <- merge(x = delta_t, y = meta_group, by = "group_id", all.x = TRUE)
   
-  # par: mu_plate_group
-  mu_plate_group <- data.frame(summary(f, par = "mu_plate_group")$summary)
-  mu_plate_group$plate_group_id <- seq_len(nrow(mu_plate_group))
-  mu_plate_group <- merge(x = mu_plate_group, y = meta_plate_group, 
-                          by = "plate_group_id", all.x = TRUE)
+  # par: delta_tp
+  delta_tp <- data.frame(summary(f, par = "delta_tp")$summary)
+  delta_tp$plate_group_id <- seq_len(nrow(delta_tp))
+  delta_tp <- merge(x = delta_tp, y = meta_plate_group, 
+                    by = "plate_group_id", all.x = TRUE)
   
   # par: mu
   mu_well <- data.frame(summary(f, par = "mu")$summary)
@@ -127,8 +127,8 @@ get_summary <- function(x, f) {
   yhat <- merge(x = yhat, y = meta_well, by = "well_id", all.x = TRUE)
   
   return(list(alpha_p = alpha_p,
-              delta_t = mu_group, 
-              delta_tp = mu_plate_group,
+              delta_t = delta_t, 
+              delta_tp = delta_tp,
               well_mu = mu_well,
               well_kappa = kappa_well,
               kappa_mu = kappa_mu,

@@ -1,16 +1,18 @@
 \docType{package}
 \name{cellmig-package}
 \alias{cellmig-package}
-\title{cellmig: quantifying cell migration with hierarchical Bayesian models}
+\title{cellmig: quantifying cell migration soeed with hierarchical Bayesian 
+models}
 \description{
-\code{cellmig} implements Bayesian hierarchical models for migration analysis
-and quantifies condition-specific (drug effects) effects on cell velocity 
-while modeling nested data structures and technical artifacts, providing 
-uncertainty-aware estimates through credible intervals.
+The \code{cellmig} package implements Bayesian hierarchical models for the
+analysis of cell migration speed. It quantifies condition-specific effects
+(e.g., drug treatments) on cell migration speed while explicitly modeling
+nested data structures and technical artifacts, and provides uncertainty-aware
+estimates via posterior credible intervals.
 }
 \details{
 This package contains functions for modeling, clustering, and visualization
-of cell migration velocity from high-throughput migration assays.
+of cell migration speed data derived from high-throughput migration assays.
 }
 \seealso{
 Useful links:
