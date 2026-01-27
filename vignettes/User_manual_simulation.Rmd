@@ -86,25 +86,33 @@ We simulate data for an experiment with the following design:
 
 ### Setting $\alpha_p$
 
-Plate-specific batch effects are modeled by drawing the plate offset
-$\alpha_p$ from a normal distribution:
+Plate-specific batch effects are modeled by drawing six (one for each 
+plate $p$) values ($\alpha_p$) from a normal distribution with mean 
+$\mu=\exp(-0.5)\approx 0.6$ (micrometers/min) and the standard deviation 
+$\sigma=0.1$. Hence, $\alpha_p$ represents the plate-specific mean speed 
+(on log-scale) of the control treatment (offset). To simulate minimal 
+plate-specific batch effects, one can select a lower $\sigma$ (e.g. 0.01).
 
 $$
-\alpha_p \sim \text{Normal}(1.7, 0.1)
+\alpha_p \sim \text{Normal}(-0.5, 0.1)
 $$
 
-Here, $\alpha_p$ represents the log-transformed mean velocity of the
-control treatment on plate $p$. The mean (1.7) and standard deviation
-(0.1) are chosen based on experimental data. If batch effects are
-minimal, the standard deviation can be set to a smaller value (e.g.,
-0.01).
+### Defining the control treatment (*offset*)
+
+To correct for batch effects across plates, we designate one treatment
+as the reference (offset). Here, we set the offset to treatment 4 (i.e.,
+the fourth treatment group, which has $\delta_t = 0$).
+
 
 ### Setting $\kappa_w$
 
 The velocities in each well are gamma distributed, and the gamma
 distribution is defined by a rate and shape parameter. The shape
 parameter for well $w$, $\kappa_w$, controls the form or skewness of the
-distribution and, to some extent, the variability in the data.
+distribution and, to some extent, the variability in the data. Larger 
+$\kappa$ is associated with lower degree of skewness (less variable data).
+Empirically we observe $\kappa_w\approx 5$ $\rightarrow$ 
+$\log(\kappa_w)\approx 1.5$
 
 We simulate the values of $\log(\kappa_w)$ by drawing randomly from a
 normal distribution with mean ($\mu_{\kappa}$) and standard deviation
@@ -117,11 +125,6 @@ $\mu_{\kappa}$ and ${\sigma}_{\kappa}$ to point estimates set the scales
 to small values (e.g., set in `control` `prior_kappa_mu_SD`=0.01 and
 `prior_kappa_sigma_SD`).
 
-### Defining the offset
-
-To correct for batch effects across plates, we designate one treatment
-as the reference (offset). Here, we set the offset to treatment 4 (i.e.,
-the fourth treatment group, which has $\delta_t = 0$).
 
 ## Generates dataframe with simulated velocities
 
@@ -140,9 +143,9 @@ y_p <- gen_partial(control = list(N_biorep = 8,
                                   sigma_bio = 0.1, 
                                   sigma_tech = 0.05, 
                                   offset = 4,
-                                  prior_alpha_p_M = 1.7,
+                                  prior_alpha_p_M = -0.5,
                                   prior_alpha_p_SD = 0.1,
-                                  prior_kappa_mu_M = 1.7,
+                                  prior_kappa_mu_M = 1.5,
                                   prior_kappa_mu_SD = 0.1,
                                   prior_kappa_sigma_M = 0,
                                   prior_kappa_sigma_SD = 0.1))
@@ -291,9 +294,9 @@ control <- list(N_biorep = 4,
                 N_techrep = 3, 
                 N_cell = 30, 
                 N_group = 8,
-                prior_alpha_p_M = 1.7,
+                prior_alpha_p_M = -0.5,
                 prior_alpha_p_SD = 1.0,
-                prior_kappa_mu_M = 1.7,
+                prior_kappa_mu_M = 1.5,
                 prior_kappa_mu_SD = 1.0,
                 prior_kappa_sigma_M = 0,
                 prior_kappa_sigma_SD = 1.0,
@@ -301,8 +304,8 @@ control <- list(N_biorep = 4,
                 prior_sigma_bio_SD = 1.0,
                 prior_sigma_tech_M = 0.0,
                 prior_sigma_tech_SD = 1.0,
-                prior_mu_group_M = 0.0,
-                prior_mu_group_SD = 1.0)
+                prior_delta_t_M = 0.0,
+                prior_delta_t_SD = 1.0)
 ```
 
 
@@ -368,9 +371,9 @@ for(N_biorep in N_bioreps) {
                                       sigma_bio = 0.1, 
                                       sigma_tech = 0.05, 
                                       offset = offset,
-                                      prior_alpha_p_M = 1.7,
+                                      prior_alpha_p_M = -0.5,
                                       prior_alpha_p_SD = 0.1,
-                                      prior_kappa_mu_M = 1.7,
+                                      prior_kappa_mu_M = 1.5,
                                       prior_kappa_mu_SD = 0.1,
                                       prior_kappa_sigma_M = 0,
                                       prior_kappa_sigma_SD = 0.1))

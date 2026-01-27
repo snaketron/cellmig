@@ -28,7 +28,7 @@ the features of a cell:
 multiple wells.
 \item compound = character. Compound name (c1, c2, c3, etc.)
 \item dose = character. Treatment dose (0, 1, 5, 10, low, mid, high, etc.)
-\item v = numeric. Observed cell migration speed.
+\item v = numeric. Observed cell migration speed (in micrometers/min).
 \item offset = binary (0 or 1). Indicates whether a treatment should be used 
 for batch correction across plates. Default: 0 (no correction). Set to 1 for 
 specific treatment groups used as offsets, ensuring they appear on each plate.
@@ -44,18 +44,25 @@ priors with the following default values:
 \item mcmc_algorithm = "NUTS" (MCMC algorithm).
 \item adapt_delta = 0.8 (Target acceptance probability for NUTS sampler).
 \item max_treedepth = 10 (Maximum depth of tree exploration in NUTS sampler).
-\item prior_alpha_p_M = 2, prior_alpha_p_SD = 1 (prior on alpha_p: normal
-distribution mean (M) and standard deviation (SD))
+\item prior_alpha_p_M = -0.5, prior_alpha_p_SD = 1 (prior on alpha_p: normal
+distribution mean (M) and standard deviation (SD), where alpha_p represents 
+the mean (on log-scale) cell speed on plate p)
 \item prior_sigma_bio_M = 0, prior_sigma_bio_SD = 0.5 (prior on sigma_bio: 
-normal distribution mean (M) and standard deviation (SD))
+normal distribution mean (M) and standard deviation (SD), where sigma_bio 
+represents the variability between biological replicates)
 \item prior_sigma_tech_M = 0, prior_sigma_tech_SD = 0.5 (prior on sigma_tech: 
-normal distribution mean (M) and standard deviation (SD))
-\item prior_kappa_mu_M = 2, prior_kappa_mu_SD = 1 (prior on kappa_mu: 
-normal distribution mean (M) and standard deviation (SD))
+normal distribution mean (M) and standard deviation (SD), where sigma_tech 
+represents the variability between technicical replicates))
+\item prior_kappa_mu_M = 1.5, prior_kappa_mu_SD = 1 (prior on kappa_mu: 
+normal distribution mean (M) and standard deviation (SD), where kappa_mu 
+is the mean of the popoulation of shape parameter of the Gamma error model)
 \item prior_kappa_sigma_M = 0, prior_kappa_sigma_SD = 1 (prior on kappa_sigma: 
-normal distribution mean (M) and standard deviation (SD))
-\item prior_mu_group_M = 0, prior_mu_group_SD = 1 (prior on mu_group: 
-normal distribution mean (M) and standard deviation (SD))
+normal distribution mean (M) and standard deviation (SD), where kappa_sigma 
+is the standard deviation of the popoulation of shape parameter of the Gamma 
+error model)
+\item prior_delta_t_M = 0, prior_delta_t_SD = 1 (prior on delta_t: 
+normal distribution mean (M) and standard deviation (SD), where delta_t 
+represents the overall treatment effects relative to a selected control)
 }
 }
 }

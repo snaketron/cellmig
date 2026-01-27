@@ -22,7 +22,7 @@ get_pairs <- function(x, groups, exponentiate) {
   if(length(groups)==1) {
     stop("only one treatment groups provided, length(groups)>1")
   }
-  p <- extract(x$fit, par = "mu_group")$mu_group
+  p <- extract(x$fit, par = "delta_t")$delta_t
   if(ncol(p)==1) {
     stop("only one treatment group: nothing to compare")
   }
@@ -99,7 +99,7 @@ get_violins <- function(x, from_groups, to_group, exponentiate) {
   check_logical_val(y = exponentiate, par = "exponentiate")
   check_length_one(y = to_group, par = "to_group")
 
-  p <- extract(x$fit, par = "mu_group")$mu_group
+  p <- extract(x$fit, par = "delta_t")$delta_t
   if(ncol(p)==1) {
     stop("only one treatment group: nothing to compare")
   }

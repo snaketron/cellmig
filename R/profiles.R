@@ -30,7 +30,8 @@ get_dose_response_profile <- function(x,
   eg <- eg[eg$group %in% groups, ]
   es <- es[es$group %in% groups, ]
   
-  bt <- get_boot_drp(x = x, hc_dist = hc_dist, hc_link = hc_link, B = B)
+  bt <- get_boot_drp(x = x, hc_dist = hc_dist, hc_link = hc_link, 
+                     groups = groups, B = B)
   
   tree <- ggtree(bt$main, linetype='solid')+
     geom_point2(mapping = aes(subset=isTip==FALSE),size = 0.5, col = "black")+
@@ -151,31 +152,30 @@ get_boot_drp <- function(x,
                          hc_link, 
                          groups,
                          B) {
-    
-    eg <- x$posteriors$delta_t
-    
-    if(missing(groups)==FALSE) {
-        if(any(!groups %in% unique(eg$group))) {
-            stop("selected treatment groups not found in data")
-        }
-        eg <- eg[eg$group %in% groups, ]
-        
-        # meta
-        meta <- eg[, c("group_id", "compound", "dose")]
-        meta <- meta[order(meta$group_id, decreasing = FALSE),]
-    }
-    
-    eg <- x$posteriors$delta_t
   
-    q <- acast(data = eg, formula = compound~dose, value.var = "mean")
-    hc <- hclust(dist(q, method = hc_dist), method = hc_link)
-    main_ph <- as.phylo(x = hc)
-    
-    
+  eg <- x$posteriors$delta_t
+  
+  if(missing(groups)) { 
+    groups <- eg$group
+  }
+  
+  if(any(!groups %in% unique(eg$group))) {
+    stop("selected treatment groups not found in data")
+  }
+  eg <- eg[eg$group %in% groups, ]
+  
+  # meta
+  meta <- eg[, c("group_id", "compound", "dose")]
+  meta <- meta[order(meta$group_id, decreasing = FALSE),]
   
   # extract posterior
-  e <- extract(x$f, par = "mu_group")$mu_group[, gs]
+  e <- extract(x$f, par = "delta_t")$delta_t[, eg$group_id]
   e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
+  
+  # summaries
+  q <- acast(data = eg, formula = compound~dose, value.var = "mean")
+  hc <- hclust(dist(q, method = hc_dist), method = hc_link)
+  main_ph <- as.phylo(x = hc)
   
   boot_phs <- lapply(seq_len(nrow(e)), function(i) {
     u <- data.frame(g = seq_len(ncol(e)), mean = e[i, ])
@@ -208,24 +208,24 @@ get_boot_tp <- function(x,
   
   eg <- x$posteriors$delta_t
   
-  if(missing(groups)==FALSE) {
-    if(any(!groups %in% unique(eg$group))) {
-      stop("selected treatment groups not found in data")
-    }
-    eg <- eg[eg$group %in% groups, ]
+  
+  if(any(!groups %in% unique(eg$group))) {
+    stop("selected treatment groups not found in data")
   }
+  eg <- eg[eg$group %in% groups, ]
+  
+  # extract posterior
+  e <- extract(x$f, par = "delta_t")$delta_t[, eg$group_id]
+  e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
   
   # hclust -> main tree
-  gs <- eg$group_id
   gns <- eg$group
   v <- eg$mean
   names(v) <- eg$group_id
   hc <- hclust(dist(v, method = hc_dist), method = hc_link)
   main_ph <- as.phylo(x = hc)
   
-  # extract posterior
-  e <- extract(x$f, par = "mu_group")$mu_group[, gs]
-  e <- e[sample(x = seq_len(nrow(e)), size = min(nrow(e), B),replace = TRUE),]
+  
   
   boot_phs <- lapply(X = seq_len(nrow(e)), FUN = function(i) {
     hc <- hclust(dist(e[i,], method = hc_dist), method = hc_link)
@@ -237,7 +237,7 @@ get_boot_tp <- function(x,
   
   main_ph$node.label <- clades
   
-  if(all(main_ph$tip.label == gs)) {
+  if(all(main_ph$tip.label == eg$group_id)) {
     main_ph$tip.label <- gns
   }
   

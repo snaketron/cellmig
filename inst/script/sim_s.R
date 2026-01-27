@@ -8,15 +8,15 @@ control <- list(N_biorep = 3,
                           -0.2, -0.1, -0.1, +0.0, +0.2, +0.4, +0.5,
                           +0.4, +0.2, +0.1, +0.0, -0.1, -0.2, -0.4,
                           +0.6, +0.3, +0.1, +0.0, -0.1, -0.3, -0.6),
-                sigma_bio = 0.30, 
+                sigma_bio = 0.10, 
                 sigma_tech = 0.10, 
                 offset = 1,
-                prior_alpha_p_M = 1.7,
-                prior_alpha_p_SD = 0.75,
-                prior_kappa_mu_M = 1.7,
-                prior_kappa_mu_SD = 0.5,
+                prior_alpha_p_M = -0.5,
+                prior_alpha_p_SD = 0.1,
+                prior_kappa_mu_M = 1.5,
+                prior_kappa_mu_SD = 0.1,
                 prior_kappa_sigma_M = 0,
-                prior_kappa_sigma_SD = 0.3)
+                prior_kappa_sigma_SD = 0.1)
 
 y <- gen_partial(control = control)
 

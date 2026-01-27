@@ -269,7 +269,7 @@ To assess model validity, we performed posterior predictive checks,
 which showed that the simulated data (pink violin) were consistent with
 the observed data (black violins). Each dot is a cells.
 
-```{r, fig.width=5, fig.height=6}
+```{r, fig.width=6, fig.height=6}
 g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
 g+scale_y_log10()
 ```

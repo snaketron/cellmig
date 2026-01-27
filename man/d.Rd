@@ -18,9 +18,9 @@ experimental plate with identifier (column \code{plate}). The dataset
 data("d", package = "cellmig")
 }
 \format{
-  A data frame with 6,300 (cells) observations with the following features.
+  A data frame with cells (rows) having with the following features.
   \describe{
-    \item{\code{v}}{a numeric vector with cell migration speeds}
+    \item{\code{v}}{a numeric vector with cell migration speed (micrometer/min)}
     \item{\code{well}}{a character vector}
     \item{\code{compound}}{a character vector}
     \item{\code{dose}}{a character vector}

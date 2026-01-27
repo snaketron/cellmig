@@ -20,8 +20,8 @@
                           prior_sigma_bio_SD = 1,
                           prior_sigma_tech_M = 0,
                           prior_sigma_tech_SD = 1,
-                          prior_mu_group_M = 0,
-                          prior_mu_group_SD = 1))
+                          prior_delta_t_M = 0,
+                          prior_delta_t_SD = 1))
 }
 \arguments{
   \item{control}{A list configuring the MCMC sampling algorithm, and parameter
@@ -46,10 +46,9 @@ priors with the following default values:
   \item{prior_sigma_tech_M,  prior_sigma_tech_SD: Mean (M) and standard 
   deviation (SD) of a normal distribution describing the variability of
   treatment effects between technical replicates.}
-  \item{prior_mu_group_M, prior_mu_group_SD: Mean (M) and standard 
+  \item{prior_delta_t_M, prior_delta_t_SD: Mean (M) and standard 
   deviation (SD) of a normal distribution describing the population of overall 
-  treatment effects.
-}
+  treatment effects.}
 }
 }
 }
@@ -74,9 +73,9 @@ f <- gen_full(control = list(N_biorep = 3,
                              N_techrep = 3, 
                              N_cell = 50,
                              N_group = 5,
-                             prior_alpha_p_M = 1.7,
+                             prior_alpha_p_M = -0.5,
                              prior_alpha_p_SD = 1.0,
-                             prior_kappa_mu_M = 1.7,
+                             prior_kappa_mu_M = 1.5,
                              prior_kappa_mu_SD = 1.0,
                              prior_kappa_sigma_M = 0,
                              prior_kappa_sigma_SD = 1.0,
@@ -84,7 +83,7 @@ f <- gen_full(control = list(N_biorep = 3,
                              prior_sigma_bio_SD = 1.0,
                              prior_sigma_tech_M = 0.0,
                              prior_sigma_tech_SD = 1.0,
-                             prior_mu_group_M = 0.0,
-                             prior_mu_group_SD = 1.0))
+                             prior_delta_t_M = 0.0,
+                             prior_delta_t_SD = 1.0))
 str(f)
 }

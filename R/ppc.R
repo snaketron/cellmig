@@ -38,7 +38,7 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
             theme(strip.text.x = element_text(
                 margin = margin(0.02,0,0.02,0, "cm")))+
             xlab(label = "dose")+
-            scale_y_continuous(name = "Cell migration speed", 
+            scale_y_continuous(name = "Cell speed", 
                                breaks = pretty_breaks(3))
     }
     
@@ -56,7 +56,7 @@ get_ppc_violins <- function(x, wrap = FALSE, ncol = 4) {
             theme(strip.text.x = element_text(
                 margin = margin(0.02,0,0.02,0, "cm")))+
             xlab(label = "dose")+
-            scale_y_continuous(name = "Cell migration speed", 
+            scale_y_continuous(name = "Cell speed", 
                                breaks = pretty_breaks(3))
     }
     
@@ -77,8 +77,8 @@ get_ppc_means <- function(x) {
         geom_point(aes(x = v, y = mean), shape = 21, 
                    fill = "white", alpha = 0.75)+
         theme_bw(base_size = 10)+
-        xlab(label = "Observed migration + 95% HDI")+
-        ylab(label = "Predicted migration")
+        xlab(label = "Observed speed")+
+        ylab(label = "Predicted speed + 95% HDI")
     
     return(g)
 }
