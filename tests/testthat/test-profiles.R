@@ -8,63 +8,45 @@ test_that("profiles functions with invalid inputs", {
                                                       mcmc_warmup = 200,
                                                       mcmc_steps = 500)))
   groups <- get_groups(x = o)$group
-  expect_error(get_dose_response_profile(x = o, groups = groups),
+  expect_error(get_dose_response_profile(x = o, groups = groups,
+                                         exponentiate = TRUE),
                regexp = "must have n >= 2 objects to cluster")
   expect_error(get_dose_response_profile(), regexp = "x is missing or NULL")
   expect_error(get_dose_response_profile(x = o, 
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = NA,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = NULL,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = character(length = 1),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = c("average", "complete"),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = NA,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = NULL,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = character(length = 1),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = c("average", "complete"),
-                                         groups = groups))
-  
-
-  expect_no_error(get_treatment_profile(x = o, groups = groups))
-  expect_error(get_treatment_profile(), regexp = "x is missing or NULL")
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = NA,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = NULL,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = character(length = 1),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = c("average", "complete"),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = NA,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = NULL,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = character(length = 1),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = c("average", "complete"),
-                                     groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
 })
 
 
@@ -81,59 +63,40 @@ test_that("profiles functions with invalid inputs", {
   groups <- get_groups(x = o)$group
   
   
-  expect_no_error(get_dose_response_profile(x = o, groups = groups))
+  expect_no_error(get_dose_response_profile(x = o, groups = groups,
+                                            exponentiate = TRUE))
   expect_error(get_dose_response_profile(), regexp = "x is missing or NULL")
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = NA,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = NULL,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = character(length = 1),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_link = c("average", "complete"),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = NA,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = NULL,
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = character(length = 1),
-                                         groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
   expect_error(get_dose_response_profile(x = o, 
                                          hc_dist = c("average", "complete"),
-                                         groups = groups))
-  
-  
-  expect_no_error(get_treatment_profile(x = o, groups = groups))
-  expect_error(get_treatment_profile(), regexp = "x is missing or NULL")
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = NA,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = NULL,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = character(length = 1),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_link = c("average", "complete"),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = NA,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = NULL,
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = character(length = 1),
-                                     groups = groups))
-  expect_error(get_treatment_profile(x = o, 
-                                     hc_dist = c("average", "complete"),
-                                     groups = groups))
+                                         groups = groups,
+                                         exponentiate = TRUE))
 })
 
