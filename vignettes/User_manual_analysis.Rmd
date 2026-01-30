@@ -218,7 +218,7 @@ on parameters $\gamma_pt$.
 -   Error bar: 95% highest density interval (HDI)
 
 ```{r, fig.width=9.5, fig.height=5}
-get_dose_response_profile(x = o)+
+get_dose_response_profile(x = o, exponentiate = TRUE)+
   patchwork::plot_layout(widths = c(.7, 1, 4))
 ```
 
