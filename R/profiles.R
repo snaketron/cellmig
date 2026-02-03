@@ -90,7 +90,7 @@ get_dose_response_profile <- function(x,
         geom_hline(yintercept = yhline, linetype = "dashed", col = "gray")+
         facet_grid(compound~., switch = "y")+
         geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5.,
-                          plate = plate), position = position_dodge(width=0.8), 
+                          group = plate), position = position_dodge(width=0.8), 
                       width = 0, alpha = 0.5)+
         geom_point(aes(x = dose, y = mean, group = plate),
                    position = position_dodge(width = 0.8), size = 1)+

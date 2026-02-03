@@ -63,7 +63,8 @@ test_that("profiles functions with invalid inputs", {
   groups <- get_groups(x = o)$group
   
   
-  expect_no_error(get_dose_response_profile(x = o, groups = groups,
+  expect_warning(get_dose_response_profile(x = o, 
+                                            groups = groups,
                                             exponentiate = TRUE))
   expect_error(get_dose_response_profile(), regexp = "x is missing or NULL")
   expect_error(get_dose_response_profile(x = o, 
