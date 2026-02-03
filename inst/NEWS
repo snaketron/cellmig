@@ -10,3 +10,6 @@ Changes in version 0.99.11 (4 Sep, 2025)
 Changes in version 0.99.14 (5 Sep, 2025)
 + More efficient loops
 + Less repetitive code
+
+Changes in version 1.1.7 (3 Feb, 2026)
++ Stable version used for publication
