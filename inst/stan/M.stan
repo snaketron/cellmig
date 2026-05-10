@@ -21,16 +21,16 @@ data {
   real prior_kappa_mu_SD;       // prior SD of kappa_mu
   real prior_kappa_sigma_M;     // prior mean of kappa_sigma
   real prior_kappa_sigma_SD;    // prior SD of kappa_sigma
-  real prior_delta_t_M;         // prior mean of delta_t
-  real prior_delta_t_SD;        // prior SD of delta_t
+  real prior_sigma_delta_M;     // prior mean of sigma_delta
+  real prior_sigma_delta_SD;    // prior SD of sigma_delta
 }
 
 parameters {
   vector [N_plate] alpha_p;
-  vector [N_group] delta_t;
   
   real <lower=0> sigma_bio;
   real <lower=0> sigma_tech;
+  real <lower=0> sigma_delta;
   
   real kappa_mu;
   real <lower=0> kappa_sigma;
@@ -38,6 +38,7 @@ parameters {
   vector [N_well] z_1;
   vector [N_plate_group] z_2;
   vector [N_well] z_3;
+  vector [N_group] z_4;
 }
 
 transformed parameters {
@@ -45,7 +46,9 @@ transformed parameters {
   vector<lower=0> [N_well] mu;
   vector [N_well] mu_well;
   vector [N_plate_group] delta_tp;
+  vector [N_group] delta_t;
   
+  delta_t = sigma_delta * z_4;
   delta_tp = delta_t[group_id] + sigma_bio * z_2;
   for(w in 1:N_well) {
     if(offset[w]==1) {
@@ -60,14 +63,18 @@ transformed parameters {
 
 model {
   alpha_p ~ normal(prior_alpha_p_M, prior_alpha_p_SD);
-  delta_t ~ normal(prior_delta_t_M, prior_delta_t_SD);
+  kappa_mu ~ normal(prior_kappa_mu_M, prior_kappa_mu_SD);
+  
+  // scales
   sigma_bio ~ normal(prior_sigma_bio_M, prior_sigma_bio_SD);
   sigma_tech ~ normal(prior_sigma_tech_M, prior_sigma_bio_SD);
-  kappa_mu ~ normal(prior_kappa_mu_M, prior_kappa_mu_SD);
   kappa_sigma ~ normal(prior_kappa_sigma_M, prior_kappa_sigma_SD);
+  sigma_delta ~ normal(prior_sigma_delta_M, prior_sigma_delta_SD);
+  
   z_1 ~ std_normal();
   z_2 ~ std_normal();
   z_3 ~ std_normal();
+  z_4 ~ std_normal();
 
   y ~ gamma(kappa[well_id], kappa[well_id] ./ mu[well_id]);
 }

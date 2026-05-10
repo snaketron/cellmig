@@ -46,7 +46,8 @@ test_that("x parameter takes column values", {
                        control = list(mcmc_warmup = 200,
                                       mcmc_steps = 900,
                                       mcmc_chains = 2,
-                                      mcmc_cores = 2)))
+                                      mcmc_cores = 2,
+                                      adapt_delta = 0.9)))
 })
 
 

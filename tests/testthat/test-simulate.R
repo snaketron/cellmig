@@ -379,8 +379,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep is NA")
   expect_error(gen_full(control = list(N_biorep = NULL, 
                                        N_techrep = 3,
@@ -396,8 +396,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep is missing or NULL")
   expect_error(gen_full(control = list(N_techrep = 3,
                                        N_cell = 50,
@@ -412,8 +412,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = -1, 
                                        N_techrep = 3,
@@ -429,8 +429,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep must be >0")
   expect_error(gen_full(control = list(N_biorep = 1.5, 
                                        N_techrep = 3,
@@ -446,8 +446,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep must be an integer")
   expect_error(gen_full(control = list(N_biorep = Inf, 
                                        N_techrep = 3,
@@ -463,8 +463,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_biorep is infinite")
   
   
@@ -483,8 +483,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep is NA")
   expect_error(gen_full(control = list(N_techrep = NULL, 
                                        N_biorep = 3,
@@ -500,8 +500,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_cell = 50,
@@ -516,8 +516,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep is missing or NULL")
   expect_error(gen_full(control = list(N_techrep = -1, 
                                        N_biorep = 3,
@@ -533,8 +533,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep must be >0")
   expect_error(gen_full(control = list(N_techrep = 1.5, 
                                        N_biorep = 3,
@@ -550,8 +550,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep must be an integer")
   expect_error(gen_full(control = list(N_techrep = Inf, 
                                        N_biorep = 3,
@@ -567,8 +567,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_techrep is infinite")
   
   
@@ -586,8 +586,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell is NA")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
@@ -603,8 +603,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
@@ -619,8 +619,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell is missing or NULL")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
@@ -636,8 +636,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell must be >0")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
@@ -653,8 +653,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell must be an integer")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_techrep = 3,
@@ -670,8 +670,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "N_cell is infinite")
   
   expect_error(gen_full(control = list(N_biorep = 3,
@@ -688,8 +688,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
@@ -705,8 +705,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
@@ -721,8 +721,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
@@ -738,8 +738,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
@@ -755,8 +755,8 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
   expect_error(gen_full(control = list(N_biorep = 3,
                                        N_tech = 3,
@@ -772,7 +772,7 @@ test_that("get_full with wrong control entries", {
                                        prior_sigma_bio_SD = 1,
                                        prior_sigma_tech_M = 0,
                                        prior_sigma_tech_SD = 1,
-                                       prior_delta_t_M = 0,
-                                       prior_delta_t_SD = 1)),
+                                       prior_sigma_delta_M = 0,
+                                       prior_sigma_delta_SD = 1)),
                regexp = "control has missing elements")
 })

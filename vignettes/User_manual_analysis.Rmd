@@ -1,6 +1,6 @@
 ---
-title: "cellmig: quantifying cell migration speed with 
-hierarchical Bayesian models"
+title: "cellmig: Quantifying Cell Migration Velocity with 
+Hierarchical Bayesian Models"
 author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
 output:
   BiocStyle::html_document
@@ -26,30 +26,35 @@ library(ggforce)
 ggplot2::theme_set(new = theme_bw(base_size = 10))
 ```
 
-# Background
+# Introduction
 
-High-throughput tracking of cells with time-lapse microscopy enables the
-analysis of cell migration across many wells treated under different
-conditions. Such experiments generate substantial technical and biological
-variability, making technical and biological replicates necessary. This
-leads to hierarchically structured datasets: cells are nested within
-technical replicates, which in turn are nested within biological replicates.
+High-throughput time-lapse microscopy allows us to track thousands of
+cells across many wells and plates. However, these experiments generate
+complex data with multiple sources of variability:
 
-Most current statistical analyses ignore the hierarchical structure and
-do not explicitly quantify uncertainty from technical or biological
-variability. The Bioconductor package `r Biocpkg("cellmig")` addresses this
-gap by implementing Bayesian hierarchical models for cell migration
-analysis. It quantifies condition-specific changes in migration speed
-(e.g., drug effects) while modeling nested data structures, producing
-uncertainty-aware estimates through credible intervals.
+1.  **Biological variability:** Cells on different experimental plates
+    (biological replicates) behave differently even under the same
+    conditions.
 
-Currently, there are no other Bioconductor packages specialized 
-for hierarchical high-throughput cell migration data analysis. 
-`r Biocpkg("cellmig")` addresses this gap and integrates naturally into 
-the Bioconductor ecosystem.
+2.  **Technical variability:** Differences between wells on the same
+    plate.
 
+3.  **Batch effects:** Systematic differences between plates (e.g.,
+    imaging days, reagent batches).
+
+Standard statistical tests often ignore this hierarchical structure
+(cells $\rightarrow$ wells $\rightarrow$ plates), which can lead to
+false positives or missed discoveries.
+
+The Bioconductor package `r Biocpkg("cellmig")` addresses this by using
+**Bayesian hierarchical models**. It separates biological signals from
+technical noise and provides uncertainty-aware estimates (credible
+intervals) for treatment effects. This vignette guides you through
+installing `cellmig`, formatting your data, fitting a model, and
+interpreting the results.
 
 # Installation
+
 To install this package, start R (version "4.5") and enter:
 
 ```{r, eval=FALSE}
@@ -59,48 +64,57 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("cellmig")
 ```
 
+# Data Structure
 
-# Data
+## Required Columns
 
-This is how a typical cell migration data looks like $\rightarrow$ a
-table.
+| Column     | Description                            | Example                |
+|:-----------------|:--------------------------------|:--------------------|
+| `well`     | Unique well ID                         | "w1", "w2", ...        |
+| `plate`    | Unique plate ID (Biological Replicate) | "p1", "p2", ...        |
+| `compound` | Name of the compound/drug              | "DMSO", "DrugA", ...   |
+| `dose`     | Concentration or level                 | "0", "10", "high", ... |
+| `v`        | Observed migration velocity (numeric)  | 0.54 (µm/min)          |
+| `offset`   | Batch correction flag (0 or 1)         | 0 or 1                 |
 
-Each row is a **cell** with the following features:
+### Important: The `offset` Column
 
--   well = unique well ID (w1, w2, w3, etc.).
--   plate = unique plate ID (p1, p2, p3, etc.). Each plate is a
-    biological replicate. A plate contains multiple wells, some of which
-    are treated with the same compound and dose (technical replicates)
--   compound = compound name (c1, c2, c3, etc.)
--   dose = compound concentration (0, 1, 5, 10, low, mid, high, etc.)
--   v = Observed cell migration speed (numeric) in micrometers per minute
--   offset = binary (0 or 1). Indicates whether a treatment should be
-    used for batch correction across plates. By default offset = 0 (no
-    correction). Set to 1 for specific treatment groups (compound x
-    dose) used as offsets. Ensure that this treatment group appears on
-    each plate.
+To correct for plate-to-plate batch effects, you must identify a
+**control treatment** that appears on every plate (e.g., DMSO).
 
-```{r}
+-   Set `offset = 1` for cells in this control group.
+
+-   Set `offset = 0` for all other treatments.
+
+-   *Note:* The model uses this group to normalize velocities across
+    plates
+
+## Example Data
+
+We will use the simulated dataset included in the package. It contains:
+
+-   **3 Plates** (Biological replicates)
+
+-   **378 Wells** (Technical replicates nested in plates)
+
+-   **6 Compounds** at **7 Doses** (42 Treatment Groups)
+
+```{r load-data}
 data("d", package = "cellmig")
 str(d)
+head(d)
 ```
 
-In this vignette we will use simulated data from:
+# Exploratory Data Analysis
 
--   **plates** ($p$): 1, 2, ... , 3
--   **wells** ($w$): 1, 2, ... , 378
--   **cells** per well with their migration speed `v`
--   wells are treated with **compounds** 1, 2, ..., 6 at **dose** 1, 2,
-    ..., 7.
--   combination of a compound and dose is a **treatment group** ($t$)
-    $\rightarrow$ 1, 2, ..., 42.
+Before modeling, it is good practice to visualize the raw data to check
+for obvious batch effects or outliers.
 
+## Raw Cell Velocities
 
-# Visualizing raw cell speed
-
-Each dot represents a cell; y-axis is velocity. Facets represent compounds,
-x-axis represents dose. Plate is indicated by color. Technical replicates
-(wells) are stacked next to each other and have the same color.
+Each dot represents a single cell. Facets show different compounds.
+Colors indicate plates. If plate colors cluster separately within
+facets, you likely have batch effects.
 
 ```{r, fig.width=7, fig.height=6}
 ggplot(data = d)+
@@ -111,7 +125,7 @@ ggplot(data = d)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  ylab(label = "migration speed")+
+  ylab(label = "migration velocity")+
   xlab(label = '')+
   scale_color_grey()+
   guides(color = guide_legend(override.aes = list(size = 3)))+
@@ -120,9 +134,10 @@ ggplot(data = d)+
   annotation_logticks(base = 10, sides = "l")
 ```
 
-## **Mean migration speed** per well
+## Mean Velocity per Well
 
-VIsualizing mean speed within wells highlights plate-specific batch effects.
+Aggregating to the well level often makes batch effects clearer. Here,
+we see the mean velocity per well.
 
 ```{r, fig.width=7, fig.height=6}
 dm <- aggregate(v~well+plate+compound+dose, data = d, FUN = mean)
@@ -134,7 +149,7 @@ ggplot(data = dm)+
   theme_bw()+
   theme(legend.position = "top",
         strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  ylab(label = "migration speed")+
+  ylab(label = "migration velocity")+
   xlab(label = '')+
   scale_color_grey()+
   guides(color = guide_legend(override.aes = list(size = 3)))+
@@ -143,175 +158,222 @@ ggplot(data = dm)+
   annotation_logticks(base = 10, sides = "l")
 ```
 
-# `cellmig` analysis
+# Model Fitting
 
-We will use this data to infer the **overall treatment effects**
-(parameter $\delta_t$), relative to a control treatment (the offset) to
-correct for plate-specific batch effects. At the same time,
-`r Biocpkg("cellmig")` will quantify many different features of the data
-using its model parameters (e.g., variability between technical or
-biological replicates; or plate-specific treatment effects
-($\gamma_{pt}$)).
+Now we fit the hierarchical Bayesian model. The `cellmig()` function
+handles the complex Stan modeling behind the scenes.
 
-## Model fitting
+## Control Parameters
 
-We fit the Stan model employed by `r Biocpkg("cellmig")` with the
-control parameters defined in the list `control`. There are many other
-input parameters in `control`, check the `cellmig` function documentation.
+You can adjust the MCMC (Markov Chain Monte Carlo) settings via the
+`control` list.
 
-```{r, fig.width=7, fig.height=3.5}
+-   `mcmc_warmup`: Steps to tune the sampler.
+
+-   `mcmc_steps`: Actual sampling steps used for inference.
+
+-   `mcmc_chains`: Number of independent chains (recommend $\ge$ 2 for
+    convergence checks).
+
+*Note: For this vignette, we use fewer steps for speed. For real
+analysis, increase `mcmc_steps` to 2000+.*
+
+```{r fit-model, fig.width=7, fig.height=3.5}
 o <- cellmig(x = d,
-             control = list(mcmc_warmup = 300, # nr. of MCMC warmup step?
-                            mcmc_steps = 1000, # nr. of MCMC iteration steps?
-                            mcmc_chains = 2,   # nr. of MCMC chains
-                            mcmc_cores = 2))   # nr. of MCMC cores
+             control = list(mcmc_warmup = 300,  # Warmup iterations
+                            mcmc_steps = 1000,  # Sampling iterations
+                            mcmc_chains = 2,    # Number of chains
+                            mcmc_cores = 2))    # Parallel cores
 ```
 
-## What are the **overall treatment effects** ($\delta_t$) on speed?
+# Interpreting Results
 
-To extract the means, medians, and 95% Highest Density Intervals (HDIs,
-quantifying parameter value uncertainty) of $\delta_t$, we have to
-access the data.frame `delta_t` in the output object `posteriors`:
+The model output `o` contains posterior distributions for all
+parameters. We focus on the **overall treatment effects** ($\delta_t$),
+which represent the change in velocity relative to the control (offset).
 
-```{r}
-str(o$posteriors$delta_t)
+## Overall Treatment Effects ($\delta_t$)
+
+The `delta_t` data frame contains the mean, median, and 95% Highest
+Density Intervals (HDI) for each treatment.
+
+```{r view-delta}
+knitr::kable(o$posteriors$delta_t, digits = 2)
 ```
 
+### Visualizing Effects
 
-## Visualizing $\delta_t$
+-   **Dot:** Posterior mean effect.
+-   **Error Bar:** 95% HDI (Uncertainty range).
+-   **Y-axis:** Log-fold change ($\delta$).
+    -   If the error bar **crosses 0**, there is no clear evidence of an
+        effect.
+    -   **Positive values:** Increased migration.
+    -   **Negative values:** Decreased migration.
 
-It is better to visualize the mean $\delta_t$s and their 95% HDIs
-
--   Dot: Posterior mean of $\delta_t$
--   Error bar: 95% highest density interval (HDI) of $\delta$
--   $\exp(\delta)$: Fold change in cell speed relative to control
-
-As compound t=1 was selected as control (by setting offset=1), the
-treatment effects of this compounds are not shown.
-
-```{r, fig.width=6, fig.height=3.3}
-ggplot(data = o$posteriors$delta_t)+
-  geom_line(aes(x = dose, y = mean, col = compound, group = compound))+
-  geom_point(aes(x = dose, y = mean, col = compound))+
+```{r plot-delta, fig.width=6, fig.height=4}
+ggplot(data = o$posteriors$delta_t) +
+  geom_line(aes(x = dose, y = mean, col = compound, group = compound)) +
+  geom_point(aes(x = dose, y = mean, col = compound)) +
   geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5., 
-                    col = compound), width = 0.1)+
-  ylab(label = expression("Overall treatment effect ("*delta*")"))+
+                    col = compound), width = 0.1) +
+  ylab(label = expression("Log-Fold Change ("*delta*")")) +
+  xlab("Dose") +
   theme(legend.position = "top")
 ```
 
-## Dose-response `profiles`
+## From Log-Fold-Change to Fold-Change
 
-For "rectangular datasets", i.e. datasets with multiple compounds and
-overlapping doses, we can study the treatment dose-response profiles by
-hierarchical clustering based on the complete posteriors of $\delta_t$,
-account for uncertainty in this parameter.
+Log-scale values can be hard to interpret biologically. We often prefer
+**Fold-Change**, where 1 = no effect, \>1 = increase, \<1 = decrease. We
+calculate this by exponentiating the values ($\exp(\delta)$).
 
-Panel A: dendrogram constructed by hierarchical clustering with average
-linkage, based on euclidean distances between vectors of $\delta_t$
-(shown in panel B) of each compound (leaf) across doses. Branch support
-values show branch robustness (label = 1000 implies this branch was
-encountered in each of the 1000 dendrograms constructed from the
-posterior of $\delta_t$). Plate-specific treatment dose-responses based
-on parameters $\gamma_pt$.
-
--   Dot in panel B/C: Posterior mean of $\delta_t$ and $\gamma_pt$
--   Error bar: 95% highest density interval (HDI)
-
-```{r, fig.width=9.5, fig.height=5}
-get_dose_response_profile(x = o, exponentiate = TRUE)+
-  patchwork::plot_layout(widths = c(.7, 1, 4))
+```{r plot-fold-change, fig.width=6, fig.height=4}
+ggplot(data = o$posteriors$delta_t) +
+  geom_line(aes(x = dose, y = exp(mean), col = compound, group = compound)) +
+  geom_point(aes(x = dose, y = exp(mean), col = compound)) +
+  geom_errorbar(aes(x = dose, y = exp(mean), ymin = exp(X2.5.), 
+                    ymax = exp(X97.5.), col = compound), width = 0.1) +
+  ylab(label = expression("Fold Change ("*delta*"')")) +
+  xlab("Dose") +
+  theme(legend.position = "top")
 ```
 
-## Pairwise comparisons of treatment effects
+# Pairwise Comparisons
 
-Pairwise dot-plot comparison $\rightarrow$ x minus y axis
+Often, you want to compare specific treatments against each other (e.g.,
+Drug A vs. Drug B), not just against the control.
 
-(Left panel) Differences in overall treatment effects. Log fold change
-(LFC; described by parameter $\rho_{ij}$) between overall treatments
-effects ($\delta_t$) of row ($i$) vs. column ($j$) treatment groups.
-Tile colors and labels represent $\rho_{ij}$. (Right panel) Probability
-of differential treatment effect described by parameter $\pi_{ij}$. Tile
-colors and labels represent $\pi_{ij}$.
+## Comparison Matrix
 
--   x/y-axis treatment groups (combinations of compounds and doses)
--   $\rho$: Difference between treatment groups at y-x axis.
--   $\pi$: probability of observing either a completely positive or
-    negative $\rho$
+The `get_pairs()` function computes the difference between all treatment
+groups.
 
-```{r, fig.width=14, fig.height=6}
+-   $\rho$: Log-fold change difference between Treatment X and
+    Treatment Y.
+
+-   $\pi$: Probability that the effect is truly different (0 to 1).
+    Closer to 1 means strong evidence.
+
+```{r pairwise-matrix}
+# Get pairwise comparisons (log-scale)
 u <- get_pairs(x = o, exponentiate = FALSE)
-u$plot
 ```
 
-## Violin plots of pairwise differences
+### Visualize $\rho$
 
--   from_groups: vector of treatment groups to consider (combinations of
-    compounds and doses)
--   to_group: target treatment group
--   violins show the posterior distributions of the differences ($\rho$:
-    each element from `from_groups` vs. `to_group`).
--   label: probability, $\pi$, of observing completely positive or
-    negative $\rho$
+```{r pairwise-matrix}
+# vislualize matrix of rhos
+u$plot_rho
+```
 
-```{r, fig.width=7, fig.height=2.5}
-str(get_groups(x = o))
+### Visualize $\pi$
+
+```{r}
+# visualize matrix of pis
+u$plot_pi
 ```
 
 
-```{r, fig.width=7, fig.height=2.5}
-u <- get_violins(x = o, 
-                 from_groups = get_groups(x = o)$group,
-                 to_group = "C2|D1",
-                 exponentiate = FALSE)
-u$plot
+*Tip: Set `exponentiate = TRUE` to get fold-change ratios instead of
+log-differences.*
+
+## Violin Plots for Specific Comparisons
+
+To inspect the distribution of differences between a specific target
+group and all others, use `get_violins()`.
+
+```{r get-groups}
+# View available group labels
+groups <- get_groups(x = o)
+head(groups)
 ```
 
-## Posterior predictive checks (PPCs)
+```{r plot-violins, fig.width=7, fig.height=3}
+# Compare all groups against Compound 2, Dose 1
+u_violin <- get_violins(x = o, 
+                        from_groups = groups$group,
+                        to_group = "C2|D1",
+                        exponentiate = FALSE)
+u_violin$plot
+```
 
-### Compare simulated data to observed data at the **cell level**
-To assess model validity, we performed posterior predictive checks,
-which showed that the simulated data (pink violin) were consistent with
-the observed data (black violins). Each dot is a cell.
+-   **Violins:** Show the posterior distribution of the difference.
+-   **Label:** Probability ($\pi$) that the difference is non-zero.
 
-```{r, fig.width=6, fig.height=6}
+# Model Diagnostics
+
+It is crucial to verify that the model fits your data well. `cellmig`
+provides Posterior Predictive Checks (PPC).
+
+## Cell-Level Check
+
+Do the simulated velocities (pink) match the observed velocities
+(black)? If they overlap well, the model captures the data distribution.
+
+```{r ppc-cell, fig.width=6, fig.height=6}
 g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
-g+scale_y_log10()
+g + scale_y_log10()
 ```
 
-### Compare mean velocity per well
-Using posterior predictive checks we compared the mean simulated
-speed per well (y-axis) with the observed mean per well (x-axis).
-Each dot is a well.
+## Well-Level Check
 
-```{r, fig.width=4, fig.height=4}
+Does the model predict the mean velocity per well accurately? Points
+should lie close to the diagonal line.
+
+```{r ppc-well, fig.width=5, fig.height=5}
 g <- get_ppc_means(x = o)
 g
 ```
 
-## Other model parameters
+# Variance Components
 
-```{r, fig.height=2, fig.width=6}
-g_alpha_p <- ggplot(data = o$posteriors$alpha_p)+
-  geom_errorbarh(aes(y = plate_id, x = mean, xmin = X2.5., xmax = X97.5.),
-                 height = 0.1)+
-  geom_point(aes(y = plate_id, x = mean))
+You can inspect how much variability comes from different sources
+(plates, wells, treatments). This helps in planning future experiments.
 
-g_sigma <- ggplot()+
+```{r plot-variance, fig.height=3, fig.width=7}
+# Plate-specific baseline effects
+g_alpha_p <- ggplot(data = o$posteriors$alpha_p) +
+  geom_errorbarh(aes(y = plate, x = mean, xmin = X2.5., xmax = X97.5.),
+                 height = 0.2) +
+  geom_point(aes(y = plate, x = mean)) +
+  xlab("Plate Effect (log-scale)")
+
+# Variance parameters (Biological vs Technical)
+g_sigma <- ggplot() +
   geom_errorbarh(data = o$posteriors$sigma_bio,
-                 aes(y = "sigma_bio",
-                     x = mean, xmin = X2.5., xmax = X97.5.),
-                 height = 0.1)+
+                 aes(y = "Biological (Plate)",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
   geom_errorbarh(data = o$posteriors$sigma_tech,
-                 aes(y = "sigma_tech",
-                     x = mean, xmin = X2.5., xmax = X97.5.),
-                 height = 0.1)+
+                 aes(y = "Technical (Well)",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
+  geom_errorbarh(data = o$posteriors$sigma_delta,
+                 aes(y = "Treatment Variation",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
   geom_point(data = o$posteriors$sigma_bio,
-             aes(y = "sigma_bio", x = mean))+
+             aes(y = "Biological (Plate)", x = mean)) +
   geom_point(data = o$posteriors$sigma_tech,
-             aes(y = "sigma_tech", x = mean))+
-  ylab(label = '')
+             aes(y = "Technical (Well)", x = mean)) +
+  geom_point(data = o$posteriors$sigma_delta,
+             aes(y = "Treatment Variation", x = mean)) +
+  xlab("Standard Deviation")
 
-g_alpha_p|g_sigma
+g_alpha_p | g_sigma
+```
+
+# Advanced: Dose-Response Profiles
+
+For screens with multiple compounds and overlapping doses, `cellmig` can
+cluster compounds based on their dose-response similarity, accounting
+for uncertainty.
+
+-   **Left:** Dendrogram showing similarity between compounds.
+-   **Middle/Right:** Dose-response curves for overall ($\delta$) and
+    plate-specific ($\gamma$) effects.
+
+```{r dose-response, fig.width=8, fig.height=5}
+get_dose_response_profile(x = o, exponentiate = TRUE) +
+  patchwork::plot_layout(widths = c(.7, 1, 2))
 ```
 
 # Session Info

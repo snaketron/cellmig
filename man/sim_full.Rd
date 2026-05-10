@@ -21,8 +21,8 @@ distributions.
                           prior_sigma_bio_SD = 1,
                           prior_sigma_tech_M = 0,
                           prior_sigma_tech_SD = 1,
-                          prior_delta_t_M = 0,
-                          prior_delta_t_SD = 1))
+                          prior_sigma_delta_M = 0,
+                          prior_sigma_delta_SD = 1))
 }
 \arguments{
 \item{control}{
@@ -41,17 +41,17 @@ Default values are:
   Mean and standard deviation of the normal prior for the population mean
   of well-specific Gamma shape parameters.
   \item \code{prior_kappa_sigma_M}, \code{prior_kappa_sigma_SD}:
-  Mean and standard deviation of the normal prior for the population
+  Mean and standard deviation of the half-normal prior for the population
   standard deviation of well-specific Gamma shape parameters.
   \item \code{prior_sigma_bio_M}, \code{prior_sigma_bio_SD}:
-  Mean and standard deviation of the normal prior describing variability
+  Mean and standard deviation of the half-normal prior describing variability
   in treatment effects between biological replicates.
   \item \code{prior_sigma_tech_M}, \code{prior_sigma_tech_SD}:
-  Mean and standard deviation of the normal prior describing variability
+  Mean and standard deviation of the half-normal prior describing variability
   in treatment effects between technical replicates.
-  \item \code{prior_delta_t_M}, \code{prior_delta_t_SD}:
-  Mean and standard deviation of the normal prior for overall treatment
-  effects.
+  \item \code{prior_sigma_delta_M}, \code{prior_sigma_delta_SD}:
+  Mean and standard deviation of the half-normal prior describing variability
+  in treatment effects.
 }
 }
 }
@@ -87,7 +87,7 @@ f <- gen_full(control = list(N_biorep = 3,
                              prior_sigma_bio_SD = 1.0,
                              prior_sigma_tech_M = 0.0,
                              prior_sigma_tech_SD = 1.0,
-                             prior_delta_t_M = 0.0,
-                             prior_delta_t_SD = 1.0))
+                             prior_sigma_delta_M = 0.0,
+                             prior_sigma_delta_SD = 1.0))
 str(f)
 }

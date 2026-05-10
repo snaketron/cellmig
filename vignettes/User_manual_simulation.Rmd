@@ -1,11 +1,11 @@
 ---
-title: "Simulating data with cellmig"
+title: "Simulating Data with cellmig"
 author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
 output:
   BiocStyle::html_document
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{User manual: data simulation}
+  %\VignetteIndexEntry{User Manual: Data Simulation}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   markdown: 
@@ -14,200 +14,197 @@ editor_options:
 
 ```{r setup, include = FALSE, warning = FALSE}
 knitr::opts_chunk$set(comment = FALSE, 
-                      message = FALSE)
+                      message = FALSE,
+                      fig.align = "center")
 ```
 
-```{r}
+```{r load-packages, message=FALSE}
 library(cellmig)
 library(ggplot2)
 library(ggforce)
 library(patchwork)
 library(rstan)
 
+# Set a clean theme for all plots
 ggplot2::theme_set(new = theme_bw(base_size = 10))
 ```
 
-# Background
+# Introduction
 
-This vignette demonstrates how to use `r Biocpkg("cellmig")` to simulate 
-cell migration speed data under *partially* and *fully* generative models. 
+Why simulate data? Simulation is a powerful tool for:
 
-The *partially* generative model simulates cell migration speed from a 
-hierarchical Bayesian model implemented in Stan, where some model parameters 
-(e.g., derived from experimental data) are fixed by the user and the remaining 
-parameters are drawn from their prior distributions.
+1.  **Validating the model:** Ensuring `cellmig` can recover known truth
+    f rom synthetic data.
 
-The *fully* generative model simulates cell migration speed from a hierarchical 
-Bayesian model implemented in Stan, where model parameters are drawn from their 
-prior distributions.
+2.  **Experimental Design:** Performing power analysis to determine how
+    many replicates or cells you need.
 
-These simulation functionalities are useful for validating the model, exploring
-parameter variability, and guiding experimental design and power analysis.
+3.  **Understanding Variability:** Exploring how biological and
+    technical noise affect your results.
 
+This vignette demonstrates two simulation modes in `cellmig`:
 
-# Data simulation from **partially generative** model
+-   **Partially Generative:** You define the true effect sizes (e.g.,
+    drug effects). Useful for validation and power analysis.
 
-We simulate data for an experiment with the following design:
+-   **Fully Generative:** All parameters are drawn from prior
+    distributions. Useful for checking if your priors produce realistic
+    data.
 
--   Six biological replicates (plates), indexed by $p = 1, 2, \dots, 6$.
+# Partially Generative Simulation
 
--   Three technical replicates (wells) per treatment per plate, indexed
-    by $t = 1, 2, 3$.
+In this mode, you specify the "ground truth" (e.g., exactly how much a
+drug slows down cells). The model then adds realistic noise (biological
+and technical variability) to generate synthetic cell velocities.
 
--   30 cells per well.
+## Experimental Design
 
--   Seven treatment groups ($t = \{1, \dots, 7\}$) with fixed effects
-    $\delta_t = [-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4]$.
+We will simulate an experiment with the following structure:
 
--   Biological replicate variability: $\sigma_{\text{bio}} = 0.1$.
+| Parameter | Value | Description |
+|:-----------------------|:-----------------------|:-----------------------|
+| **Biological Replicates** | 8 Plates | Independent experimental runs |
+| **Technical Replicates** | 5 Wells | Wells per treatment per plate |
+| **Cells per Well** | 50 | Number of tracked cells |
+| **Treatment Groups** | 7 | Different compounds/doses |
+| **True Effects (**$\delta$) | -0.4 to 0.4 | Log-fold changes relative to control |
+| **Bio Variability (**$\sigma_{bio}$) | 0.1 | Plate-to-plate variation |
+| **Tech Variability (**$\sigma_{tech}$) | 0.05 | Well-to-well variation |
 
--   Technical replicate variability: $\sigma_{\text{tech}} = 0.05$.
+## Model Parameters
 
-## Model specification
+### Plate Effects ($\alpha_p$)
 
-### Setting $\alpha_p$
+Plates often have batch effects (e.g., one day cells move faster than
+another). We simulate this by drawing plate-specific baselines from a
+normal distribution.
 
-Plate-specific batch effects are modeled by drawing six (one for each 
-plate $p$) values ($\alpha_p$) from a normal distribution with mean 
-$\mu=\exp(-0.5)\approx 0.6$ (micrometers/min) and the standard deviation 
-$\sigma=0.1$. Hence, $\alpha_p$ represents the plate-specific mean speed 
-(on log-scale) of the control treatment (offset). To simulate minimal 
-plate-specific batch effects, one can select a lower $\sigma$ (e.g. 0.01).
+-   **Mean:** 0.0 (log-scale velocity)
 
-$$
-\alpha_p \sim \text{Normal}(-0.5, 0.1)
-$$
+-   **SD:** 0.1 (magnitude of batch effect)
 
-### Defining the control treatment (*offset*)
+### Control Treatment (Offset)
 
-To correct for batch effects across plates, we designate one treatment
-as the reference (offset). Here, we set the offset to treatment 4 (i.e.,
-the fourth treatment group, which has $\delta_t = 0$).
+To correct for batch effects, one treatment group must serve as a
+reference (control) across all plates. We designate **Treatment 4** as
+the control (true effect = 0).
 
+### Cell Velocity Distribution ($\kappa_w$)
 
-### Setting $\kappa_w$
+Cell velocities are modeled using a Gamma distribution. The shape
+parameter $\kappa$ controls the skewness:
 
-The speed in each well are gamma distributed, and the gamma
-distribution is defined by a rate and shape parameter. The shape
-parameter for well $w$, $\kappa_w$, controls the form or skewness of the
-distribution and, to some extent, the variability in the data. Larger 
-$\kappa$ is associated with lower degree of skewness (less variable data).
-Empirically we observe $\kappa_w\approx 5$ $\rightarrow$ 
-$\log(\kappa_w)\approx 1.5$
+-   **Higher** $\kappa$: Less variable, more symmetric data.
 
-We simulate the values of $\log(\kappa_w)$ by drawing randomly from a
-normal distribution with mean ($\mu_{\kappa}$) and standard deviation
-(${\sigma}_{\kappa}$). The values of $\mu_{\kappa}$ and
-${\sigma}_{\kappa}$ can either be fixed to point values, or be drawn
-from two normal distributions whose means and standard deviations are
-described by the inputs `prior_kappa_mu_M`, `prior_kappa_sigma_M`,
-`prior_kappa_mu_SD`, and `prior_kappa_sigma_SD`. To fix the values of
-$\mu_{\kappa}$ and ${\sigma}_{\kappa}$ to point estimates set the scales
-to small values (e.g., set in `control` `prior_kappa_mu_SD`=0.01 and
-`prior_kappa_sigma_SD`).
+-   **Lower** $\kappa$: More skewed data.
 
+-   **Typical value:** $\log(\kappa) \approx 1.5$ ($\kappa \approx 5$).
 
-## Generates dataframe with simulated speeds
+## Generating the Data
 
-We use the `gen_partial` function from `r Biocpkg("cellmig")` to simulate the 
-data. The function requires a control list specifying the experimental design
-and model parameters.
+We use the `gen_partial()` function. The `control` list specifies all
+design parameters.
 
-```{r}
-# set seed for reproducible results
-set.seed(seed = 1253)
-# simulate data
-y_p <- gen_partial(control = list(N_biorep = 8, 
-                                  N_techrep = 5, 
-                                  N_cell = 50, 
-                                  delta = c(-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4),
-                                  sigma_bio = 0.1, 
-                                  sigma_tech = 0.05, 
-                                  offset = 4,
-                                  prior_alpha_p_M = -0.5,
-                                  prior_alpha_p_SD = 0.1,
-                                  prior_kappa_mu_M = 1.5,
-                                  prior_kappa_mu_SD = 0.1,
-                                  prior_kappa_sigma_M = 0,
-                                  prior_kappa_sigma_SD = 0.1))
+```{r sim-partial}
+# Set seed for reproducibility
+set.seed(1253)
+
+# Generate synthetic data
+y_p <- gen_partial(control = list(
+  N_biorep = 8,                  # Number of plates
+  N_techrep = 5,                 # Wells per treatment per plate
+  N_cell = 50,                   # Cells per well
+  delta = c(-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4), # True treatment effects
+  sigma_bio = 0.1,               # Biological variability
+  sigma_tech = 0.05,             # Technical variability
+  offset = 4,                    # Index of the control treatment
+  prior_alpha_p_M = 0,           # Mean plate baseline
+  prior_alpha_p_SD = 0.1,        # SD of plate baseline
+  prior_kappa_mu_M = 1.5,        # Mean log(shape parameter)
+  prior_kappa_mu_SD = 0.1,       # SD of log(shape parameter)
+  prior_kappa_sigma_M = 0,       # Fixed sigma for shape
+  prior_kappa_sigma_SD = 0.1     # SD of sigma for shape
+))
 ```
 
-```{r}
-# see data structure
+## Inspecting the Simulated Data
+
+The output `y_p` contains the data frame `y` and the true parameters
+`par`.
+
+```{r view-sim-data}
 str(y_p$y)
 ```
 
-The output is a dataframe with columns:
+The data frame includes:
 
--   `v`: Cell speed
+-   `v`: Simulated cell velocity.
 
--   `well`: Well identifier
+-   `well`, `plate`: Hierarchical identifiers.
 
--   `plate`: Plate identifier
+-   `group`: Treatment group ID.
 
--   `group`: Treatment group
+-   `compound`, `dose`: Metadata (set to generic values in simulation).
 
--   `compound`: Compound identifier (same as group in this simulation)
+## Visualizing Simulated Data
 
--   `dose`: Dose level (not used in this simulation, set to "X")
+Let's plot the raw cell velocities. Colors represent plates. If batch
+effects are present, you might see plate colors clustering at different
+heights.
 
-**Visualizing the simulated data**
-
-We can visualize the simulated cell speeds using scatter plots, with
-points jittered by well and colored by plate.
-
-```{r, fig.width=7, fig.height=3}
-ggplot(data = y_p$y)+
+```{r plot-sim-raw, fig.width=7, fig.height=3}
+ggplot(data = y_p$y) +
   geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
-                y = v, group = well), size = 0.5)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_color_grey(name = "plate")+
-  scale_y_log10()
+                y = v, group = well), size = 0.5) +
+  xlab("Treatment Group") +
+  ylab("Migration Speed (µm/min)") +
+  scale_color_grey(name = "Plate") +
+  scale_y_log10() +
+  theme(legend.position = "top")
 ```
 
-Alternatively, we can visualize the well-specific mean speeds to
-highlight plate-specific batch effects:
+We can also look at **mean well velocities** to see batch effects more
+clearly:
 
-```{r, fig.width=7, fig.height=3}
-ggplot(data = aggregate(v~well+group+plate, data = y_p$y, FUN = mean))+
+```{r plot-sim-well, fig.width=7, fig.height=3}
+well_means <- aggregate(v ~ well + group + plate, data = y_p$y, FUN = mean)
+
+ggplot(data = well_means) +
   geom_sina(aes(x = paste0("t=", group), col = paste0("p=", plate), 
-                y = v, group = well), size = 1)+
-  theme_bw()+
-  theme(legend.position = "top",
-        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
-  xlab(label = "dose")+
-  ylab(label = "migration speed")+
-  guides(color = guide_legend(override.aes = list(size = 3)))+
-  scale_y_log10()+
-  scale_color_grey(name = "plate")
+                y = v, group = well), size = 1) +
+  xlab("Treatment Group") +
+  ylab("Mean Well Speed") +
+  scale_color_grey(name = "Plate") +
+  scale_y_log10() +
+  theme(legend.position = "top")
 ```
 
-### Analyzing simulated data with `r Biocpkg("cellmig")`
+## Analyzing Simulated Data
 
-The simulated data must be formatted to match the input requirements of
-`r Biocpkg("cellmig")`. Specifically, we need to convert some columns to 
-character and add an `offset` column indicating the reference treatment.
+To verify the model works, we analyze the synthetic data just like real
+experimental data.
 
-```{r, fig.width=7, fig.height=3.5}
+**Important:** We must format the data correctly:
+
+1.  Convert IDs to characters.
+2.  Create an `offset` column (1 for control, 0 for others).
+
+```{r format-sim-data}
 sim_data <- y_p$y
 
-# format simulated data to be used as input in cellmig
+# Format columns
 sim_data$well <- as.character(sim_data$well)
 sim_data$compound <- as.character(sim_data$compound)
 sim_data$plate <- as.character(sim_data$plate)
+
+# Define offset (Control = Group 4)
 sim_data$offset <- 0
-sim_data$offset[sim_data$group=="4"] <- 1
+sim_data$offset[sim_data$group == 4] <- 1
 ```
 
-We now analyze the simulated data using `r Biocpkg("cellmig")` with the 
-following control parameters:
+Now we fit the model:
 
-```{r, fig.width=7, fig.height=3.5}
+```{r fit-sim-data, fig.width=7, fig.height=3.5}
 osd <- cellmig(x = sim_data,
                control = list(mcmc_warmup = 250,
                               mcmc_steps = 800,
@@ -218,199 +215,233 @@ osd <- cellmig(x = sim_data,
                               max_treedepth = 10))
 ```
 
-### Comparing simulated vs. inferred parameters
+## Validation: Truth vs. Inference
 
-We compare the inferred parameters (posterior means and 95% HDIs) with
-the true values used in the simulation.
+Does `cellmig` recover the true parameters we set? We compare the
+**posterior estimates** (dots + error bars) against the **true values**
+(red dots).
 
-#### Plate-specific offsets ($\alpha_p$)
+### Plate Effects ($\alpha_p$)
 
-```{r, fig.width=4, fig.height=2}
-ggplot(data = osd$posteriors$alpha_p)+
-  geom_point(aes(y = plate_id, x = exp(mean)))+
+The model should recover the plate-specific baselines.
+
+```{r check-alpha, fig.width=5, fig.height=3}
+ggplot(data = osd$posteriors$alpha_p) +
+  geom_point(aes(y = plate_id, x = exp(mean))) +
   geom_errorbarh(aes(y = plate_id, x = exp(mean), xmin = exp(X2.5.), 
-                     xmax = exp(X97.5.)), height = 0.1)+
+                     xmax = exp(X97.5.)), height = 0.1) +
+  # Overlay true values in red
   geom_point(data = data.frame(v = exp(y_p$par$alpha_p),
                                plate = osd$posteriors$alpha_p$plate_id),
-             aes(y = plate, x = v), col = "red")+
-  scale_y_continuous(breaks = osd$posteriors$alpha_p$plate_id)+
-  xlab(label = expression(alpha[p]*"'"))
+             aes(y = plate, x = v), col = "red", size = 2) +
+  xlab(label = expression("Plate Baseline ("*alpha[p]*"')")) +
+  ylab("Plate ID") +
+  scale_y_continuous(breaks = osd$posteriors$alpha_p$plate_id)
 ```
 
-#### Effect sizes ($\delta_t$)
+### Treatment Effects ($\delta_t$)
 
-```{r, fig.width=4, fig.height=2.5}
-ggplot(data = osd$posteriors$delta_t)+
-  geom_point(aes(y = group_id, x = mean))+
+The model should recover the true log-fold changes we defined in
+`delta`.
+
+```{r check-delta, fig.width=5, fig.height=3}
+# Note: Group 4 is the control (offset), so it is not estimated
+ggplot(data = osd$posteriors$delta_t) +
+  geom_point(aes(y = group_id, x = mean)) +
   geom_errorbarh(aes(y = group_id, x = mean, xmin = X2.5., xmax = X97.5.), 
-                 height = 0.1)+
+                 height = 0.1) +
+  # Overlay true values (excluding control)
   geom_point(data = data.frame(delta = c(-0.4, -0.2, -0.1, 0.1, 0.2, 0.4), 
                                group_id = 1:6),
-             aes(y = group_id, x = delta), col = "red")+
-  xlab(label = expression(delta[t]))+
-  ylab(label = "treatment")+
+             aes(y = group_id, x = delta), col = "red", size = 2) +
+  xlab(label = expression("Treatment Effect ("*delta[t]*")")) +
+  ylab("Treatment Group") +
   scale_y_continuous(breaks = 1:8)
 ```
 
-#### Biological ($\sigma_{bio}$) and technical ($\sigma_{tech}$) variability 
+### Variability Parameters
 
-```{r, fig.width=4, fig.height=2}
-plot(osd$fit, par = c("sigma_bio", "sigma_tech"))
+Check if the estimated biological and technical noise matches the input.
+
+```{r check-sigma, fig.width=5, fig.height=3}
+plot(osd$fit, par = c("sigma_bio", "sigma_tech", "sigma_delta"))
 ```
 
+# Fully Generative Simulation
 
+In this mode, **no parameters are fixed**. Everything (including
+treatment effects) is drawn from the prior distributions. This generates
+data from the **prior predictive distribution**.
 
-# Data simulation from **fully generative** model 
-We can also use `r Biocpkg("cellmig")` to generate cell speeds from 
-the prior distributions of the parameters $\rightarrow$ data from prior 
-predictive distribution.
+**Use Case:** Check if your priors produce realistic data before
+collecting any real samples. If the simulated velocities are
+biologically impossible (e.g., 1000 µm/min), your priors may need
+adjustment.
 
-In this scenario, the parameters, such as $\delta_t$, will not be fixed to
-point values but rather generated from their priors.
+## Model Specification
 
-## Model specification
+We define priors for all parameters instead of fixed values.
 
-```{r}
-control <- list(N_biorep = 4, 
-                N_techrep = 3, 
-                N_cell = 30, 
-                N_group = 8,
-                prior_alpha_p_M = -0.5,
-                prior_alpha_p_SD = 1.0,
-                prior_kappa_mu_M = 1.5,
-                prior_kappa_mu_SD = 1.0,
-                prior_kappa_sigma_M = 0,
-                prior_kappa_sigma_SD = 1.0,
-                prior_sigma_bio_M = 0.0,
-                prior_sigma_bio_SD = 1.0,
-                prior_sigma_tech_M = 0.0,
-                prior_sigma_tech_SD = 1.0,
-                prior_delta_t_M = 0.0,
-                prior_delta_t_SD = 1.0)
+```{r sim-full-control}
+control_full <- list(
+  N_biorep = 4, 
+  N_techrep = 3, 
+  N_cell = 30, 
+  N_group = 8,
+  # Priors for plate baselines
+  prior_alpha_p_M = -0.5,
+  prior_alpha_p_SD = 1.0,
+  # Priors for Gamma shape
+  prior_kappa_mu_M = 1.5,
+  prior_kappa_mu_SD = 1.0,
+  prior_kappa_sigma_M = 0,
+  prior_kappa_sigma_SD = 1.0,
+  # Priors for variability
+  prior_sigma_bio_M = 0.0,
+  prior_sigma_bio_SD = 1.0,
+  prior_sigma_tech_M = 0.0,
+  prior_sigma_tech_SD = 1.0,
+  prior_sigma_delta_M = 0.0,
+  prior_sigma_delta_SD = 1.0
+)
 ```
 
+## Generate Data
 
-
-```{r}
-# generate data
-y_f <- gen_full(control = control)
-```
-
-The generate data has a similar structure as before:
-
-```{r}
+```{r sim-full}
+y_f <- gen_full(control = control_full)
 str(y_f)
 ```
 
+## Comparing Simulation Modes
 
+Do the two simulation modes produce similar ranges of cell velocities?
 
-## Compare density of speeds from partially vs. fully generative models
-
-```{r, fig.width=4, fig.height=4}
+```{r compare-sim-modes, fig.width=5, fig.height=5}
+# Compare a subset of velocities
 w <- data.frame(v_f = y_f$y$v[1:2000], v_p = y_p$y$v[1:2000])
- ggplot(data = w)+
-    geom_point(aes(x = v_f, y = v_p), size = 0.5)+
-    geom_density_2d(aes(x = v_f, y = v_p), col = "orange")+
-    scale_x_log10(name = "Speed from fully generative model", 
-                  limits = c(0.01, 10^4))+
-    scale_y_log10(name = "Speed from partially generative model", 
-                  limits = c(0.01, 10^4))+
-    annotation_logticks(base = 10, sides = "lb")+
-    theme_bw(base_size = 10)
+
+ggplot(data = w) +
+  geom_point(aes(x = v_f, y = v_p), size = 0.5, alpha = 0.5) +
+  geom_density_2d(aes(x = v_f, y = v_p), col = "orange") +
+  scale_x_log10(name = "Fully Generative Speed", limits = c(0.01, 10^4)) +
+  scale_y_log10(name = "Partially Generative Speed", limits = c(0.01, 10^4)) +
+  annotation_logticks(base = 10, sides = "lb") +
+  theme_bw()
 ```
 
-# Power analysis
-How many biological replicates do we need to capture certain effect size 
-($\delta$)? Similar question can be asked in order to optimize the number 
-of technical replicates or the number of cells per well.
+# Power Analysis
 
-The code below takes considerable time to be executed. This is because we 
-generate N_biorep times N_sim datasets and fit a model. To avoid this during
-R-package checks, the following chunks will not be evaluated. Do this 
-yourselves.
+One of the most practical uses of simulation is **power analysis**.
+*Question:* How many biological replicates (plates) do I need to detect
+a specific effect size?
 
-**Important note**: using multicore execution you can considerably speed-up 
-this analysis!
+We can answer this by:
 
-```{r, eval = FALSE, message=FALSE, warning=FALSE}
-# Constants
-N_bioreps <- c(3, 6, 9)
-N_sim <- 10
-true_deltas <- c(-0.3, -0.15, 0, 0.2, 0.4)
-offset <- 3
+1.  Simulating many datasets with varying numbers of replicates.
 
-# power analysis
-deltas <- vector(mode = "list", length = length(N_bioreps)*N_sim)
+2.  Fitting the model to each.
+
+3.  Checking how often the model correctly identifies the true effect
+    (True Positive Rate).
+
+**Note:** The code below is computationally intensive (it fits many
+models). It is set to `eval = FALSE` for this vignette. You can run it
+locally to perform your own power analysis. **Tip:** Use multiple cores
+(`mcmc_cores`) to speed this up!
+
+## Simulation Loop
+
+```{r power-analysis, eval = FALSE, message=FALSE, warning=FALSE}
+# --- Configuration ---
+N_bioreps <- c(3, 6, 9)      # Replicate scenarios to test
+N_sim <- 10                  # Number of simulations per scenario
+true_deltas <- c(-0.3, -0.15, 0, 0.2, 0.4) # Effects to test
+offset <- 3                  # Control group index
+
+# Store results
+deltas <- vector(mode = "list", length = length(N_bioreps) * N_sim)
 i <- 1
+
 for(N_biorep in N_bioreps) {
   for(b in 1:N_sim) {
-    # simulate data
-    y_p <- gen_partial(control = list(N_biorep = N_biorep, 
-                                      N_techrep = 3, 
-                                      N_cell = 40, 
-                                      delta = true_deltas,
-                                      sigma_bio = 0.1, 
-                                      sigma_tech = 0.05, 
-                                      offset = offset,
-                                      prior_alpha_p_M = -0.5,
-                                      prior_alpha_p_SD = 0.1,
-                                      prior_kappa_mu_M = 1.5,
-                                      prior_kappa_mu_SD = 0.1,
-                                      prior_kappa_sigma_M = 0,
-                                      prior_kappa_sigma_SD = 0.1))
     
-    # format simulated data to be used as input in cellmig
+    # 1. Simulate data
+    y_p <- gen_partial(control = list(
+      N_biorep = N_biorep, 
+      N_techrep = 3, 
+      N_cell = 40, 
+      delta = true_deltas,
+      sigma_bio = 0.1, 
+      sigma_tech = 0.05, 
+      offset = offset,
+      prior_alpha_p_M = -0.5,
+      prior_alpha_p_SD = 0.1,
+      prior_kappa_mu_M = 1.5,
+      prior_kappa_mu_SD = 0.1,
+      prior_kappa_sigma_M = 0,
+      prior_kappa_sigma_SD = 0.1
+    ))
+    
+    # 2. Format data
     sim_data <- y_p$y
     sim_data$well <- as.character(sim_data$well)
     sim_data$compound <- as.character(sim_data$compound)
     sim_data$plate <- as.character(sim_data$plate)
     sim_data$offset <- 0
-    sim_data$offset[sim_data$group==offset] <- 1
+    sim_data$offset[sim_data$group == offset] <- 1
     
-    # run cellmig
+    # 3. Fit model
     o <- cellmig(x = sim_data,
-                   control = list(mcmc_warmup = 300,
-                                  mcmc_steps = 1000,
-                                  mcmc_chains = 1,
-                                  mcmc_cores = 1,
-                                  mcmc_algorithm = "NUTS",
-                                  adapt_delta = 0.8,
-                                  max_treedepth = 10))
+                 control = list(mcmc_warmup = 300,
+                                mcmc_steps = 1000,
+                                mcmc_chains = 1,
+                                mcmc_cores = 1, # Increase for speed
+                                mcmc_algorithm = "NUTS",
+                                adapt_delta = 0.8,
+                                max_treedepth = 10))
     
+    # 4. Evaluate Performance
     delta <- o$posteriors$delta_t
     delta$b <- b
     delta$N_biorep <- N_biorep
     delta$true_deltas <- true_deltas[-offset]
+    
+    # True Positive: HDI excludes 0 AND includes true value
     delta$TP <- (delta$X2.5. <= delta$true_deltas & 
                    delta$X97.5. >= delta$true_deltas) &
       !(delta$X2.5. <= 0 & delta$X97.5. >= 0)
+    
     deltas[[i]] <- delta
     i <- i + 1
   }
 }
 
-rm(i, delta, o, sim_data, y_p, b, N_biorep, offset, true_deltas)
-
+# Combine results
 deltas <- do.call(rbind, deltas)
 ```
 
-What do you see? For Large effect ($|\delta_t|>>0$) we need few biological 
-replicates to capture the true effect and not the null effect ($\delta_t=0$),
-i.e., in nearly all simulations we have a true positive. For smaller effects,
-this is not the case, and we probably need many more biological replicates
-to each a high true positive rate.
+## Interpreting Results
 
-```{r, eval = FALSE, fig.height=3, fig.width = 6}
-ggplot(data = aggregate(TP~N_biorep+true_deltas, data = deltas, FUN = sum))+
+When you run this analysis, you will typically observe:
+
+-   **Large Effects** (e.g., $|\delta| > 0.3$): Detected reliably even
+    with few replicates (High True Positive rate).
+
+-   **Small Effects** (e.g., $|\delta| < 0.2$): Require many biological
+    replicates to distinguish from noise.
+
+```{r plot-power, eval = FALSE, fig.height=4, fig.width = 7}
+ggplot(data = aggregate(TP ~ N_biorep + true_deltas, data = deltas, FUN = sum)) +
   geom_point(aes(x = N_biorep, y = TP, col = abs(true_deltas), 
-                 group = as.factor(true_deltas)), size = 2, alpha = 0.5)+
+                 group = as.factor(true_deltas)), size = 2, alpha = 0.5) +
   geom_line(aes(x = N_biorep, y = TP, col = abs(true_deltas), 
-                group = as.factor(true_deltas)), alpha = 0.5)+
-  ylab(label = "Number of true positives (TPs)")+
-  scale_color_distiller(name = expression("|"*delta[t]*"|"),palette="Spectral")+
-  theme_bw(base_size = 10)
+                group = as.factor(true_deltas)), alpha = 0.5) +
+  ylab("Number of True Positives (TPs)") +
+  xlab("Number of Biological Replicates") +
+  scale_color_distiller(name = expression("|"*delta[t]*"|"), palette = "Spectral") +
+  theme_bw()
 ```
-
 
 # Session Info
 

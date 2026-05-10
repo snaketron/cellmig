@@ -4,18 +4,18 @@ data {
     int<lower=0> N_well_reps;       // number groups
     int offset;
     // priors
-    real prior_alpha_p_M;         // prior mean of alpha_p
-    real prior_alpha_p_SD;        // prior SD of alpha_p
-    real prior_sigma_bio_M;       // prior mean of sigma_bio
-    real prior_sigma_bio_SD;      // prior SD of sigma_bio
-    real prior_sigma_tech_M;      // prior mean of sigma_tech
-    real prior_sigma_tech_SD;     // prior SD of sigma_tech
-    real prior_kappa_mu_M;        // prior mean of kappa_mu
-    real prior_kappa_mu_SD;       // prior SD of kappa_mu
-    real prior_kappa_sigma_M;     // prior mean of kappa_sigma
-    real prior_kappa_sigma_SD;    // prior SD of kappa_sigma
-    real prior_delta_t_M;        // prior mean of delta_t
-    real prior_delta_t_SD;       // prior SD of delta_t
+    real prior_alpha_p_M;              // prior mean of alpha_p
+    real prior_alpha_p_SD;             // prior SD of alpha_p
+    real prior_sigma_bio_M;            // prior mean of sigma_bio
+    real prior_sigma_bio_SD;           // prior SD of sigma_bio
+    real prior_sigma_tech_M;           // prior mean of sigma_tech
+    real prior_sigma_tech_SD;          // prior SD of sigma_tech
+    real prior_kappa_mu_M;             // prior mean of kappa_mu
+    real prior_kappa_mu_SD;            // prior SD of kappa_mu
+    real prior_kappa_sigma_M;          // prior mean of kappa_sigma
+    real prior_kappa_sigma_SD;         // prior SD of kappa_sigma
+    real prior_sigma_delta_M;          // prior M of prior_sigma_delta
+    real prior_sigma_delta_SD;         // prior SD of prior_sigma_delta
 }
 
 transformed data {
@@ -36,22 +36,25 @@ generated quantities {
     vector [N_well] mu_well;
     real <lower=0> sigma_bio;
     real <lower=0> sigma_tech;
+    real <lower=0> sigma_delta;
     vector [N_plate] alpha_p;
     vector [N_group] delta_t;
     real kappa_mu;
     real kappa_sigma;
     int well_id;
     
+    sigma_delta = abs(normal_rng(prior_sigma_delta_M, prior_sigma_delta_SD));
+    sigma_bio = abs(normal_rng(prior_sigma_bio_M, prior_sigma_bio_SD));
+    sigma_tech = abs(normal_rng(prior_sigma_tech_M, prior_sigma_tech_SD));
+    kappa_mu = normal_rng(prior_kappa_mu_M, prior_kappa_mu_SD);
+    kappa_sigma = abs(normal_rng(prior_kappa_sigma_M, prior_kappa_sigma_SD));
+    
     for(i in 1:N_plate) {
         alpha_p[i] = normal_rng(prior_alpha_p_M, prior_alpha_p_SD);
     }
     for(i in 1:N_group) {
-        delta_t[i] = normal_rng(prior_delta_t_M, prior_delta_t_SD);
+        delta_t[i] = normal_rng(0.0, sigma_delta);
     }
-    sigma_bio = abs(normal_rng(prior_sigma_bio_M, prior_sigma_bio_SD));
-    sigma_tech = abs(normal_rng(prior_sigma_tech_M, prior_sigma_bio_SD));
-    kappa_mu = normal_rng(prior_kappa_mu_M, prior_kappa_mu_SD);
-    kappa_sigma = abs(normal_rng(prior_kappa_sigma_M, prior_kappa_sigma_SD));
     
     well_id = 1;
     for(g in 1:N_group) {
