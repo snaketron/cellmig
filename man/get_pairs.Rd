@@ -1,6 +1,6 @@
 \name{get_pairs}
 \alias{get_pairs}
-\title{Pairwise comparison of treatment effects on cell migration speed}
+\title{Quantitative and visual comparison of overall treatment effects}
 \usage{
 get_pairs(x, groups, exponentiate)
 }
@@ -28,6 +28,8 @@ A list containing:
   treatment group pairs.
   \item \code{plot_pi}: A heatmap (ggplot2 object) of \eqn{\pi} values for all
   treatment group pairs.
+  \item \code{plot_volcano}: A volcano plot (ggplot2 object) of \eqn{\pi} vs.
+  \\eqn{\rho} for all treatment group pairs.
 }
 }
 \description{

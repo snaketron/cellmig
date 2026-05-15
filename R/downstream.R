@@ -68,7 +68,7 @@ get_pairs <- function(x, groups, exponentiate) {
     ylab(label = '')
   
   if(exponentiate==FALSE) {
-    g <- ggplot(data = ds)+
+    g_rho <- ggplot(data = ds)+
       geom_tile(aes(y = group_x, x = group_y, fill = rho_M), col = "white")+
       geom_text(aes(y = group_x, x = group_y, 
                     label = round(x = rho_M, digits = 1)), size = 2)+
@@ -78,9 +78,17 @@ get_pairs <- function(x, groups, exponentiate) {
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
       xlab(label = '')+
       ylab(label = '')
+    
+    g_volcano <- ggplot(data = ds)+
+        geom_errorbar(aes(x = rho_M, y = pmax, xmin = rho_L95, 
+                          xmax = rho_H95), col = "gray")+
+        geom_point(aes(x = rho_M, y = pmax), size = 1.5, shape = 21, 
+                   fill = "white", col = "black")+
+        ylab(label = expression(pi))+
+        xlab(label = expression(rho))
   } 
   else {
-    g <- ggplot(data = ds)+
+    g_rho <- ggplot(data = ds)+
       geom_tile(aes(y = group_x, x = group_y, fill = rho_M_exp), col = "white")+
       geom_text(aes(y = group_x, x = group_y, 
                     label = round(x = rho_M_exp, digits = 1)), size = 2)+
@@ -90,8 +98,21 @@ get_pairs <- function(x, groups, exponentiate) {
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
       xlab(label = '')+
       ylab(label = '')
+    
+    g_volcano <- ggplot(data = ds)+
+        geom_errorbar(aes(x = exp(rho_M), y = pmax, xmin = exp(rho_L95), 
+                          xmax = exp(rho_H95)), col = "gray")+
+        geom_point(aes(x = exp(rho_M), y = pmax), size = 1.5, shape = 21, 
+                   fill = "white", col = "black")+
+        ylab(label = expression(pi))+
+        xlab(label = expression(rho*"'"))+
+        scale_x_log10()+
+        annotation_logticks(base = 10, sides = "b")
   }
-  return(list(ds = ds, plot_rho = g, plot_pi = g_pi))
+  return(list(ds = ds, 
+              plot_rho = g_rho, 
+              plot_pi = g_pi, 
+              plot_volcano = g_volcano))
 }
 
 get_violins <- function(x, from_groups, to_group, exponentiate) {

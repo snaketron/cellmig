@@ -255,14 +255,14 @@ groups.
 -   $\pi$: Probability that the effect is truly different (0 to 1).
     Closer to 1 means strong evidence.
 
-```{r pairwise-matrix}
+```{r}
 # Get pairwise comparisons (log-scale)
 u <- get_pairs(x = o, exponentiate = FALSE)
 ```
 
 ### Visualize $\rho$
 
-```{r pairwise-matrix}
+```{r}
 # vislualize matrix of rhos
 u$plot_rho
 ```
@@ -274,6 +274,13 @@ u$plot_rho
 u$plot_pi
 ```
 
+
+### Visualize $\rho$ vs. $\pi$ with a volcano plot
+
+```{r}
+# visualize volcano plot
+u$plot_volcano
+```
 
 *Tip: Set `exponentiate = TRUE` to get fold-change ratios instead of
 log-differences.*
