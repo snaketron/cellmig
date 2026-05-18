@@ -29,7 +29,7 @@ A list containing:
   \item \code{plot_pi}: A heatmap (ggplot2 object) of \eqn{\pi} values for all
   treatment group pairs.
   \item \code{plot_volcano}: A volcano plot (ggplot2 object) of \eqn{\pi} vs.
-  \\eqn{\rho} for all treatment group pairs.
+  \eqn{\rho} for all treatment group pairs.
 }
 }
 \description{

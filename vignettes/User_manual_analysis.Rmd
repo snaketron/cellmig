@@ -23,6 +23,7 @@ knitr::opts_chunk$set(comment = FALSE,
 library(cellmig)
 library(ggplot2)
 library(ggforce)
+library(rstan)
 ggplot2::theme_set(new = theme_bw(base_size = 10))
 ```
 
@@ -82,22 +83,22 @@ BiocManager::install("cellmig")
 To correct for plate-to-plate batch effects, you must identify a
 **control treatment** that appears on every plate (e.g., DMSO).
 
--   Set `offset = 1` for cells in this control group.
+- Set `offset = 1` for cells in this control group.
 
--   Set `offset = 0` for all other treatments.
+- Set `offset = 0` for all other treatments.
 
--   *Note:* The model uses this group to normalize velocities across
-    plates
+- *Note:* The model uses this group to normalize velocities across
+  plates
 
 ## Example Data
 
 We will use the simulated dataset included in the package. It contains:
 
--   **3 Plates** (Biological replicates)
+- **3 Plates** (Biological replicates)
 
--   **378 Wells** (Technical replicates nested in plates)
+- **378 Wells** (Technical replicates nested in plates)
 
--   **6 Compounds** at **7 Doses** (42 Treatment Groups)
+- **6 Compounds** at **7 Doses** (42 Treatment Groups)
 
 ```{r load-data}
 data("d", package = "cellmig")
@@ -108,7 +109,8 @@ head(d)
 # Exploratory Data Analysis
 
 Before modeling, it is good practice to visualize the raw data to check
-for obvious batch effects or outliers.
+for obvious batch effects, outliers, multimodal distributions, or other
+imaging- related effects.
 
 ## Raw Cell Velocities
 
@@ -168,12 +170,12 @@ handles the complex Stan modeling behind the scenes.
 You can adjust the MCMC (Markov Chain Monte Carlo) settings via the
 `control` list.
 
--   `mcmc_warmup`: Steps to tune the sampler.
+- `mcmc_warmup`: Steps to tune the sampler.
 
--   `mcmc_steps`: Actual sampling steps used for inference.
+- `mcmc_steps`: Actual sampling steps used for inference.
 
--   `mcmc_chains`: Number of independent chains (recommend $\ge$ 2 for
-    convergence checks).
+- `mcmc_chains`: Number of independent chains (recommend $\ge$ 2 for
+  convergence checks).
 
 *Note: For this vignette, we use fewer steps for speed. For real
 analysis, increase `mcmc_steps` to 2000+.*
@@ -203,13 +205,13 @@ knitr::kable(o$posteriors$delta_t, digits = 2)
 
 ### Visualizing Effects
 
--   **Dot:** Posterior mean effect.
--   **Error Bar:** 95% HDI (Uncertainty range).
--   **Y-axis:** Log-fold change ($\delta$).
-    -   If the error bar **crosses 0**, there is no clear evidence of an
-        effect.
-    -   **Positive values:** Increased migration.
-    -   **Negative values:** Decreased migration.
+- **Dot:** Posterior mean effect.
+- **Error Bar:** 95% HDI (Uncertainty range).
+- **Y-axis:** Log-fold change ($\delta$).
+  - If the error bar **crosses 0**, there is no clear evidence of an
+    effect.
+  - **Positive values:** Increased migration.
+  - **Negative values:** Decreased migration.
 
 ```{r plot-delta, fig.width=6, fig.height=4}
 ggplot(data = o$posteriors$delta_t) +
@@ -249,11 +251,10 @@ Drug A vs. Drug B), not just against the control.
 The `get_pairs()` function computes the difference between all treatment
 groups.
 
--   $\rho$: Log-fold change difference between Treatment X and
-    Treatment Y.
-
--   $\pi$: Probability that the effect is truly different (0 to 1).
-    Closer to 1 means strong evidence.
+- $\rho$: Log-fold change difference between Treatment X and Treatment
+  Y.  
+- $\pi$: Probability that the effect is truly different (0 to 1). Closer
+  to 1 means strong evidence.
 
 ```{r}
 # Get pairwise comparisons (log-scale)
@@ -273,7 +274,6 @@ u$plot_rho
 # visualize matrix of pis
 u$plot_pi
 ```
-
 
 ### Visualize $\rho$ vs. $\pi$ with a volcano plot
 
@@ -305,25 +305,43 @@ u_violin <- get_violins(x = o,
 u_violin$plot
 ```
 
--   **Violins:** Show the posterior distribution of the difference.
--   **Label:** Probability ($\pi$) that the difference is non-zero.
+- **Violins:** Show the posterior distribution of the difference.
+- **Label:** Probability ($\pi$) that the difference is non-zero.
 
-# Model Diagnostics
+# Model Diagnostics and Calibration
+
+Reliable uncertainty quantification requires verifying that the model
+fits the data well and that probability metrics ($\pi$) are calibrated
+to your experimental design. `cellmig` provides tools for both.
+
+## Posterior Predictive Checks (PPC)
+
+PPCs compare observed data to data simulated from the fitted model. If
+the model is well-specified, the simulated data (pink) should overlap
+the observed data (black).
 
 It is crucial to verify that the model fits your data well. `cellmig`
 provides Posterior Predictive Checks (PPC).
 
-## Cell-Level Check
+**Interpretation:**
+
+- **Good Fit**: Observed points fall within the pink violin densities;
+  well-means cluster near the diagonal.
+
+- **Bad Fit**: Systematic deviations suggest the model may not be valid
+  and the outputs (parameter values) should not be trusted!
+
+### Cell-Level Check
 
 Do the simulated velocities (pink) match the observed velocities
 (black)? If they overlap well, the model captures the data distribution.
 
-```{r ppc-cell, fig.width=6, fig.height=6}
+```{r ppc-cell, fig.width=6, fig.height=9}
 g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
 g + scale_y_log10()
 ```
 
-## Well-Level Check
+### Well-Level Check
 
 Does the model predict the mean velocity per well accurately? Points
 should lie close to the diagonal line.
@@ -332,6 +350,70 @@ should lie close to the diagonal line.
 g <- get_ppc_means(x = o)
 g
 ```
+
+
+## Leave-One-Out (LOO) diagnostics
+
+To detect influential observations or model misspecification, cellmig 
+supports Pareto k diagnostics via the rstan or loo packages:
+https://mc-stan.org/loo/reference/pareto-k-diagnostic.html). 
+
+High k values (>0.7) indicate highly influential observations that the model 
+struggles to predict, e.g. outlying cell velocities generated by tracking or
+segmentation artifacts or experimental errors. 
+
+```{r}
+# run loo
+loo_o <- rstan::loo(x = o$fit)
+
+# Print diagnostic table
+print(loo_o)
+
+# Plot diagnostic estimates for each cell
+plot(loo_o)
+
+# Which cells have k>0.7? Inspect these cells
+which(loo_o$pointwise[,"influence_pareto_k"]>0.7)
+```
+
+
+## MCMC diagnostics
+Bayesian uncertainty estimates (HDI, $\pi$) are only valid if the Markov 
+Chain Monte Carlo (MCMC) sampler has successfully explored the posterior 
+distribution. `cellmig` provides tools to verify convergence.
+
+### Check $\hat{R}$ and ESS
+The potential scale reduction factor ($\hat{R}$) should be close to 1.0 
+(typically $< 1.01$) for all parameters. Additionally, the Effective Sample 
+Size (ESS) should be sufficiently large to ensure stable HDI estimates.
+
+```{r rhat, fig.width=3, fig.height=3}
+rstan::stan_rhat(o$fit)
+```
+
+
+```{r mcmc-summary}
+summary_stats <- summary(o$fit)$summary
+hist(summary_stats[,"n_eff"])
+```
+
+### Check for divergent transitions and other issues
+
+Divergent transitions indicate that the sampler encountered regions of 
+high curvature it could not explore. Valid uncertainty quantification 
+**requires 0 divergent transitions**.
+
+```{r}
+rstan::check_hmc_diagnostics(object = o$fit)
+```
+
+Is any warnings are produced by this check, please consult the guidelines
+provided in the following vignette:
+
+https://mc-stan.org/learn-stan/diagnostics-warnings.html
+
+
+
 
 # Variance Components
 
@@ -374,9 +456,9 @@ For screens with multiple compounds and overlapping doses, `cellmig` can
 cluster compounds based on their dose-response similarity, accounting
 for uncertainty.
 
--   **Left:** Dendrogram showing similarity between compounds.
--   **Middle/Right:** Dose-response curves for overall ($\delta$) and
-    plate-specific ($\gamma$) effects.
+- **Left:** Dendrogram showing similarity between compounds.
+- **Middle/Right:** Dose-response curves for overall ($\delta$) and
+  plate-specific ($\gamma$) effects.
 
 ```{r dose-response, fig.width=8, fig.height=5}
 get_dose_response_profile(x = o, exponentiate = TRUE) +
