@@ -67,7 +67,7 @@ model {
   
   // scales
   sigma_bio ~ normal(prior_sigma_bio_M, prior_sigma_bio_SD);
-  sigma_tech ~ normal(prior_sigma_tech_M, prior_sigma_bio_SD);
+  sigma_tech ~ normal(prior_sigma_tech_M, prior_sigma_tech_SD);
   kappa_sigma ~ normal(prior_kappa_sigma_M, prior_kappa_sigma_SD);
   sigma_delta ~ normal(prior_sigma_delta_M, prior_sigma_delta_SD);
   
