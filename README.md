@@ -43,4 +43,6 @@ Case studies are provided in the directory /vignettes
 
 
 # How to cite
-bioRxiv preprint doi: https://doi.org/10.1101/2025.06.12.659342
+Citation: Kitanovski S, Conroy S, Sonneck J, Claas L, Dorsch M, Urban S, et al. (2026) 
+Uncertainty-aware quantitative analysis of high-throughput live cell migration data. 
+PLoS Comput Biol 22(7): e1014472. https://doi.org/10.1371/journal.pcbi.1014472
