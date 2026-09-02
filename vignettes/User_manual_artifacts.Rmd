@@ -1,0 +1,154 @@
+---
+title: "Quantifying velocity from noisy data with cellmig"
+author: "Simo Kitanovski (simo.kitanovski@uni-due.de)"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{User Manual: cellmig}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include = FALSE, warning = FALSE}
+knitr::opts_chunk$set(comment = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
+```
+
+```{r}
+library(cellmig)
+library(ggplot2)
+library(ggforce)
+ggplot2::theme_set(new = theme_bw(base_size = 10))
+```
+
+```{r load-data}
+data("d", package = "cellmig")
+str(d)
+head(d)
+```
+
+
+```{r, fig.width=7, fig.height=6}
+ggplot(data = d)+
+  facet_wrap(facets = ~paste0("compound=", compound), 
+             scales = "free_y", ncol = 2)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
+            size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  ylab(label = "migration velocity")+
+  xlab(label = '')+
+  scale_color_grey()+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  guides(shape = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()+
+  annotation_logticks(base = 10, sides = "l")
+```
+
+# Create experimental ``artifact'' -> merge C2 and C6 to create a bimodal velocity distribution
+
+```{r}
+c6 <- d[d$compound == "C6",]
+c2 <- d[d$compound == "C2",]
+c6$well <- c2$well
+c6$v <- c6$v+20
+c6$compound <- "C2"
+
+
+q <- d[d$compound != "C6",]
+q <- rbind(q, c6)
+d <- q
+```
+
+```{r, fig.width=7, fig.height=6}
+ggplot(data = d)+
+  facet_wrap(facets = ~paste0("compound=", compound), 
+             scales = "free_y", ncol = 2)+
+  geom_sina(aes(x = as.factor(dose), col = plate, y = v, group = well), 
+            size = 0.5)+
+  theme_bw()+
+  theme(legend.position = "top",
+        strip.text.x = element_text(margin = margin(0.03,0,0.03,0, "cm")))+
+  ylab(label = "migration velocity")+
+  xlab(label = '')+
+  scale_color_grey()+
+  guides(color = guide_legend(override.aes = list(size = 3)))+
+  guides(shape = guide_legend(override.aes = list(size = 3)))+
+  scale_y_log10()+
+  annotation_logticks(base = 10, sides = "l")
+```
+
+
+
+
+
+```{r fit-model, fig.width=7, fig.height=3.5}
+o <- cellmig(x = d,
+             control = list(mcmc_warmup = 300,  # Warmup iterations
+                            mcmc_steps = 1000,  # Sampling iterations
+                            mcmc_chains = 2,    # Number of chains
+                            mcmc_cores = 2))    # Parallel cores
+```
+
+```{r plot-delta, fig.width=6, fig.height=4}
+ggplot(data = o$posteriors$delta_t) +
+  geom_line(aes(x = dose, y = mean, col = compound, group = compound)) +
+  geom_point(aes(x = dose, y = mean, col = compound)) +
+  geom_errorbar(aes(x = dose, y = mean, ymin = X2.5., ymax = X97.5., 
+                    col = compound), width = 0.1) +
+  ylab(label = expression("Log-Fold Change ("*delta*")")) +
+  xlab("Dose") +
+  theme(legend.position = "top")
+```
+
+
+```{r ppc-cell, fig.width=8, fig.height=10}
+g <- get_ppc_violins(x = o, wrap = TRUE, ncol = 3)
+g + scale_y_log10()
+```
+
+```{r ppc-well, fig.width=5, fig.height=5}
+g <- get_ppc_means(x = o)
+g
+```
+
+```{r plot-variance, fig.height=3, fig.width=7}
+# Plate-specific baseline effects
+g_alpha_p <- ggplot(data = o$posteriors$alpha_p) +
+  geom_errorbarh(aes(y = plate, x = mean, xmin = X2.5., xmax = X97.5.),
+                 height = 0.2) +
+  geom_point(aes(y = plate, x = mean)) +
+  xlab("Plate Effect (log-scale)")
+
+# Variance parameters (Biological vs Technical)
+g_sigma <- ggplot() +
+  geom_errorbarh(data = o$posteriors$sigma_bio,
+                 aes(y = "Biological (Plate)",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
+  geom_errorbarh(data = o$posteriors$sigma_tech,
+                 aes(y = "Technical (Well)",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
+  geom_errorbarh(data = o$posteriors$sigma_delta,
+                 aes(y = "Treatment Variation",
+                     x = mean, xmin = X2.5., xmax = X97.5.), height = 0.2) +
+  geom_point(data = o$posteriors$sigma_bio,
+             aes(y = "Biological (Plate)", x = mean)) +
+  geom_point(data = o$posteriors$sigma_tech,
+             aes(y = "Technical (Well)", x = mean)) +
+  geom_point(data = o$posteriors$sigma_delta,
+             aes(y = "Treatment Variation", x = mean)) +
+  xlab("Standard Deviation")
+
+g_alpha_p | g_sigma
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
